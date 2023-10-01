@@ -18,7 +18,7 @@
             }
 
             // Setup
-            const baseUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/Repo/"
+            const baseUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/"
 
             // Function to get URL parameters by name
             function getQueryParam(name) {
@@ -36,25 +36,49 @@
             let link = window.location.href;
 
             // Get link for listing
+            if (typeParam == "in_win_x86") {
+                let link = baseUrl
+                link = link.concat("Installers/Builds/win_x86/Installer.exe")
+                window.location.href = link
+                console.log(link)
+            }
             if (typeParam == "modpack") {
                 let repoUrl = baseUrl
-                let json = ""
-                repoUrl = repoUrl.concat("repo.json")
+                let jsonObj
+                repoUrl = repoUrl.concat("Repo/repo.json")
                 // Fetch the JSON
-                fetch(jsonFileUrl)
-                .then(response => {
-                    if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                    }
-                    json = response.json();
-                })
-                .catch(error => {
-                    console.error("Error fetching JSON:", error);
-                });
-                // get the source link
-                window.location.href = getSourceByModpackName(json,modpackParam) 
-            }
+                fetch(repoUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                        }
+                        return response.json(); // Use response.text() as a function
+                    })
+                    .then(json => {
+                        window.location.href = getSourceByModpackName(json,modpackParam)
+                    })
+            } else if (typeParam == "bundle") {
 
+                // Get link for bundle
+                link = baseUrl
+                link = link.concat("Repo/Packages/")
+                link = link.concat(modpackParam.replace(/ /g,"_"))
+                window.location.href = link.concat("/bundle.zip")
+            } else if (typeParam == "buildsrc") {
+
+                // Get link for bundle
+                link = baseUrl
+                link = link.concat("Repo/Packages/")
+                link = link.concat(modpackParam.replace(/ /g,"_"))
+                window.location.href = link.concat("/build_source.zip")
+            }else if (typeParam == "qi_win_x86") {
+
+                // Get link for bundle
+                link = baseUrl
+                link = link.concat("Repo/Packages/")
+                link = link.concat(modpackParam.replace(/ /g,"_"))
+                window.location.href = link.concat("/build-win_x86/QuickInstaller.exe")
+            }
         </script>
     </body>
 </html>
