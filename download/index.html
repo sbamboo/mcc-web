@@ -7,7 +7,54 @@
     </head>
     <body>
         <script>
-            
+            function getSourceByModpackName(jsonData, modpackName) {
+                const flavors = jsonData.flavors;
+                const modpack = flavors.find(flavor => flavor.name === modpackName);
+                if (modpack) {
+                    return modpack.source;
+                } else {
+                    return null; // Modpack not found
+                }
+            }
+
+            // Setup
+            const baseUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/Repo/"
+
+            // Function to get URL parameters by name
+            function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+            }
+
+            // Get the "modpack" parameter and set to "none" if unset or empty
+            const modpackParam = getQueryParam("modpack") || "none";
+
+            // Get the "type" parameter and set to "none" if unset or empty
+            const typeParam = getQueryParam("type") || "none"; 
+
+            // Standard link
+            let link = window.location.href;
+
+            // Get link for listing
+            if (typeParam == "modpack") {
+                let repoUrl = baseUrl
+                let json = ""
+                repoUrl = repoUrl.concat("repo.json")
+                // Fetch the JSON
+                fetch(jsonFileUrl)
+                .then(response => {
+                    if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                    }
+                    json = response.json();
+                })
+                .catch(error => {
+                    console.error("Error fetching JSON:", error);
+                });
+                // get the source link
+                window.location.href = getSourceByModpackName(json,modpackParam) 
+            }
+
         </script>
     </body>
 </html>
