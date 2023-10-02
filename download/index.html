@@ -7,6 +7,31 @@
     </head>
 
     <body>
+        <noscript>
+            <style type="text/css">
+                body {
+                    background-color: #181818;
+                    color: #d7d7d7;
+                }
+                .noscriptmsg {
+                    margin: 10px;
+                    padding: 10px;
+                    border-radius: 10px;
+                    background-color: #1f1f1f;
+                }
+                a {
+                    color: #2e7ad6;
+                }
+
+                a:visited {
+                    color: #b670d6;
+                }
+            </style>
+            <div class="noscriptmsg">
+                <p>You don't have javascript enabled, this website sadly relies on javascript to function.<br>
+                Please turn on javascript or alternatively download modpacks and related assets from the github repository: <a href="https://github.com/sbamboo/MinecraftCustomClient">sbamboo/MinecraftCustomClient</a></p>
+            </div>
+        </noscript>
         <script>
             function getSourceByModpackName(jsonData, modpackName) {
                 const flavors = jsonData.flavors;
