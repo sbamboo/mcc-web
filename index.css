@@ -124,3 +124,17 @@ a:visited {
 #down-installer p {
     margin-bottom: 5px;
 }
+
+.min-spacer {
+    margin-top: 7px;
+}
+.min-spacer2 {
+    margin-top: 14px;
+}
+.min-spacer3 {
+    margin-top: 4px;
+}
+
+.inline {
+    display: inline;
+}
