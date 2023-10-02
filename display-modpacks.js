@@ -29,14 +29,15 @@ function makeQueryStringSafe(inputString) {
 }
 
 // Function to create the modpack div elements
-function createModpackDiv(name, desc, links) {
+function createModpackDiv(name, desc, author, links) {
     const container = document.getElementById("modpack-link-container");
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
     div.className = "modpack-down";
     div.innerHTML = `
-      <b id="modpacktitle">${name}</b>
+      <b>${name}</b>
       <p>${desc}</p>
+      <p class="modpack-author">By: ${author}</p>
       <a class="button os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
       <a class="button os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
       <a class="button os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
@@ -50,9 +51,11 @@ async function main() {
     const repoData = await fetchRepoData();
     const parentUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo";
   
-    repoData.forEach(({ name, source, desc }) => {
-      const links = generateLinks(name, source, parentUrl);
-      createModpackDiv(name, desc, links);
+    repoData.forEach(({ name, source, desc, author, hidden }) => {
+      if (hidden != true) {
+        const links = generateLinks(name, source, parentUrl);
+        createModpackDiv(name, desc, author, links);
+      }
     });
 }
   
