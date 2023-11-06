@@ -206,3 +206,7 @@ a:visited {
     display: inline-block;
     padding-right: 5px;
 }
+
+#content {
+    white-space: pre-wrap;
+}

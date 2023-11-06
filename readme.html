@@ -27,44 +27,7 @@
         </header>
         <main>
             <div id="readme">
-                <p id="content"></p>
-                <script>
-                    // The initial URL
-                    var initialURL = "./download?readme";
-
-                    // Reference to the <p> element where you want to display the content
-                    var contentElement = document.getElementById("content");
-
-                    // Function to fetch content from a URL and handle redirection
-                    function fetchData(url) {
-                        fetch(url)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error("Network response was not ok");
-                                }
-                                // Check if there is a 'Location' header in the response (indicating a redirection)
-                                if (response.headers.has('Location')) {
-                                    // Get the redirected URL
-                                    var redirectedURL = response.headers.get('Location');
-                                    // Fetch the content from the redirected URL
-                                    return fetchData(redirectedURL);
-                                }
-                                return response.text();
-                            })
-                            .then(data => {
-                                // Display the content in the <p> element
-                                contentElement.textContent = data;
-                            })
-                            .catch(error => {
-                                console.error("Error fetching data:", error);
-                                // If an error occurs, redirect to the fallback URL
-                                window.location.href = initialURL;
-                            });
-                    }
-
-                    // Call the fetchData function to initiate the fetch
-                    fetchData(initialURL);
-                </script>
+                <iframe id="content-ifr" width="100%" height="400" src="download?readme"></iframe>
             </div>
             <a class="button big-size ui-btn btn-bellow-margin" href="./index.html">Go back</a>
         </main>
