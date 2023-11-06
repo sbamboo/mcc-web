@@ -107,10 +107,14 @@ a:visited {
     color: #d1984e;
 }
 
+.section p {
+    font-size: 18.5px;
+}
+
 .modpack-down {
-    background-color: #252525;
+    background-color: #272727;
     border-radius: 10px;
-    border: 1px solid #282828;
+    border: 1px solid #303030;
     padding: 5px;
     margin-bottom: 15px;
 }
@@ -124,6 +128,10 @@ a:visited {
 
 #down-installer p {
     margin-bottom: 5px;
+}
+
+#down-modpack p {
+    margin-bottom: 3px;
 }
 
 .min-spacer {
