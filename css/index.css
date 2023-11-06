@@ -30,6 +30,7 @@ a:visited {
     padding: 10px;
     border-radius: 10px;
     background-color: #1f1f1f;
+    padding-top: 5px;
 }
 
 .button {
@@ -97,6 +98,22 @@ a:visited {
 
 .section {
     padding-bottom: 20px;
+}
+
+.title {
+    display: flex;
+    flex-direction: row;
+}
+
+.title img {
+    height: 42px;
+    width: 42px;
+    margin-left: 10px;
+    margin-bottom: 5px;
+}
+
+.title h1 {
+    margin-top: 5px
 }
 
 .subtitle {
