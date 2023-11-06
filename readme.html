@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>MinecraftCustomClient - Website (Readme)</title>
+        <link rel="stylesheet" href="./css/index.css">
+        <link rel="icon" type="image/png" href="./images/favicon_128.png">
+    </head>
+    <noscript>
+        <style type="text/css">
+            #pagecontent {display:none;}
+        </style>
+        <div class="noscriptmsg">
+            <p>You don't have javascript enabled, this website sadly relies on javascript to function.<br>
+            Please turn on javascript or alternatively download modpacks and related assets from the github repository: <a href="https://github.com/sbamboo/MinecraftCustomClient">sbamboo/MinecraftCustomClient</a></p>
+        </div>
+    </noscript>
+    <body><div id="pagecontent">
+        <header>
+            <div class="title sideflex">
+                <h1>MinecraftCustomClient</h1>
+                <img src="./images/favicon2_128.png" alt="Logo">
+            </div>
+            <div class="hr"></div>
+            <br>
+        </header>
+        <main>
+            <div id="readme">
+                <p id="content"></p>
+                <script>
+                    // The URL you want to fetch data from
+                    var url = "./download?readme";
+
+                    // Reference to the <p> element where you want to display the content
+                    var contentElement = document.getElementById("content");
+
+                    // Function to fetch content from the URL
+                    function fetchData() {
+                        fetch(url)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error("Network response was not ok");
+                                }
+                                return response.text();
+                            })
+                            .then(data => {
+                                // Display the content in the <p> element
+                                contentElement.textContent = data;
+                            })
+                            .catch(error => {
+                                console.error("Error fetching data:", error);
+                                // If an error occurs, redirect to the fallback URL
+                                window.location.href = url;
+                            });
+                    }
+
+                    // Call the fetchData function to initiate the fetch
+                    fetchData();
+                </script>
+            </div>
+            <a class="button big-size ui-btn btn-bellow-margin" href="./index.html">Go back</a>
+        </main>
+        <footer>
+            <p class="smal-text">Created by Simon Kalmi Claesson for personal use, any content on this website is owned by the author and is not permitted to be redistrubuted without crediting the original author, redistributing any assets/parts or the project as a whole as your own is not and never will be allowed.</p>
+            <p class="smal-text" id="source-link-prefix">Website source: </p><a class="source-link" href="https://github.com/sbamboo/mcc-web">Github.com</a>
+            <p class="smal-text" id="website-build-date">Website Build: 2023-11-06</p>
+        </footer>
+    </div></body>
+</html>
