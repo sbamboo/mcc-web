@@ -39,7 +39,7 @@ function createModpackDiv(name, desc, author, id, links) {
       <p>${desc}</p>
       <div class="modpack-info sideflex">
           <p class="modpack-author">By: ${author}</p>
-          <p class="modpack-id inline">[MpId:${id}]</p>
+          <p class="modpack-id inline">[MdpkId:${id}]</p>
       </div>
       <a class="button os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
       <a class="button os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
