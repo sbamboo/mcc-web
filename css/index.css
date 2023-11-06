@@ -96,11 +96,15 @@ a:visited {
     background-color: #2a559a;
 }
 
+.btn-bellow-margin {
+    margin-bottom: 7px;
+}
+
 .section {
     padding-bottom: 20px;
 }
 
-.title {
+.sideflex {
     display: flex;
     flex-direction: row;
 }
@@ -167,6 +171,16 @@ a:visited {
 
 .modpack-author {
     color: gray;
+}
+
+.modpack-info p {
+    font-size: 17px;
+}
+
+.modpack-id {
+    color: #373737;
+    margin-left: 12px;
+    font-size: 12px;
 }
 
 .smal-text {

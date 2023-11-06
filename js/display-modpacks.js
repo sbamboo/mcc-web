@@ -29,7 +29,7 @@ function makeQueryStringSafe(inputString) {
 }
 
 // Function to create the modpack div elements
-function createModpackDiv(name, desc, author, links) {
+function createModpackDiv(name, desc, author, id, links) {
     const container = document.getElementById("modpack-link-container");
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
@@ -37,7 +37,10 @@ function createModpackDiv(name, desc, author, links) {
     div.innerHTML = `
       <b>${name}</b>
       <p>${desc}</p>
-      <p class="modpack-author">By: ${author}</p>
+      <div class="modpack-info sideflex">
+          <p class="modpack-author">By: ${author}</p>
+          <p class="modpack-id inline">[MpId:${id}]</p>
+      </div>
       <a class="button os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
       <a class="button os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
       <a class="button os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
@@ -51,10 +54,10 @@ async function main() {
     const repoData = await fetchRepoData();
     const parentUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo";
   
-    repoData.forEach(({ name, source, desc, author, hidden }) => {
+    repoData.forEach(({ name, source, desc, author, hidden, id }) => {
       if (hidden != true) {
         const links = generateLinks(name, source, parentUrl);
-        createModpackDiv(name, desc, author, links);
+        createModpackDiv(name, desc, author, id, links);
       }
     });
 }
