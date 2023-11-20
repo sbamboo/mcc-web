@@ -113,16 +113,18 @@
                 window.location.href = link.concat("/build-win_x86/QuickInstaller.exe")
                 console.log(link)
             }
-            // Redirect back to ../index.html after a delay (e.g., 3 seconds)
-            setTimeout(() => {
-                window.location.href = "../index.html";
-            }, 3000); // 3000 milliseconds = 3 seconds
 
+            // Write notice
             document.write('<div id="pagecontent">');
             document.write('    <h2>Starting download:</h2>');
             document.write('    <i>Will redirect in approximately 3s, if not press <a href="../index.html">HERE</a>.</i>');
             document.write('    <footer><p class="smal-text">Created by Simon Kalmi Claesson for personal use, any content on this website is owned by the author and is not permitted to be redistributed without crediting the original author, redistributing any assets/parts or the project as a whole as your own is not and never will be allowed.</p></footer>');
             document.write('</div>');
+
+            // Redirect back to ../index.html after a delay (e.g., 3 seconds)
+            setTimeout(() => {
+                window.location.href = "../index.html";
+            }, 3000); // 3000 milliseconds = 3 seconds
 
         </script>
     </body>
