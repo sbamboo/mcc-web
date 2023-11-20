@@ -127,7 +127,7 @@
                 link = link.concat(modpackParam.replace(/ /g,"_"))
                 window.location.href = link.concat("/build-win_x86/QuickInstaller.exe")
             }
-            window.location.href = "../index.html"
+            setTimeout(function(){ window.location.href = "../index.html" }, 5000);
         </script>
     </body>
 </html>
