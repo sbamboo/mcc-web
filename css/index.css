@@ -124,6 +124,10 @@ a:visited {
     padding-bottom: 7px;
 }
 
+.subtitle-top-margin {
+    margin-top: 5px;
+}
+
 .section h3 {
     color: #d1984e;
 }
