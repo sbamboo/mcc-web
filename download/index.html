@@ -21,6 +21,11 @@
                 <footer><p class="smal-text">Created by Simon Kalmi Claesson for personal use, any content on this website is owned by the author and is not permitted to be redistrubuted without crediting the original author, redistributing any assets/parts or the project as a whole as your own is not and never will be allowed.</p></footer>
             </div>
         </noscript>
+        <div id="pagecontent">
+            <h2>Starting download:</h2>
+            <i>Will redirect in approximately 3s, if not press <a href="../index.html">HERE</a>.</i>
+            <footer><p class="smal-text">Created by Simon Kalmi Claesson for personal use, any content on this website is owned by the author and is not permitted to be redistributed without crediting the original author, redistributing any assets/parts or the project as a whole as your own is not and never will be allowed.</p></footer>
+        </div>
         <script>
             function getSourceByModpackName(jsonData, modpackName) {
                 const flavors = jsonData.flavors;
@@ -31,6 +36,9 @@
                     return null; // Modpack not found
                 }
             }
+
+            // Add cascading-style to show the redirect-notice
+            document.body.innerHTML += '<style type="text/css">#pagecontent {display:Block;}</style>'
 
             // Setup
             const baseUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/"
@@ -119,18 +127,10 @@
                 console.log(link)
             }
 
-            // Add cascading-style to show the redirect-notice
-            document.body.innerHTML += '<style type="text/css">#pagecontent {display:Block;}</style>'
-
             // Redirect back to ../index.html after a delay (e.g., 3 seconds)
             setTimeout(() => {
-                window.location.href = "../index.html";
+                //window.location.href = "../index.html";
             }, 3000); // 3000 milliseconds = 3 seconds
         </script>
-        <div id="pagecontent">
-            <h2>Starting download:</h2>
-            <i>Will redirect in approximately 3s, if not press <a href="../index.html">HERE</a>.</i>
-            <footer><p class="smal-text">Created by Simon Kalmi Claesson for personal use, any content on this website is owned by the author and is not permitted to be redistributed without crediting the original author, redistributing any assets/parts or the project as a whole as your own is not and never will be allowed.</p></footer>
-        </div>
     </body>
 </html>
