@@ -32,6 +32,19 @@ a:visited {
     background-color: #1f1f1f;
     padding-top: 5px;
 }
+.center-text {
+    text-align: center;
+    width: 100%;
+    display: block;
+}
+.center-box {
+    width: 100%;
+    display: grid;
+}
+#pagecontent-logo {
+    justify-self: center;
+    width: 256px;
+}
 
 .button {
     margin: 2px;
@@ -213,4 +226,26 @@ a:visited {
 
 #content {
     white-space: pre-wrap;
+}
+
+.download-info {
+    width:fit-content;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.download-info h2 {
+    font-size: 45px;
+    padding-left: 5px;
+}
+.download-info i {
+    font-size: 19px;
+}
+.download-info .center-box {
+    margin-top: 30px;
+}
+.center-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
