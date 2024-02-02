@@ -252,6 +252,7 @@ a:visited {
 
 .modpack-down-nosup-badge {
     color: goldenrod;
+    margin-left: 10px;
 }
 
 .oneline-wrapper {
