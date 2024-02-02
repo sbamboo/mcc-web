@@ -253,3 +253,11 @@ a:visited {
 .modpack-down-nosup-badge {
     color: goldenrod;
 }
+
+.oneline-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+.oneline-wrapper-elem {
+    display: block;
+}

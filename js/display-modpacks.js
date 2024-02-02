@@ -34,12 +34,12 @@ function createModpackDiv(name, desc, author, id, links, supported) {
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
     if (supported != true) {
-      desc += '<p class="modpack-down-nosup-badge"> [NoSupport]<p>'
+      desc = `<p>${desc}</p>` + '<p class="modpack-down-nosup-badge"> [NoSupport]<p>'
     }
     div.className = "modpack-down";
     div.innerHTML = `
       <b>${name}</b>
-      <p>${desc}</p>
+      <div class="oneline-wrapper">${desc}</div>
       <div class="modpack-info sideflex">
           <p class="modpack-author">By: ${author}</p>
           <p class="modpack-id inline">[MdpkId:${id}]</p>
