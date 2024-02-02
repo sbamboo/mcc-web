@@ -28,13 +28,13 @@
         </header>
         <main>
             <div id="readme">
-                <p id="content"></p>
+                <p id="repoview-content"></p>
                 <script>
                     // The URL you want to fetch data from
                     var url = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo/repo.json";
 
                     // Reference to the <p> element where you want to display the content
-                    var contentElement = document.getElementById("content");
+                    var contentElement = document.getElementById("repoview-content");
 
                     // Function to fetch content from the URL
                     function fetchData() {
@@ -52,7 +52,7 @@
                             .catch(error => {
                                 console.error("Error fetching data:", error);
                                 // If an error occurs, provide a fallback value
-                                return `{"err": ${error}`+"}";
+                                return `{"err": "${error}"`+"}";
                             });
                     }
 
@@ -71,8 +71,26 @@
                             var namesString = '';
 
                             // Display all the names
+                            namesString = `
+                            <div class="oneline-wrapper rvsp"><p class="repo-key">Format:</p> <p class="repo-value">${parsedContent.format}</p></div>
+                            <div class="oneline-wrapper rvsp"><p class="repo-key">Author:</p> <p class="repo-value">${parsedContent.author}</p></div>
+                            <div class="oneline-wrapper rvsp"><p class="repo-key">Version:</p> <p class="repo-value">${parsedContent.version}</p></div>
+                            <div class="oneline-wrapper rvsp"><p class="repo-key">Created:</p> <p class="repo-value">${parsedContent.created}</p></div>
+                            <div class="oneline-wrapper rvsp"><p class="repo-key">LastUpdated:</p> <p class="repo-value">${parsedContent.lastUpdated}</p></div>
+                            <div class="oneline-wrapper rvsp"><p class="repo-key">Flavors:</p></div>
+                            `
                             flavors.forEach(flavor => {
-                                namesString += flavor.name + '<br>';
+                                domain = new URL(flavor.source).hostname
+                                namesString += `
+                                <div class="oneline-wrapper rvsp"><h3 class="repo-value">${flavor.name}:</h3></div>
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Desc:</p> <p class="repo-value">${flavor.desc}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Author:</p> <p class="repo-value">${flavor.author}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">ID:</p> <p class="repo-value">${flavor.id}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Hidden:</p> <p class="repo-value">${flavor.hidden}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Supported:</p> <p class="repo-value">${flavor.supported}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">SourceType:</p> <p class="repo-value">${flavor.sourceType}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Source:</p> <p class="repo-value"><a href="${flavor.source}">${domain}</a></p></div>
+                                `
                             });
 
                             contentElement.innerHTML = namesString;

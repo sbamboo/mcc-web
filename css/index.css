@@ -262,3 +262,33 @@ a:visited {
 .oneline-wrapper-elem {
     display: block;
 }
+
+
+.repo-key {
+    color: gray;
+}
+.repo-value {
+    color: purple
+}
+
+h3.repo-value {
+    margin-top: 20px;
+}
+
+.rvsp .repo-key {
+    margin-right: 7px;
+}
+.rvt1 {
+    margin-left: 40px;
+}
+.rvt2 {
+    margin-left: 20px;
+}
+
+#repoview-content {
+    line-height: 1.5em;
+    margin-bottom: 40px;
+    border: 2px solid #424242;
+    margin: 20px;
+    padding: 20px;
+}
