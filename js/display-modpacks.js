@@ -29,10 +29,13 @@ function makeQueryStringSafe(inputString) {
 }
 
 // Function to create the modpack div elements
-function createModpackDiv(name, desc, author, id, links) {
+function createModpackDiv(name, desc, author, id, links, supported) {
     const container = document.getElementById("modpack-link-container");
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
+    if (supported != true) {
+      desc += '<p class="modpack-down-nosup-badge"> [NoSupport]<p>'
+    }
     div.className = "modpack-down";
     div.innerHTML = `
       <b>${name}</b>
@@ -54,10 +57,10 @@ async function main() {
     const repoData = await fetchRepoData();
     const parentUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo";
   
-    repoData.forEach(({ name, source, desc, author, hidden, id }) => {
+    repoData.forEach(({ name, source, desc, author, hidden, supported, id }) => {
       if (hidden != true) {
         const links = generateLinks(name, source, parentUrl);
-        createModpackDiv(name, desc, author, id, links);
+        createModpackDiv(name, desc, author, id, links, supported);
       }
     });
 }

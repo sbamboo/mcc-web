@@ -249,3 +249,7 @@ a:visited {
     display: flex;
     justify-content: center;
 }
+
+.modpack-down-nosup-badge {
+    color: goldenrod;
+}
