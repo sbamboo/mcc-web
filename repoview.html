@@ -83,7 +83,77 @@
                             <div class="oneline-wrapper rvsp"><p class="repo-key">Flavors:</p></div>
                             `
                             flavors.forEach(flavor => {
-                                domain = new URL(flavor.source).hostname
+                                try {
+                                    domain = new URL(flavor.source).hostname;
+                                    sourceData = `<a href="${flavor.source}">${domain}</a>`;
+                                } catch (error) {
+                                    if (flavor.sourceType == "legacy") {
+                                        sourceData = "Legacy";
+                                    } else if (flavor.sourceType == "legacyB64") {
+                                        sourceData = "LegacyB64";
+                                    } else {
+                                        sourceData = flavor.source;
+                                    }
+                                }
+                                if (sourceData == "Legacy") {
+                                    try {
+                                        domain_inner = new URL(flavor.source.url).hostname;
+                                        sourceData_inner = `<a href="${flavor.source.url}">${domain_inner}</a>`;
+                                    } catch (error) {
+                                        sourceData_inner = flavor.source.url;
+                                    }
+                                    if (flavor.source.launcherIcon.includes("https:/") || flavor.source.launcherIcon.includes("http:/")) {
+                                        try {
+                                            launcherIcon_domain = new URL(flavor.source.launcherIcon).hostname;
+                                        } catch (error) {
+                                            launcherIcon_domain = flavor.source.launcherIcon;
+                                        }
+                                        launcherIcon = `<a href="${flavor.source.launcherIcon}">${launcherIcon_domain}</a>`
+                                    } else {
+                                        launcherIcon = flavor.source.launcherIcon;
+                                    }
+                                    sourceData = `
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Source:</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">Url:</p> <p class="repo-value">${sourceData_inner}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">ArchiveType:</p> <p class="repo-value">${flavor.source.archiveType}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">FlavorDataFile:</p> <p class="repo-value">${flavor.source.flavorDataFile}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">LauncherIcon:</p> <p class="repo-value">${launcherIcon}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">ModLoader:</p> <p class="repo-value">${flavor.source.modLoader}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">ModLoaderVer:</p> <p class="repo-value">${flavor.source.modLoaderVer}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">MinecraftVer:</p> <p class="repo-value">${flavor.source.minecraftVer}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">BackwardsCompat:</p></div>
+                                    <div class="oneline-wrapper rvsp rvt3"><p class="repo-key">InstallLocation:</p> <p class="repo-value">${flavor.source.backwardsCompat.installLocation}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt3"><p class="repo-key">AllowCopy:</p> <p class="repo-value">${flavor.source.backwardsCompat.allowCopy}</p></div>
+                                    `
+                                } else if (sourceData == "LegacyB64") {
+                                    if (flavor.source.launcherIcon.includes("https:/") || flavor.source.launcherIcon.includes("http:/")) {
+                                        try {
+                                            launcherIcon_domain = new URL(flavor.source.launcherIcon).hostname;
+                                        } catch (error) {
+                                            launcherIcon_domain = flavor.source.launcherIcon;
+                                        }
+                                        launcherIcon = `<a href="${flavor.source.launcherIcon}">${launcherIcon_domain}</a>`
+                                    } else {
+                                        launcherIcon = flavor.source.launcherIcon;
+                                    }
+                                    sourceData = `
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Source:</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">Base64:</p> <p class="repo-value">${flavor.source.base64}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">ArchiveType:</p> <p class="repo-value">${flavor.source.archiveType}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">FlavorDataFile:</p> <p class="repo-value">${flavor.source.flavorDataFile}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">LauncherIcon:</p> <p class="repo-value">${launcherIcon}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">ModLoader:</p> <p class="repo-value">${flavor.source.modLoader}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">ModLoaderVer:</p> <p class="repo-value">${flavor.source.modLoaderVer}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">MinecraftVer:</p> <p class="repo-value">${flavor.source.minecraftVer}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt2"><p class="repo-key">BackwardsCompat:</p></div>
+                                    <div class="oneline-wrapper rvsp rvt3"><p class="repo-key">InstallLocation:</p> <p class="repo-value">${flavor.source.backwardsCompat.installLocation}</p></div>
+                                    <div class="oneline-wrapper rvsp rvt3"><p class="repo-key">AllowCopy:</p> <p class="repo-value">${flavor.source.backwardsCompat.allowCopy}</p></div>
+                                    `
+                                } else {
+                                    sourceData = `
+                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Source:</p> <p class="repo-value">${sourceData}</p></div>
+                                    `
+                                }
                                 namesString += `
                                 <div class="oneline-wrapper rvsp"><h3 class="repo-value">${flavor.name}:</h3></div>
                                     <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Desc:</p> <p class="repo-value">${flavor.desc}</p></div>
@@ -92,7 +162,7 @@
                                     <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Hidden:</p> <p class="repo-value">${flavor.hidden}</p></div>
                                     <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Supported:</p> <p class="repo-value">${flavor.supported}</p></div>
                                     <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">SourceType:</p> <p class="repo-value">${flavor.sourceType}</p></div>
-                                    <div class="oneline-wrapper rvsp rvt1"><p class="repo-key">Source:</p> <p class="repo-value"><a href="${flavor.source}">${domain}</a></p></div>
+                                    ${sourceData}
                                 `
                             });
 
