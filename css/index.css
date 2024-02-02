@@ -292,3 +292,15 @@ h3.repo-value {
     margin: 20px;
     padding: 20px;
 }
+
+#repoview-title {
+    color: rgb(146, 1, 146);
+    display: block;
+    width: 100%;
+    border-bottom: 4px solid rgb(78, 1, 78);
+    margin-bottom: 15px;
+    padding-bottom: 7px;
+}
+#repoview-title-link {
+    color: rgb(92, 0, 128);
+}

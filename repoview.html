@@ -71,7 +71,10 @@
                             var namesString = '';
 
                             // Display all the names
+                            repoFname = url.split("/")
+                            repoFname = repoFname[repoFname.length - 1];
                             namesString = `
+                            <h2 id="repoview-title">Default Repostory: <a id="repoview-title-link" href="${url}">${repoFname}</a></h2>
                             <div class="oneline-wrapper rvsp"><p class="repo-key">Format:</p> <p class="repo-value">${parsedContent.format}</p></div>
                             <div class="oneline-wrapper rvsp"><p class="repo-key">Author:</p> <p class="repo-value">${parsedContent.author}</p></div>
                             <div class="oneline-wrapper rvsp"><p class="repo-key">Version:</p> <p class="repo-value">${parsedContent.version}</p></div>
