@@ -31,7 +31,7 @@
         </header>
         <main>
             <div id="readme">
-                <p id="repoview-content"></p>
+                <div id="modview-content"><h1 id="modview-content-replacable-loading">Loading...</h1></div>
                 <script>
 
                     function generateRandomString(length) {
@@ -135,7 +135,8 @@
                     const url = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo/repo.json";
                 
                     // Reference to the <p> element where you want to display the content
-                    const contentElement = document.getElementById("repoview-content");
+                    const contentElement = document.getElementById("modview-content");
+                    const loadingText = document.getElementById("modview-content-replacable-loading");
                 
                     // Call the fetchData function to initiate the fetch
                     fetchData(url)
@@ -164,6 +165,7 @@
                                         }
                                     })
                                     .then(content => {
+                                        loadingText.style.display = "none";
                                         try {
                                             // If all succeeds, parse the JSON content
                                             const jsonData = JSON.parse(content);
@@ -289,6 +291,7 @@
                                         return Array(mods,disabledMods);
                                     })
                                     .then(modFiles => {
+                                        loadingText.style.display = "none";
                                         console.log(modFiles);
                                         disabledModFiles = modFiles[1];
                                         modFiles = modFiles[0];
