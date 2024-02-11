@@ -37,6 +37,7 @@ function createModpackDiv(name, desc, author, id, links, supported) {
       desc = `<p>${desc}</p>` + '<p class="modpack-down-nosup-badge"> [NoSupport]<p>'
     }
     div.className = "modpack-down";
+    urlSafename = encodeURIComponent(name);
     div.innerHTML = `
       <b>${name}</b>
       <div class="oneline-wrapper">${desc}</div>
@@ -47,6 +48,7 @@ function createModpackDiv(name, desc, author, id, links, supported) {
       <a class="button os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
       <a class="button os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
       <a class="button os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
+      <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="modview-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
       <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
     `;
     container.appendChild(div);

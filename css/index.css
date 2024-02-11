@@ -18,6 +18,11 @@ a:visited {
     color: #b670d6;
 }
 
+.title-link,.title-link:hover,.title-link:active,.title-link:visited {
+    color: white;
+    text-decoration: none;
+}
+
 .noscriptmsg {
     margin: 10px;
     padding: 10px;
@@ -306,4 +311,34 @@ h3.repo-value {
 }
 #repoview-title-link {
     color: rgb(92, 0, 128);
+}
+
+.modviewer {
+    background-color: #00000000;
+    border-color: rgb(105, 9, 127);
+    background-image: linear-gradient(to bottom, #00000000, #8d049f4f);
+    font-family: "Segoe UI","sans-serif";
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+.modviewer:hover {
+    background-color: #00000000;
+    border-color: rgb(124, 10, 150);
+    background-image: linear-gradient(to bottom, #00000012, #8d049f76);
+}
+.modview-button-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+.modview-button-wrapper img {
+    width: 17px;
+    height: 17px;
+}
+.modview-button-wrapper p {
+    font-size: 17px;
+    margin: 0px;
+    padding-top: 2px;
+    padding-bottom: 1px;
 }

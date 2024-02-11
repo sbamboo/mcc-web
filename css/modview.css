@@ -1,0 +1,179 @@
+.hsep {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    border-bottom: 2px solid #424242;
+}
+
+.hsep-ntop {
+    margin-bottom: 10px;
+    width: 100%;
+    border-bottom: 2px solid #424242;
+}
+
+.modview-source-name {
+    color: rgb(161, 161, 161);
+}
+
+.modview-info {
+    color: rgb(115, 115, 115);
+}
+
+.modview-source-length {
+    margin-bottom: 20px;
+}
+
+.modview-source-format,.modview-source-archtype {
+    color: rgb(81, 80, 80);
+}
+
+.modview-mod {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+    border: 1px solid #272727;
+}
+
+.disabled-mod {
+    background-color: #322222;
+}
+
+.modview-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.modview-buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+.modview-icon {
+    margin-right: 10px;
+}
+
+.modview-icon-size {
+    width: 60px;
+    height: 60px;
+}
+
+.modview-download {
+    padding: 2px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border: 1.5px solid white;
+    border-radius: 5px;
+    display: block;
+    height: 25px;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+.modview-download-text {
+    display: flex;
+    flex-direction: row;
+}
+
+.modview-download-text-icon {
+    width: 20px;
+    height: 20px;
+    padding: 2.0px;
+    margin-right: 4px;
+}
+
+.modview-download-text p {
+    font-size: 12.5px;
+}
+
+.modview-filename {
+    font-weight: 500;
+    font-family: "Segoe UI","sans-serif";
+    color: rgb(106, 106, 106);
+    font-size: 18px;
+    padding-bottom: 5px;
+}
+
+.modrinth-download {
+    width: 160px;
+    border-color: #2f4236;
+    background-image: linear-gradient(to bottom, #00000000, #26262633);
+}
+.modrinth-download:hover {
+    background-image: linear-gradient(to bottom, #00000000, #0536096f);
+}
+.modrinth-download, .modrinth-download:active, .modrinth-download:hover, .modrinth-download:visited {
+    color: #979797;
+}
+
+.modrinth-site {
+    width: 115px;
+    border-color: #183220;
+    background-image: linear-gradient(to bottom, #072c13, #041c0b);
+}
+.modrinth-site:hover {
+    background-image: linear-gradient(to bottom, #0c4c20, #05240e);
+}
+.modrinth-site, .modrinth-site:active, .modrinth-site:hover, .modrinth-site:visited {
+    color: #14984b;
+}
+
+
+.curseforge-download {
+    width: 170px;
+    border-color: #4b362f;
+    background-image: linear-gradient(to bottom, #00000000, #26262633);
+}
+.curseforge-download:hover {
+    background-image: linear-gradient(to bottom, #00000000, #36050550);
+}
+.curseforge-download, .curseforge-download:active, .curseforge-download:hover, .curseforge-download:visited {
+    color: #979797;
+}
+
+.curseforge-site {
+    width: 130px;
+    border-color: #4b362f;
+    background-image: linear-gradient(to bottom, #2d130b, #1f0c07);
+}
+.curseforge-site:hover {
+    background-image: linear-gradient(to bottom, #3a180f, #280f09);
+}
+.curseforge-site, .curseforge-site:active, .curseforge-site:hover, .curseforge-site:visited {
+    color: #c25835;
+}
+
+.curseforge-search {
+    width: 160px;
+    border-color: #4b362f;
+    background-image: linear-gradient(to bottom, #2d130b, #1f0c07);
+}
+.curseforge-search:hover {
+    background-image: linear-gradient(to bottom, #3a180f, #280f09);
+}
+.curseforge-search, .curseforge-search:active, .curseforge-search:hover, .curseforge-search:visited {
+    color: #c25835;
+}
+
+.blob-download {
+    width: 150px;
+    border-color: #a5a5a5;
+    background-image: linear-gradient(to bottom, #00000000, #26262633);
+}
+.blob-download:hover {
+    background-image: linear-gradient(to bottom, #00000000, #2f276776);
+}
+.blob-download, .blob-download:active, .blob-download:hover, .blob-download:visited {
+    color: #7b78a1;
+}
+
+.modview-blob-warn {
+    font-size: 12px;
+    color: #858585;
+}
+
+.modview-blob-warn a,.modview-blob-warn:visited a {
+    color: #7b78a1;
+}
+.modview-blob-warn:hover a {
+    color: #a09dd4;
+}
