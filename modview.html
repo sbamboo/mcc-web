@@ -168,7 +168,7 @@
                             const dataOfModpack = flavors.find(flavor => flavor.name === modpack);
                 
                             // If the modpack is found get mods based on type
-                            if (dataOfModpack.sourceType == "mlisting") {
+                            if (dataOfModpack.sourceType == "mlisting" || dataOfModpack.sourceType == "urlListing") {
                                 fetch(dataOfModpack.source)
                                     .then(response => response.blob())
                                     .then(zipBlob => {
@@ -189,7 +189,6 @@
                                         try {
                                             // If all succeeds, parse the JSON content
                                             const jsonData = JSON.parse(content);
-                                            console.log(jsonData);
                                             // Append sourceLength
                                             repoDomain = new URL(url).hostname;
                                             contentElement.innerHTML += `
@@ -229,7 +228,6 @@
                                                 </div>
                                                 `
                                             });
-                                            console.log(modLookup)
                                             // Use the JSON data to get the mods
                                             Object.keys(modLookup).forEach(modLookupID => {
                                                 modType = modLookup[modLookupID].type;
@@ -513,6 +511,319 @@
                                         console.error(error.message);
                                         contentElement.textContent = "Error loading mods";
                                     });
+                            // LEGACYB64
+                            } else if (dataOfModpack.sourceType == "legacyB64") {
+                                var uint8Array = Uint8Array.from(atob(dataOfModpack.source.base64), c => c.charCodeAt(0));
+                                var zipBlob = new Blob([uint8Array], { type: "application/octet-stream" });
+                                JSZip.loadAsync(zipBlob)
+                                    .then(zip => {
+                                        mods = Array();
+                                        disabledMods = Array();
+                                        zip.forEach((relativePath, file) => {
+                                            if (relativePath.startsWith('mods')) {
+                                                if (relativePath.endsWith('.jar')) {
+                                                    mods.push(file);
+                                                } else if (relativePath.endsWith('.dis')) {
+                                                    disabledMods.push(file);
+                                                }
+                                            }
+                                        });
+                                        loadingText.style.display = "none";
+                                        try {
+                                            // Create lookup-table for al mods to their tied data
+                                            modLookup = {}
+                                            joinedModFiles = Array();
+                                            mods.forEach(mod => {
+                                                mod.generaleFileCategory = "enabled";
+                                                joinedModFiles.push(mod);
+                                            });
+                                            disabledMods.forEach(mod => {
+                                                mod.generaleFileCategory = "disabled";
+                                                joinedModFiles.push(mod);
+                                            });
+                                            // Append sourceLength
+                                            repoDomain = new URL(url).hostname;
+                                            contentElement.innerHTML += `
+                                            <div class="modview-listing-info">
+                                                <h2 class="modview-source-name">${dataOfModpack.name}</h2>
+                                                <div class="hsep"></div>
+                                                <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${url}">${repoDomain}</a></p>
+                                                <p class="modview-info modview-source-author">Author: ${dataOfModpack.author}</p>
+                                                <p class="modview-info modview-source-mcver">Minecraft Version: ${dataOfModpack.source.minecraftVer}</p>
+                                                <p class="modview-info modview-source-modloader">Modloader: ${dataOfModpack.source.modLoader} ${dataOfModpack.source.modLoaderVer}</p>
+                                                <p class="modview-info modview-source-format">Listing format: None, Legacy</p>
+                                                <p class="modview-info modview-source-archtype">ArchiveType: ${dataOfModpack.source.archiveType}</p>
+                                                <div class="hsep"></div>
+                                                <h3 class="modview-info modview-source-length">Showing ${joinedModFiles.length} mods:  (${disabledMods.length} disabled)</h3>
+                                            </div>
+                                            `;
+                                            // Use the JSON data to get the mods
+                                            joinedModFiles.forEach(modFile => {
+                                                // Display each mod, adjust as needed
+                                                modFile.async("uint8array").then(function (uint8array) {
+                                                    filename = modFile.name.split("/").slice(-1);
+                                                    var blob = new Blob([uint8array], { type: "application/octet-stream" });
+                                                    var blobUrl = URL.createObjectURL(blob);
+                                                    additionalClassStr = "";
+                                                    additionalFilenStr = "";
+                                                    if (modFile.generaleFileCategory == "disabled") {
+                                                        additionalClassStr = " disabled-mod";
+                                                        additionalFilenStr = " (Disabled)";
+                                                    }
+                                                    contentElement.innerHTML += `
+                                                    <div class="modview-mod legacy-mod${additionalClassStr}">
+                                                        <img class="modview-icon modview-icon-size" src="./images/modview/legacy.png" alt="Mod icon" onerror="modiconFallback(this,'legacy','');">
+                                                        <div class="modview-section">
+                                                            <p class="modview-filename">${filename}${additionalFilenStr}</p>
+                                                            <div class="modview-buttons">
+                                                                <a class="modview-download legacy-download blob-download" href="${blobUrl}" download="${filename}">
+                                                                    <div class="modview-download-text">
+                                                                        <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                                        <p>Download from blob</p>
+                                                                    </div>
+                                                                </a>
+                                                                <p class="modview-blob-warn">(OBS! <a href="./modview_issueswithblobs.html?redir-modpack=${modpack}">Issues with blobs</a>)</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    `;
+                                                });
+                                            });
+                                        } catch (error) {
+                                            throw new Error('Failed to parse listing.json: '.concat(error.message));
+                                        }
+                                    });
+                            // Included
+                            } else if (dataOfModpack.sourceType == "included") {
+                                loadingText.style.display = "none";
+                                try {
+                                    // If all succeeds, parse the JSON content
+                                    const jsonData = dataOfModpack.source;
+                                    // Append sourceLength
+                                    repoDomain = new URL(url).hostname;
+                                    contentElement.innerHTML += `
+                                    <div class="modview-listing-info">
+                                        <h2 class="modview-source-name">${jsonData.name}</h2>
+                                        <div class="hsep"></div>
+                                        <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${url}">${repoDomain}</a></p>
+                                        <p class="modview-info modview-source-author">Author: ${dataOfModpack.author}</p>
+                                        <p class="modview-info modview-source-mcver">Minecraft Version: ${jsonData.minecraftVer}</p>
+                                        <p class="modview-info modview-source-modloader">Modloader: ${jsonData.modloader} ${jsonData.modloaderVer}</p>
+                                        <p class="modview-info modview-source-format">Listing format: ${jsonData.format}</p>
+                                        <div class="hsep"></div>
+                                        <h3 class="modview-info modview-source-length">Showing ${jsonData.sourceLength} mods:</h3>
+                                    </div>
+                                    `;
+                                    // Create lookup-table for al mods to their tied data
+                                    modLookup = {}
+                                    jsonData.sources.forEach(mod => {
+                                        _key = makeIdSafe(mod.filename);
+                                        number = 1;
+                                        while (modLookup.hasOwnProperty(_key)) {
+                                            _key = makeIdSafe(mod.filename) + number;
+                                            number++;
+                                        }
+                                        modLookup[_key] = mod;
+                                        contentElement.innerHTML += `
+                                        <div class="modview-mod modview-placehold" id="modview-placehold_${_key}">
+                                            <div class="modview-icon modview-icon-size modview-loading-icon-wrapper">
+                                                <img class="modview-loading-icon" src="./images/modview/loading.gif" alt="Mod icon">
+                                            </div>
+                                            <div class="modview-section">
+                                                <p class="modview-filename">${_key}</p>
+                                                <div class="modview-buttons">
+                                                    <p class="modview-loading-text">Loading...</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        `
+                                    });
+                                    // Use the JSON data to get the mods
+                                    Object.keys(modLookup).forEach(modLookupID => {
+                                        modType = modLookup[modLookupID].type;
+                                        // Display each mod, adjust as needed
+                                        if (modType == "modrinth") {
+                                            mod = modLookup[modLookupID];
+                                            hostname = new URL(mod.url).hostname;
+                                            icon = mod.url.split("/versions/")[0].concat("/icon.png");
+                                            modrinthid = mod.url.split("/versions/")[0].split("/").slice(-1)
+                                            modrinthModPage = "https://modrinth.com/mod/".concat(modrinthid)
+                                            toReplHtml = `
+                                            <img class="modview-icon modview-icon-size" src="${icon}" alt="Mod icon" onerror="modiconFallback(this,'modrinth','${modrinthid}');">
+                                            <div class="modview-section">
+                                                <p class="modview-filename">${mod.filename}</p>
+                                                <div class="modview-buttons">
+                                                    <a class="modview-download modrinth-download" href="${mod.url}">
+                                                        <div class="modview-download-text">
+                                                            <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                            <p>Download via Modrinth</p>
+                                                        </div>
+                                                    </a>
+                                                    <a class="modview-download modrinth-site" href="${modrinthModPage}">
+                                                        <div class="modview-download-text">
+                                                            <img class="modview-download-text-icon" src="https://docs.modrinth.com/img/logo.svg" alt="Modrinth icon">
+                                                            <p>Modrinth Page</p>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            `;
+                                            targetElem = getPlchldDiv(modLookupID,["modrinth-mod"]);
+                                            targetElem.innerHTML = toReplHtml;
+                                        } else if (modType == "curseforgeManifest") {
+                                            curseforgeProjId = modLookup[modLookupID].curseforgeProjId
+                                            if (curseforgeProjId == "") {
+                                                curseforgeProjId = null;
+                                            }
+                                            if (curseforgeProjId != null) {
+                                                fetch(`https://api.curse.tools/v1/cf/mods/${curseforgeProjId}`)
+                                                    .then(response => {
+                                                        if (!response.ok) {
+                                                            throw new Error(`HTTP error! status: ${response.status}`);
+                                                        }
+                                                        return response.json();
+                                                    })
+                                                    .then(data => {
+                                                        modId = modLookupID;
+                                                        for (var key in modLookup) {
+                                                            if (modLookup.hasOwnProperty(key)) {
+                                                                if (modLookup[key].curseforgeProjId == data.data.id) {
+                                                                    modId = key;
+                                                                }
+                                                            }
+                                                        }
+                                                        toReplHtml = `
+                                                        <img class="modview-icon modview-icon-size" src="" alt="Mod icon" onerror="modiconFallback(this,'curseforge','${data.data.id}');">
+                                                        <div class="modview-section">
+                                                            <p class="modview-filename">${modLookup[modId].filename}</p>
+                                                            <div class="modview-buttons">
+                                                                <a class="modview-download curseforge-download" href="${modLookup[modId].url}">
+                                                                    <div class="modview-download-text">
+                                                                        <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                                        <p>Download via Curseforge</p>
+                                                                    </div>
+                                                                </a>
+                                                                <a class="modview-download curseforge-site" href="${data.data.links.websiteUrl}"><div class="modview-download-text"><img class="modview-download-text-icon" src="./images/modview/curseforge.png" alt="Modrinth icon"><p>Curseforge Page</p></div></a>
+                                                            </div>
+                                                        </div>
+                                                        `;
+                                                        targetElem = getPlchldDiv(modId,["curseforge-mod"]);
+                                                        targetElem.innerHTML = toReplHtml;
+                                                    })
+                                                    .catch(error => {
+                                                        console.error('Error:', error);
+                                                    });
+                                            } else {
+                                                filename = modLookup[modLookupID].filename
+                                                toReplHtml = `
+                                                <img class="modview-icon modview-icon-size" src="" alt="Mod icon" onerror="modiconFallback(this,'curseforge','${curseforgeProjId}');">
+                                                <div class="modview-section">
+                                                    <p class="modview-filename">${filename}</p>
+                                                    <div class="modview-buttons">
+                                                        <a class="modview-download curseforge-download" href="${modLookup[modLookupID].url}">
+                                                            <div class="modview-download-text">
+                                                                <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                                <p>Download via Curseforge</p>
+                                                            </div>
+                                                        </a>
+                                                        <a class="modview-download curseforge-search" href="https://www.curseforge.com/minecraft/search?page=1&pageSize=20&sortBy=relevancy&class=mc-mods&search=${filename}"><div class="modview-download-text"><img class="modview-download-text-icon" src="./images/modview/curseforge.png" alt="Modrinth icon"><p>Search on Curseforge</p></div></a>
+                                                    </div>
+                                                </div>
+                                                `;
+                                                targetElem = getPlchldDiv(modLookupID,["curseforge-mod"]);
+                                                targetElem.innerHTML = toReplHtml;
+                                            }
+                                        } else if (modType == "custom") {
+                                            mod = modLookup[modLookupID]
+                                            filename = mod.filename
+                                            hostname = new URL(mod.url).hostname
+                                            toReplHtml = `
+                                            <img class="modview-icon modview-icon-size" src="" alt="Mod icon" onerror="modiconFallback(this,'custom','');">
+                                            <div class="modview-section">
+                                                <p class="modview-filename">${filename}</p>
+                                                <div class="modview-buttons">
+                                                    <a class="modview-download custom-download" href="${mod.url}">
+                                                        <div class="modview-download-text">
+                                                            <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                            <p>Download via ${hostname}</p>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            `;
+                                            targetElem = getPlchldDiv(modLookupID,["custom-mod"]);
+                                            targetElem.innerHTML = toReplHtml;
+                                        } else if (modType == "customB64") {
+                                            mod = modLookup[modLookupID]
+                                            filename = mod.filename
+                                            var uint8Array = Uint8Array.from(atob(mod.base64), c => c.charCodeAt(0));
+                                            var blob = new Blob([uint8Array], { type: "application/octet-stream" });
+                                            var blobUrl = URL.createObjectURL(blob);
+                                            toReplHtml = `
+                                            <img class="modview-icon modview-icon-size" src="" alt="Mod icon" onerror="modiconFallback(this,'customB64','');">
+                                            <div class="modview-section">
+                                                <p class="modview-filename">${filename}</p>
+                                                <div class="modview-buttons">
+                                                    <a class="modview-download customB64-download blob-download" href="${blobUrl}" download="${filename}">
+                                                        <div class="modview-download-text">
+                                                            <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                            <p>Download from blob</p>
+                                                        </div>
+                                                    </a>
+                                                    <p class="modview-blob-warn">(OBS! <a href="./modview_issueswithblobs.html?redir-modpack=${modpack}">Issues with blobs</a>)</p>
+                                                </div>
+                                            </div>
+                                            `;
+                                            targetElem = getPlchldDiv(modLookupID,["customB64-mod"]);
+                                            targetElem.innerHTML = toReplHtml;
+                                        } else if (modType == "customArchiveB64") {
+                                            mod = modLookup[modLookupID]
+                                            filename = mod.filename
+                                            var uint8Array = Uint8Array.from(atob(mod.base64), c => c.charCodeAt(0));
+                                            var blob = new Blob([uint8Array], { type: "application/octet-stream" });
+                                            var blobUrl = URL.createObjectURL(blob);
+                                            toReplHtml = `
+                                            <img class="modview-icon modview-icon-size" src="" alt="Mod icon" onerror="modiconFallback(this,'customArchiveB64','');">
+                                            <div class="modview-section">
+                                                <p class="modview-filename">${filename}</p>
+                                                <div class="modview-buttons">
+                                                    <a class="modview-download customArchiveB64-download blob-download" href="${blobUrl}" download="${filename}">
+                                                        <div class="modview-download-text">
+                                                            <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                            <p>Download from blob</p>
+                                                        </div>
+                                                    </a>
+                                                    <p class="modview-blob-warn">(OBS! <a href="./modview_issueswithblobs.html?redir-modpack=${modpack}">Issues with blobs</a>)</p>
+                                                </div>
+                                            </div>
+                                            `;
+                                            targetElem = getPlchldDiv(modLookupID,["customArchiveB64-mod"]);
+                                            targetElem.innerHTML = toReplHtml;
+                                        } else if (modType == "customArchive") {
+                                            mod = modLookup[modLookupID]
+                                            filename = mod.filename
+                                            hostname = new URL(mod.url).hostname
+                                            toReplHtml = `
+                                            <img class="modview-icon modview-icon-size" src="" alt="Mod icon" onerror="modiconFallback(this,'customArchive','');">
+                                            <div class="modview-section">
+                                                <p class="modview-filename">${filename}</p>
+                                                <div class="modview-buttons">
+                                                    <a class="modview-download customArchive-download" href="${mod.url}">
+                                                        <div class="modview-download-text">
+                                                            <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                            <p>Download via ${hostname}</p>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            `;
+                                            targetElem = getPlchldDiv(modLookupID,["customArchive-mod"]);
+                                            targetElem.innerHTML = toReplHtml;
+                                        }
+                                    });
+                                } catch (error) {
+                                    throw new Error('Failed to parse listing.json: '.concat(error.message));
+                                }
                             }
                         })
                         .catch(error => {
