@@ -57,6 +57,17 @@
     height: 60px;
 }
 
+.modview-loading-icon-wrapper {
+    overflow: hidden;
+}
+
+.modview-loading-icon {
+    transform: scale(2);
+    transform-origin: center;
+    width: 60px;
+    height: 60px;
+}
+
 .modview-download {
     padding: 2px;
     padding-top: 0px;
