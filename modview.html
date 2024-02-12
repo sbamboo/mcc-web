@@ -142,6 +142,7 @@
                         elem.classList.remove("modview-placehold");
                         newClasses.forEach(function(className) {
                             elem.classList.add(className);
+                            elem.removeAttribute("id");
                         });
                         return elem
                     }
