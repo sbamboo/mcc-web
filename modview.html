@@ -220,25 +220,6 @@
                                                     if (curseforgeProjId == "") {
                                                         curseforgeProjId = null;
                                                     }
-                                                    projIdExiSiteLink = `<a class="modview-download curseforge-site" href="%REPLACEME2%"><div class="modview-download-text"><img class="modview-download-text-icon" src="./images/modview/curseforge.png" alt="Modrinth icon"><p>Curseforge Page</p></div></a>`;
-                                                    projIdNexSiteLink = `<a class="modview-download curseforge-search" href="%REPLACEME2%"><div class="modview-download-text"><img class="modview-download-text-icon" src="./images/modview/curseforge.png" alt="Modrinth icon"><p>Search on Curseforge</p></div></a>`;
-                                                    contentElement.innerHTML += `
-                                                    <div class="modview-mod curseforge-mod">
-                                                        <img class="modview-icon modview-icon-size" src="" alt="Mod icon" onerror="modiconFallback(this,'curseforge','${curseforgeProjId}');">
-                                                        <div class="modview-section">
-                                                            <p class="modview-filename">${mod.filename}</p>
-                                                            <div class="modview-buttons">
-                                                                <a class="modview-download curseforge-download" href="${mod.url}">
-                                                                    <div class="modview-download-text">
-                                                                        <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
-                                                                        <p>Download via Curseforge</p>
-                                                                    </div>
-                                                                </a>
-                                                                %REPLACEME%
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    `;
                                                     if (curseforgeProjId != null) {
                                                         fetch(`https://api.curse.tools/v1/cf/mods/${curseforgeProjId}`)
                                                             .then(response => {
@@ -248,15 +229,45 @@
                                                                 return response.json();
                                                             })
                                                             .then(data => {
-                                                                projid_innerhtml = projIdExiSiteLink.replace("%REPLACEME2%",data.data.links.websiteUrl)
-                                                                contentElement.innerHTML = contentElement.innerHTML.replace("%REPLACEME%",projid_innerhtml);
+                                                                contentElement.innerHTML += `
+                                                                <div class="modview-mod curseforge-mod">
+                                                                    <img class="modview-icon modview-icon-size" src="" alt="Mod icon" onerror="modiconFallback(this,'curseforge','${curseforgeProjId}');">
+                                                                    <div class="modview-section">
+                                                                        <p class="modview-filename">${mod.filename}</p>
+                                                                        <div class="modview-buttons">
+                                                                            <a class="modview-download curseforge-download" href="${mod.url}">
+                                                                                <div class="modview-download-text">
+                                                                                    <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                                                    <p>Download via Curseforge</p>
+                                                                                </div>
+                                                                            </a>
+                                                                            <a class="modview-download curseforge-site" href="${data.data.links.websiteUrl}"><div class="modview-download-text"><img class="modview-download-text-icon" src="./images/modview/curseforge.png" alt="Modrinth icon"><p>Curseforge Page</p></div></a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                `;
                                                             })
                                                             .catch(error => {
                                                                 console.error('Error:', error);
                                                             });
                                                     } else {
-                                                        noprojid_innerhtml = projIdNexSiteLink.replace("%REPLACEME2%",`https://www.curseforge.com/minecraft/search?page=1&pageSize=20&sortBy=relevancy&class=mc-mods&search=${mod.filename}`)
-                                                        contentElement.innerHTML = contentElement.innerHTML.replace("%REPLACEME%",noprojid_innerhtml);
+                                                        contentElement.innerHTML += `
+                                                        <div class="modview-mod curseforge-mod">
+                                                            <img class="modview-icon modview-icon-size" src="" alt="Mod icon" onerror="modiconFallback(this,'curseforge','${curseforgeProjId}');">
+                                                            <div class="modview-section">
+                                                                <p class="modview-filename">${mod.filename}</p>
+                                                                <div class="modview-buttons">
+                                                                    <a class="modview-download curseforge-download" href="${mod.url}">
+                                                                        <div class="modview-download-text">
+                                                                            <img class="modview-download-text-icon" src="./images/modview/download.png" alt="Download icon">
+                                                                            <p>Download via Curseforge</p>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a class="modview-download curseforge-search" href="https://www.curseforge.com/minecraft/search?page=1&pageSize=20&sortBy=relevancy&class=mc-mods&search=${mod.filename}"><div class="modview-download-text"><img class="modview-download-text-icon" src="./images/modview/curseforge.png" alt="Modrinth icon"><p>Search on Curseforge</p></div></a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        `;
                                                     }
                                                 }
                                             });
