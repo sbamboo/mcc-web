@@ -1,0 +1,7 @@
+{
+    "mcc:crossed": "./images/icons/crossed_icon128.png",
+    "mcc:default": "./images/modpack_default.png",
+    "mcc:modded": "./images/icons/modded_icon128.png",
+    "mcc:normal": "./images/icons/normal_icon128.png",
+    "mcc:legacy": "./images/icons/legacy_icon128.png"
+}

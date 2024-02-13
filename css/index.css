@@ -161,12 +161,28 @@ a:visited {
     padding: 5px;
     margin-bottom: 15px;
 }
-.modpack-down b {
+
+.modpack-wrapper-outer {
+    display: flex;
+    flex-direction: row;
+}
+
+.modpack-wrapper b {
     color: #c8c8c8;
     margin-bottom: 3px;
 }
-.modpack-down p {
+.modpack-wrapper p {
     margin-bottom: 6px;
+}
+
+.modpack-icon {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.modpack-icon-wrapper {
+    margin-right: 10px;
 }
 
 #down-installer p {

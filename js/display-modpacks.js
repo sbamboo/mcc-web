@@ -29,7 +29,7 @@ function makeQueryStringSafe(inputString) {
 }
 
 // Function to create the modpack div elements
-function createModpackDiv(name, desc, author, id, links, supported) {
+function createModpackDiv(name, desc, author, id, links, supported, icon) {
     const container = document.getElementById("modpack-link-container");
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
@@ -38,18 +38,28 @@ function createModpackDiv(name, desc, author, id, links, supported) {
     }
     div.className = "modpack-down";
     urlSafename = encodeURIComponent(name);
+    if (icon == null || icon == "" || icon == undefined) {
+      icon = "./images/modpack_default.png";
+    }
     div.innerHTML = `
-      <b>${name}</b>
-      <div class="oneline-wrapper">${desc}</div>
-      <div class="modpack-info sideflex">
-          <p class="modpack-author">By: ${author}</p>
-          <p class="modpack-id inline">[MdpkId:${id}]</p>
+      <div class="modpack-wrapper-outer">
+        <div class="modpack-icon-wrapper">
+          <img class="modpack-icon" src="${icon}" alt="Modpack Icon">
+        </div>
+        <div class="modpack-wrapper">
+          <b>${name}</b>
+          <div class="oneline-wrapper">${desc}</div>
+          <div class="modpack-info sideflex">
+              <p class="modpack-author">By: ${author}</p>
+              <p class="modpack-id inline">[MdpkId:${id}]</p>
+          </div>
+          <a class="button os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
+          <a class="button os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
+          <a class="button os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
+          <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="modview-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
+          <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
+        </div>
       </div>
-      <a class="button os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
-      <a class="button os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
-      <a class="button os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
-      <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="modview-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
-      <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
     `;
     container.appendChild(div);
 }
@@ -59,10 +69,10 @@ async function main() {
     const repoData = await fetchRepoData();
     const parentUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo";
   
-    repoData.forEach(({ name, source, desc, author, hidden, supported, id }) => {
+    repoData.forEach(({ name, source, desc, author, hidden, supported, icon, id }) => {
       if (hidden != true) {
         const links = generateLinks(name, source, parentUrl);
-        createModpackDiv(name, desc, author, id, links, supported);
+        createModpackDiv(name, desc, author, id, links, supported, icon);
       }
     });
 }
