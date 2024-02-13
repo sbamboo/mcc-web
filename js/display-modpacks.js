@@ -29,7 +29,7 @@ function makeQueryStringSafe(inputString) {
 }
 
 // Function to create the modpack div elements
-function createModpackDiv(name, desc, author, id, links, supported, icon) {
+function createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping) {
     const container = document.getElementById("modpack-link-container");
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
@@ -41,6 +41,14 @@ function createModpackDiv(name, desc, author, id, links, supported, icon) {
     if (icon == null || icon == "" || icon == undefined) {
       icon = "./images/modpack_default.png";
     }
+    for (var key in iconMapping) {
+      if (iconMapping.hasOwnProperty(key)) {
+          if (icon == key) {
+            icon = iconMapping[key];
+          }
+      }
+    }
+    console.log(icon)
     div.innerHTML = `
       <div class="modpack-wrapper-outer">
         <div class="modpack-icon-wrapper">
@@ -69,12 +77,16 @@ async function main() {
     const repoData = await fetchRepoData();
     const parentUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo";
   
-    repoData.forEach(({ name, source, desc, author, hidden, supported, icon, id }) => {
-      if (hidden != true) {
-        const links = generateLinks(name, source, parentUrl);
-        createModpackDiv(name, desc, author, id, links, supported, icon);
-      }
-    });
+    fetch("https://raw.githubusercontent.com/sbamboo/mcc-web/main/images/icons/icons_b64map.json")
+      .then(response => response.json())
+      .then(iconMapping => {
+        repoData.forEach(({ name, source, desc, author, hidden, supported, icon, id }) => {
+          if (hidden != true) {
+            const links = generateLinks(name, source, parentUrl);
+            createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping);
+          }
+        });
+      });
 }
   
 // Call the main function to initiate the process
