@@ -192,3 +192,25 @@
 .modview-blob-warn:hover a {
     color: #a09dd4;
 }
+
+
+.modview-modpack-input-wrapper {
+    margin-bottom: 10px;
+}
+.modview-modpack-input-text {
+    color: #aaaaaa;
+    background-color: #1b1b1b;
+    padding: 3px;
+    border-radius: 5px;
+    border: 1px solid #2e2e2e;
+    margin-right: 6px;
+    font-size: 16px;
+}
+.modview-modpack-input-submit {
+    color: #aaaaaa;
+    background-color: #1b1b1b;
+    padding: 3px;
+    border-radius: 5px;
+    border: 1px solid #2e2e2e;
+    font-size: 16px;
+}
