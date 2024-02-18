@@ -3,5 +3,8 @@
     "mcc:default": "./images/modpack_default.png",
     "mcc:modded": "./images/icons/modded_icon128.png",
     "mcc:normal": "./images/icons/normal_icon128.png",
-    "mcc:legacy": "./images/icons/legacy_icon128.png"
+    "mcc:legacy": "./images/icons/legacy_icon128.png",
+
+    "skc:supmozz_opt": "./images/icons/vendors/private/simonkc/super_mozzarella_optimized_logo.png",
+    "skc:supmozz_opt_vk": "./images/icons/vendors/private/simonkc/super_mozzarella_optimized_logo_valkyrianskies.png"
 }
