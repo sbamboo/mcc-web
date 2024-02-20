@@ -28,6 +28,17 @@ function makeQueryStringSafe(inputString) {
     return safeString;
 }
 
+// Function to make an id safe
+function makeIdSafe(str) {
+  // Replace invalid characters with underscores
+  var safeStr = str.replace(/[^\w:.-]/g, '_');
+  // Ensure the string starts with a letter
+  if (!/^[A-Za-z]/.test(safeStr)) {
+      safeStr = 'id_' + safeStr; // Prefix with 'id_' if it doesn't start with a letter
+  }
+  return safeStr;
+}
+
 // Function to create the modpack div elements
 function createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping) {
     const container = document.getElementById("modpack-link-container");
@@ -48,28 +59,31 @@ function createModpackDiv(name, desc, author, id, links, supported, icon, iconMa
           }
       }
     }
-    console.log(icon)
-    div.innerHTML = `
-      <div class="modpack-wrapper-outer">
-        <div class="modpack-icon-wrapper">
-          <img class="modpack-icon" src="${icon}" alt="Modpack Icon">
-        </div>
-        <div class="modpack-wrapper">
-          <b>${name}</b>
-          <div class="oneline-wrapper">${desc}</div>
-          <div class="modpack-info sideflex">
-              <p class="modpack-author">By: ${author}</p>
-              <p class="modpack-id inline">[MdpkId:${id}]</p>
+    if (icon == "lis:launcherico") {
+      // Fetch source and read listing for launchericon then resolve it, if fails fallback to def
+    } else {
+      div.innerHTML = `
+        <div class="modpack-wrapper-outer">
+          <div class="modpack-icon-wrapper">
+            <img class="modpack-icon" src="${icon}" alt="Modpack Icon">
           </div>
-          <a class="button os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
-          <a class="button os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
-          <a class="button os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
-          <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="modview-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
-          <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
+          <div class="modpack-wrapper">
+            <b>${name}</b>
+            <div class="oneline-wrapper">${desc}</div>
+            <div class="modpack-info sideflex">
+                <p class="modpack-author">By: ${author}</p>
+                <p class="modpack-id inline">[MdpkId:${id}]</p>
+            </div>
+            <a class="button os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
+            <a class="button os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
+            <a class="button os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
+            <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="modview-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
+            <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
+          </div>
         </div>
-      </div>
-    `;
-    container.appendChild(div);
+      `;
+      container.appendChild(div);
+    }
 }
   
 // Main function to fetch data and create modpack divs
