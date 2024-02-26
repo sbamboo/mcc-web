@@ -74,9 +74,9 @@ function createModpackDiv(name, desc, author, id, links, supported, icon, iconMa
                 <p class="modpack-author">By: ${author}</p>
                 <p class="modpack-id inline">[MdpkId:${id}]</p>
             </div>
-            <a class="button os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
-            <a class="button os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
-            <a class="button os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
+            <a class="button os-down modpack-os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
+            <a class="button os-down modpack-os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
+            <a class="button os-down-alt modpack-os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
             <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="modview-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
             <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
           </div>
