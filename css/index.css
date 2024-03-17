@@ -381,3 +381,14 @@ h3.repo-value {
     padding-top: 2px;
     padding-bottom: 1px;
 }
+
+.notice-red {
+    background-color: #4c1f1f;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1.5px solid #444444;
+    width: fit-content;
+}
+.notice-b,.notice-p {
+    font-size: 16px !important;
+}
