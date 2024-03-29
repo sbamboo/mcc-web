@@ -1,5 +1,7 @@
 # Version: 1.0, Author: Simon Kalmi Claesson
 # THis file is meant to be executed easily from powershell using "iex(iwr -Uri "https://sbamboo.github.io/mcc-web/cdn/static/scr-inst-win.ps1" -UseBasicParsing).Content"
+
+#REPLACEDELIM-LATTER
 # Define vars
 $folderPath = "C:\installs\scripted-install-temp"
 $bundleURL = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Installers/Builds/bundle.zip"
