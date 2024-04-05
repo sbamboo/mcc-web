@@ -20,7 +20,7 @@ if (-not (Test-Path -Path $markerFilePath)) {
 # Run windows.bat
 $batchFilePath = Join-Path -Path $folderPath -ChildPath "launcher.bat"
 if (Test-Path -Path $batchFilePath -PathType Leaf) {
-    Start-Process -FilePath $batchFilePath -NoNewWindow
+    "cmd /c $batchFilePath" | iex
 } else {
     Write-Host "Batch file not found: $batchFilePath"
 }
