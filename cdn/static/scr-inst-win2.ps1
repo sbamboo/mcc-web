@@ -18,7 +18,7 @@ if (-not (Test-Path -Path $markerFilePath)) {
     Remove-Item -Path "$folderPath\bundle.zip" -Force
 }
 # Run windows.bat
-$batchFilePath = Join-Path -Path $folderPath -ChildPath "windows.bat"
+$batchFilePath = Join-Path -Path $folderPath -ChildPath "launcher.bat"
 if (Test-Path -Path $batchFilePath -PathType Leaf) {
     Start-Process -FilePath $batchFilePath -NoNewWindow
 } else {
