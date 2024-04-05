@@ -1,5 +1,5 @@
 # Version: 1.0, Author: Simon Kalmi Claesson
-# THis file is meant to be executed easily from powershell using "iwr "https://sbamboo.github.io/mcc-web/cdn/static/scr-inst-win.ps1" | iex"
+# THis file is meant to be executed easily from powershell using 'iwr "https://sbamboo.github.io/mcc-web/cdn/static/scr-inst-win2.ps1" | iex'
 
 #REPLACEDELIM-LATTER
 # Define vars
