@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>MinecraftCustomClient - Website (RepoView)</title>
         <link rel="stylesheet" href="./css/index.css">
+        <link rel="stylesheet" href="./css/flimmer-fix.css">
         <link rel="icon" type="image/png" href="./images/favicon_128.png">
     </head>
     <noscript>
@@ -31,7 +32,10 @@
                 <p id="repoview-content"></p>
                 <script>
                     // The URL you want to fetch data from
-                    var url = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo/repo.json";
+                    const urlParams = new URLSearchParams(window.location.search);
+                    var url = urlParams.get('url');
+                    var sourceUrlFormatted = "https://sbamboo.github.io/websa/jsonview/?decorate-expanded=true&altsym=true&return-url=" + "history-back" + "&url=" + encodeURIComponent(url);
+                    //var url = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo/repo.json";
 
                     // Reference to the <p> element where you want to display the content
                     var contentElement = document.getElementById("repoview-content");
@@ -74,7 +78,7 @@
                             repoFname = url.split("/")
                             repoFname = repoFname[repoFname.length - 1];
                             namesString = `
-                            <h2 id="repoview-title">Default Repostory: <a id="repoview-title-link" href="${url}">${repoFname}</a></h2>
+                            <h2 id="repoview-title">Default Repostory: <a id="repoview-title-link" href="${sourceUrlFormatted}">${repoFname} (Formatted)</a>  <a id="repoview-title-link" href="${url}">${repoFname} (Raw)</a></h2>
                             <div class="oneline-wrapper rvsp"><p class="repo-key">Format:</p> <p class="repo-value">${parsedContent.format}</p></div>
                             <div class="oneline-wrapper rvsp"><p class="repo-key">Author:</p> <p class="repo-value">${parsedContent.author}</p></div>
                             <div class="oneline-wrapper rvsp"><p class="repo-key">Version:</p> <p class="repo-value">${parsedContent.version}</p></div>

@@ -153,6 +153,7 @@
                 
                     // The URL you want to fetch data from
                     const url = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo/repo.json";
+                    const sourceUrlFormatted = "https://sbamboo.github.io/websa/jsonview/?decorate-expanded=true&altsym=true&return-url=" + "history-back" + "&url=" + encodeURIComponent(url);
                 
                     // Reference to the <p> element where you want to display the content
                     const contentElement = document.getElementById("modview-content");
@@ -224,7 +225,7 @@
                                                 <div class="modview-listing-info">
                                                     <h2 class="modview-source-name">${jsonData.name}</h2>
                                                     <div class="hsep"></div>
-                                                    <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${url}">${repoDomain}</a></p>
+                                                    <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${sourceUrlFormatted}">${repoDomain} (Formatted)</a>  <a class="modview-from-repo-link" href="${url}">${repoDomain} (Raw)</a></p>
                                                     <p class="modview-info modview-source-author">Author: ${dataOfModpack.author}</p>
                                                     <p class="modview-info modview-source-mcver">Minecraft Version: ${jsonData.minecraftVer}</p>
                                                     <p class="modview-info modview-source-modloader">Modloader: ${jsonData.modloader} ${jsonData.modloaderVer}</p>
@@ -491,7 +492,7 @@
                                                 <div class="modview-listing-info">
                                                     <h2 class="modview-source-name">${dataOfModpack.name}</h2>
                                                     <div class="hsep"></div>
-                                                    <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${url}">${repoDomain}</a></p>
+                                                    <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${sourceUrlFormatted}">${repoDomain} (Formatted)</a>  <a class="modview-from-repo-link" href="${url}">${repoDomain} (Raw)</a></p>
                                                     <p class="modview-info modview-source-author">Author: ${dataOfModpack.author}</p>
                                                     <p class="modview-info modview-source-mcver">Minecraft Version: ${dataOfModpack.source.minecraftVer}</p>
                                                     <p class="modview-info modview-source-modloader">Modloader: ${dataOfModpack.source.modLoader} ${dataOfModpack.source.modLoaderVer}</p>
@@ -577,7 +578,7 @@
                                                 <div class="modview-listing-info">
                                                     <h2 class="modview-source-name">${dataOfModpack.name}</h2>
                                                     <div class="hsep"></div>
-                                                    <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${url}">${repoDomain}</a></p>
+                                                    <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${sourceUrlFormatted}">${repoDomain} (Formatted)</a>  <a class="modview-from-repo-link" href="${url}">${repoDomain} (Raw)</a></p>
                                                     <p class="modview-info modview-source-author">Author: ${dataOfModpack.author}</p>
                                                     <p class="modview-info modview-source-mcver">Minecraft Version: ${dataOfModpack.source.minecraftVer}</p>
                                                     <p class="modview-info modview-source-modloader">Modloader: ${dataOfModpack.source.modLoader} ${dataOfModpack.source.modLoaderVer}</p>
@@ -635,7 +636,7 @@
                                         <div class="modview-listing-info">
                                             <h2 class="modview-source-name">${jsonData.name}</h2>
                                             <div class="hsep"></div>
-                                            <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${url}">${repoDomain}</a></p>
+                                            <p class="modview-info modview-from-repo">Repo: <a class="modview-from-repo-link" href="${sourceUrlFormatted}">${repoDomain} (Formatted)</a>  <a class="modview-from-repo-link" href="${url}">${repoDomain} (Raw)</a></p>
                                             <p class="modview-info modview-source-author">Author: ${dataOfModpack.author}</p>
                                             <p class="modview-info modview-source-mcver">Minecraft Version: ${jsonData.minecraftVer}</p>
                                             <p class="modview-info modview-source-modloader">Modloader: ${jsonData.modloader} ${jsonData.modloaderVer}</p>
