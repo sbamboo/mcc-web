@@ -27,6 +27,9 @@ function getParameterByName(name) {
   
       // Scroll to the new position
       window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+
+      // Class the element with an indentifier
+      element.classList.add("scrolled-to");
     } else {
       // If the element is not found, set up a MutationObserver to watch for changes
       const observer = new MutationObserver((mutationsList, observer) => {
@@ -41,7 +44,10 @@ function getParameterByName(name) {
   
               // Scroll to the new position
               window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
-              
+
+              // Class the element with an indentifier
+              updatedElement.classList.add("scrolled-to");
+
               observer.disconnect(); // Stop observing once the element is found
               break;
             }
