@@ -6,5 +6,8 @@
     "mcc:legacy": "./images/icons/legacy_icon128.png",
 
     "skc:supmozz_opt": "./images/icons/vendors/private/simonkc/super_mozzarella_optimized_logo.png",
-    "skc:supmozz_opt_vk": "./images/icons/vendors/private/simonkc/super_mozzarella_optimized_logo_valkyrianskies.png"
+    "skc:supmozz_opt_vk": "./images/icons/vendors/private/simonkc/super_mozzarella_optimized_logo_valkyrianskies.png",
+
+    "skc:community_E": "./images/icons/vendors/private/simonkc/community_client_essential.png",
+    "skc:community_C": "./images/icons/vendors/private/simonkc/community_client_c4mc.png"
 }
