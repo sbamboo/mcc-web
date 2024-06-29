@@ -78,7 +78,7 @@
                                 elem.src = './images/modview/missing-mod-icon.png';
                             } else {
                                 if (amnt < 5) {
-                                    console.log(`Modrinth fetch for ${id} try ${amnt} allowed.`)
+                                    //console.log(`Modrinth fetch for ${id} try ${amnt} allowed.`)
                                     seenFallbacks.push(id);
                                     fetch(`https://api.modrinth.com/v2/project/${id}`,modrinth_api_requestOptions)
                                     .then(response => {
@@ -103,7 +103,7 @@
                                 elem.src = './images/modview/missing-mod-icon.png';
                             } else {
                                 if (!seenFallbacks.includes(id)) {
-                                    console.log(`Curseforge fetch for ${id} try ${amnt} allowed.`)
+                                    //console.log(`Curseforge fetch for ${id} try ${amnt} allowed.`)
                                     fetch(`https://api.curse.tools/v1/cf/mods/${id}`)
                                     .then(response => {
                                         if (!response.ok) {
@@ -265,7 +265,17 @@
                                                     if (modType == "modrinth") {
                                                         mod = modLookup[modLookupID];
                                                         hostname = new URL(mod.url).hostname;
-                                                        icon = mod.url.split("/versions/")[0].concat("/icon.png");
+                                                        if (mod.modrinthIcon) {
+                                                            console.log(mod.modrinthIcon)
+                                                            if (mod.modrinthIcon.startsWith("proj:")) {
+                                                                // Fetch the modrinth API for the project icon
+                                                                // Current just skipping :)
+                                                            } else {
+                                                                icon = mod.modrinthIcon;
+                                                            }
+                                                        } else {
+                                                            icon = mod.url.split("/versions/")[0].concat("/icon.png");
+                                                        }
                                                         modrinthid = mod.url.split("/versions/")[0].split("/").slice(-1)
                                                         modrinthModPage = "https://modrinth.com/mod/".concat(modrinthid)
                                                         toReplHtml = `
@@ -451,7 +461,6 @@
                                         });
                                 // LEGACY
                                 } else if (dataOfModpack.sourceType == "legacy") {
-                                    console.log(dataOfModpack.source)
                                     fetch(dataOfModpack.source.url)
                                         .then(response => response.blob())
                                         .then(zipBlob => {
