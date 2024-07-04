@@ -92,13 +92,19 @@ async function main() {
     const repoUrl = parentUrl+"/repo.json"
     const repoData = await fetchRepoData(repoUrl);
     const urlParams = new URLSearchParams(window.location.search);
-    const showHidden = urlParams.get("showHidden");
+    const showHidden_param = urlParams.get("showHidden");
+    var showHidden = false;
+    if (showHidden_param) {
+        if (showHidden_param === true || showHidden_param.toLowerCase() === "true" || showHidden_param == 1) {
+            	showHidden = true
+        }
+    }
   
     fetch("https://raw.githubusercontent.com/sbamboo/mcc-web/main/images/icons/icons_b64map.json")
         .then(response => response.json())
         .then(iconMapping => {
             repoData.forEach(({ name, source, desc, author, hidden, supported, icon, id }) => {
-                if (hidden != true || (showHidden === true || showHidden.toLowerCase() === "true" || showHidden == 1)) {
+                if (hidden != true || showHidden == true) {
                     const links = generateLinks(name, source, parentUrl);
                     createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping);
                 }
