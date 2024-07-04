@@ -98,7 +98,7 @@ async function main() {
         .then(response => response.json())
         .then(iconMapping => {
             repoData.forEach(({ name, source, desc, author, hidden, supported, icon, id }) => {
-                if (hidden != true || showHidden == true) {
+                if (hidden != true || (showHidden === true || showHidden.toLowerCase() === "true" || showHidden == 1)) {
                     const links = generateLinks(name, source, parentUrl);
                     createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping);
                 }
