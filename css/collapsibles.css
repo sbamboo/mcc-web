@@ -1,0 +1,31 @@
+
+.collapsible-content {
+    display: block;
+}
+
+/* Basic styles for the collapsible content */
+.collapsible {
+    cursor: pointer;
+    width: max-content;
+}
+
+/* Styles for the collapsed state */
+.collapsible-collapsed::after {
+    content: ' ▼';
+}
+
+/* Styles for the expanded state */
+.collapsible:not(.collapsible-collapsed)::after {
+    content: ' ▲';
+}
+
+/* Hide content when collapsed */
+.collapsible-collapsed + .collapsible-content {
+    display: none;
+}
+
+.category-flavour, .category-versions {
+    padding-left: 15px;
+    border-left: 1px solid rgb(49, 49, 49);
+    padding-bottom: 15px;
+}
