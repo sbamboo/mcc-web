@@ -157,7 +157,7 @@ function createModpackDiv(name, desc, author, id, links, supported, icon, iconMa
                         <p class="modpack-author">By: ${author}</p>
                         <p class="modpack-id inline">[MdpkId:${id}]</p>
                     </div>
-                    <b class="collapsible${xtra}">Links:</b>
+                    <b class="collapsible${xtra}">Downloads:</b>
                     <div class="collapsible-content vflex">
                         <div class="hflex">
                             <a class="button modviewer" href="./modview.html?modpack=${urlSafename}">
