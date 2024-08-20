@@ -39,6 +39,84 @@ function makeIdSafe(str) {
     return safeStr;
 }
 
+function compareMcVer(version1, version2, textPlacement = 'last') {
+    const parseVersion = (version) => {
+        // Extract text placeholder and base version
+        const textMatch = version.match(/^(.*?)([a-zA-Z_]+)?$/);
+        const baseVersion = textMatch[1];
+        const textPlaceholder = textMatch[2] || '';
+
+        // Extract snapshot information
+        const snapshotMatch = baseVersion.match(/(\d{2}w\d{2}[a-z]?)(_text)?$/);
+        const snapshot = snapshotMatch ? snapshotMatch[0] : '';
+        const baseVersionWithoutSnapshot = baseVersion.replace(snapshot, '');
+
+        // Split base version into parts and parse as integers
+        const baseParts = baseVersionWithoutSnapshot.split(/[\.\-_]/).map(part => isNaN(part) ? 0 : parseInt(part, 10));
+
+        // Fill in any missing parts with zeroes
+        while (baseParts.length < 5) {
+            baseParts.push(0);
+        }
+
+        return { baseParts, snapshot, textPlaceholder };
+    };
+
+    const { baseParts: baseParts1, snapshot: snapshot1, textPlaceholder: text1 } = parseVersion(version1);
+    const { baseParts: baseParts2, snapshot: snapshot2, textPlaceholder: text2 } = parseVersion(version2);
+
+    const compareBaseVersions = () => {
+        for (let i = 0; i < baseParts1.length; i++) {
+            if (baseParts1[i] > baseParts2[i]) return 1;
+            if (baseParts1[i] < baseParts2[i]) return -1;
+        }
+        return 0;
+    };
+
+    const compareSnapshots = () => {
+        if (snapshot1 && !snapshot2) return 1; // Snapshot1 is newer
+        if (!snapshot1 && snapshot2) return -1; // Snapshot2 is newer
+        if (snapshot1 && snapshot2) {
+            return snapshot1.localeCompare(snapshot2); // Compare snapshots
+        }
+        return 0;
+    };
+
+    const compareTextPlaceholders = () => {
+        if (textPlacement === 'last') {
+            // For 'last', versions with text placeholders should come after
+            if (text1 && !text2) return 1;
+            if (!text1 && text2) return -1;
+            if (text1 && text2) return text1.localeCompare(text2);
+        } else { // textPlacement === 'first'
+            // For 'first', versions with text placeholders should come before
+            if (text1 && !text2) return -1;
+            if (!text1 && text2) return 1;
+            if (text1 && text2) return text1.localeCompare(text2);
+        }
+        return 0;
+    };
+
+    // First, compare base versions
+    const baseComparison = compareBaseVersions();
+    if (baseComparison !== 0) {
+        return baseComparison;
+    }
+
+    // Ensure snapshots come after main versions
+    if (snapshot1 && !snapshot2) return 1;
+    if (!snapshot1 && snapshot2) return -1;
+
+    // Compare snapshots if both versions have them
+    if (snapshot1 && snapshot2) {
+        const snapshotComparison = compareSnapshots();
+        if (snapshotComparison !== 0) return snapshotComparison;
+    }
+
+    // Finally, compare text placeholders
+    return compareTextPlaceholders();
+}
+
 // Function to create the modpack div elements
 function createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping, container) {
     const div = document.createElement("div");
@@ -185,7 +263,22 @@ async function main() {
                                     "leaves": Array()
                                 }
                                 container = group_elem_branch_container;
-                                groups_tree[group]["container"].appendChild(group_elem_branch)
+                                //groups_tree[group]["container"].appendChild(group_elem_branch)
+                                lastChild = groups_tree[group]["container"].lastElementChild;
+                                if (lastChild) {
+                                    lastVersion = lastChild.getElementsByClassName("category-versions-title")[0].innerText
+                                    compareNum = compareMcVer(lastVersion,mcver)
+                                    if (compareNum == 1) {
+                                        console.log(`Inserted ${mcver} after ${lastVersion}  (${group})`)
+                                        groups_tree[group]["container"].appendChild(group_elem_branch)
+                                    } else {
+                                        console.log(`Inserted ${mcver} before ${lastVersion} (${group})`)
+                                        groups_tree[group]["container"].insertBefore(group_elem_branch, lastChild)
+                                    }
+                                } else {
+                                    console.log(`Inserted ${mcver} as first child        (${group})`)
+                                    groups_tree[group]["container"].appendChild(group_elem_branch)
+                                }
                             }
                         }
                     }
