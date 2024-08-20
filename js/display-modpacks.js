@@ -118,7 +118,7 @@ function compareMcVer(version1, version2, textPlacement = 'last') {
 }
 
 // Function to create the modpack div elements
-function createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping, container) {
+function createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping, container, genmode_dropdownLinks) {
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
     if (supported != true) {
@@ -138,6 +138,62 @@ function createModpackDiv(name, desc, author, id, links, supported, icon, iconMa
     }
     if (icon == "lis:launcherico") {
         // Fetch source and read listing for launchericon then resolve it, if fails fallback to def
+    }
+    if (genmode_dropdownLinks === "expanded" || genmode_dropdownLinks === "collapsed") {
+        if (genmode_dropdownLinks === "collapsed") {
+            xtra = " collapsible-collapsed";
+        } else {
+            xtra = "";
+        }
+        div.innerHTML = `
+            <div class="modpack-wrapper-outer">
+                <div class="modpack-icon-wrapper">
+                    <img class="modpack-icon" src="${icon}" alt="Modpack Icon">
+                </div>
+                <div class="modpack-wrapper">
+                    <b>${name}</b>
+                    <div class="oneline-wrapper">${desc}</div>
+                    <div class="modpack-info sideflex">
+                        <p class="modpack-author">By: ${author}</p>
+                        <p class="modpack-id inline">[MdpkId:${id}]</p>
+                    </div>
+                    <b class="collapsible${xtra}">Links:</b>
+                    <div class="collapsible-content vflex">
+                        <div class="hflex">
+                            <a class="button modviewer" href="./modview.html?modpack=${urlSafename}">
+                                <div class="icon-button-wrapper">
+                                    <img src="./images/modview/modviewer.png" alt="Modview icon">
+                                    <p>Open in modviewer</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="hflex">
+                            <a class="button os-down modpack-os-down modpack-os-down-sb" href="${links.qiWinX86Link}">
+                                <div class="icon-button-wrapper">
+                                    <img src="./images/win_icon-icons.com.svg" alt="Windows (exe)">
+                                    <p>Installer - Win</p>
+                                </div>
+                            </a>
+                            <a class="button os-down modpack-os-down modpack-os-down-sb" href="${links.bundleLink}">
+                                <div class="icon-button-wrapper">
+                                    <img src="./images/zip_icon-icons.com.svg" alt="Any (zip)">
+                                    <p>Installer - Any</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="hflex">
+                            <a class="legacy-link link-ul" href="${links.modpackLink}">Modpack/listing</a>
+                            <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        [...div.getElementsByClassName("collapsible")].forEach(elem => {
+            elem.addEventListener('click', function() {
+                this.classList.toggle('collapsible-collapsed');
+            });
+        });
     } else {
         div.innerHTML = `
             <div class="modpack-wrapper-outer">
@@ -154,13 +210,13 @@ function createModpackDiv(name, desc, author, id, links, supported, icon, iconMa
                     <a class="button os-down modpack-os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
                     <a class="button os-down modpack-os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
                     <a class="button os-down-alt modpack-os-down-alt" href="${links.modpackLink}">Modpack/listing</a>
-                    <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="modview-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
+                    <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="icon-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
                     <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
                 </div>
             </div>
         `;
-        container.appendChild(div);
     }
+    container.appendChild(div);
 }
   
 // Main function to fetch data and create modpack divs
@@ -194,6 +250,16 @@ async function main() {
         }
     }
     var groups_tree = {};
+
+    const dropdownLinks_param = urlParams.get("dropdownLinks");
+    var dropdownLinks = false;
+    if (dropdownLinks_param) {
+        if (dropdownLinks_param === true || dropdownLinks_param.toLowerCase() === "true" || dropdownLinks_param == 1) {
+            dropdownLinks = "expanded";
+        } else if (dropdownLinks_param.toLowerCase() === "collapsed" || dropdownLinks_param == 2) {
+            dropdownLinks = "collapsed";
+        }
+    }
 
     fetch("https://raw.githubusercontent.com/sbamboo/mcc-web/main/images/icons/icons_b64map.json")
         .then(response => response.json())
@@ -283,7 +349,7 @@ async function main() {
                         }
                     }
 
-                    createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping, container);
+                    createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping, container, dropdownLinks);
                 }
             });
         });

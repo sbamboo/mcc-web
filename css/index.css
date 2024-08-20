@@ -113,6 +113,10 @@ a:visited {
 .modpack-os-down:hover {
     background-color: #464ca1;
 }
+.modpack-os-down-sb {
+    border: 1px solid #6b70c2;
+    padding-bottom: 0px;
+}
 
 .legacy-link {
     color: #787878;
@@ -145,9 +149,18 @@ a:visited {
     padding-bottom: 20px;
 }
 
-.sideflex {
+.sideflex,.hflex {
     display: flex;
     flex-direction: row;
+}
+
+.vflex {
+    display: flex;
+    flex-direction: column;
+}
+
+.link-ul {
+    text-decoration: underline;
 }
 
 .title img {
@@ -368,15 +381,17 @@ h3.repo-value {
     border-color: rgb(124, 10, 150);
     background-image: linear-gradient(to bottom, #00000012, #8d049f76);
 }
-.modview-button-wrapper {
+.icon-button-wrapper {
     display: flex;
     flex-direction: row;
 }
-.modview-button-wrapper img {
-    width: 17px;
-    height: 17px;
+.icon-button-wrapper img {
+    width: 19px;
+    height: 19px;
+    margin-right: 5px;
+    margin-right: 3px;
 }
-.modview-button-wrapper p {
+.icon-button-wrapper p {
     font-size: 17px;
     margin: 0px;
     padding-top: 2px;
