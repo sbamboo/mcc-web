@@ -10,6 +10,6 @@
 
     "skc:community_E": "./images/icons/vendors/private/simonkc/community_client_essential.png",
     "skc:community_C": "./images/icons/vendors/private/simonkc/community_client_c4mc.png",
-    "skc:community_lite_E": "./images/icons/vendors/private/simonkc/community_client_essential.png",
-    "skc:community_lite_C": "./images/icons/vendors/private/simonkc/community_client_c4mc.png"
+    "skc:community_lite_E": "./images/icons/vendors/private/simonkc/community_client_lite_essential.png",
+    "skc:community_lite_C": "./images/icons/vendors/private/simonkc/community_client_lite_c4mc.png"
 }
