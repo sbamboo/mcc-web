@@ -238,6 +238,9 @@ async function main() {
     const group_param = urlParams.get("group");
     var groupPacks = false;
     var groupCollapseMode = "none";
+
+    groupPacks = true; // ENABLE GROUP BY DEFAULT
+
     if (group_param) {
         if (group_param === true || group_param.toLowerCase() === "true" || group_param == 1) {
             groupPacks = true;
@@ -247,6 +250,8 @@ async function main() {
         } else if (group_param === "hidden" || group_param == 3) {
             groupPacks = true;
             groupCollapseMode = "hidden";
+        } else {
+            groupPacks = false;
         }
     }
     var groups_tree = {};
