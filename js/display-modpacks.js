@@ -118,7 +118,7 @@ function compareMcVer(version1, version2, textPlacement = 'last') {
 }
 
 // Function to create the modpack div elements
-function createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping, container, genmode_dropdownLinks) {
+function createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping, container, genmode_dropdownLinks, frontend_icon_rendering=null) {
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
     if (supported != true) {
@@ -137,7 +137,11 @@ function createModpackDiv(name, desc, author, id, links, supported, icon, iconMa
         }
     }
     if (icon == "lis:launcherico") {
-        // Fetch source and read listing for launchericon then resolve it, if fails fallback to def
+        //MARK: Fetch source and read listing for launchericon then resolve it, if fails fallback to def
+    }
+    modpack_icon_options = "";
+    if (frontend_icon_rendering == "pixelated") {
+        modpack_icon_options = ` style="image-rendering: pixelated;"`;
     }
     if (genmode_dropdownLinks === "expanded" || genmode_dropdownLinks === "collapsed") {
         if (genmode_dropdownLinks === "collapsed") {
@@ -148,7 +152,7 @@ function createModpackDiv(name, desc, author, id, links, supported, icon, iconMa
         div.innerHTML = `
             <div class="modpack-wrapper-outer">
                 <div class="modpack-icon-wrapper">
-                    <img class="modpack-icon" src="${icon}" alt="Modpack Icon">
+                    <img class="modpack-icon" src="${icon}" alt="Modpack Icon"${modpack_icon_options}>
                 </div>
                 <div class="modpack-wrapper">
                     <b>${name}</b>
@@ -198,7 +202,7 @@ function createModpackDiv(name, desc, author, id, links, supported, icon, iconMa
         div.innerHTML = `
             <div class="modpack-wrapper-outer">
                 <div class="modpack-icon-wrapper">
-                    <img class="modpack-icon" src="${icon}" alt="Modpack Icon">
+                    <img class="modpack-icon" src="${icon}" alt="Modpack Icon"${modpack_icon_options}>
                 </div>
                 <div class="modpack-wrapper">
                     <b>${name}</b>
@@ -269,7 +273,7 @@ async function main() {
     fetch("https://raw.githubusercontent.com/sbamboo/mcc-web/main/images/icons/icons_b64map.json")
         .then(response => response.json())
         .then(iconMapping => {
-            repoData.forEach(({ name, source, desc, author, hidden, supported, icon, id, group, mcver }) => {
+            repoData.forEach(({ name, source, desc, author, hidden, supported, icon, id, group, mcver, frontend_icon_rendering }) => {
                 container = baseContainer;
                 if (hidden != true || showHidden == true) {
                     const links = generateLinks(name, source, parentUrl);
@@ -354,7 +358,7 @@ async function main() {
                         }
                     }
 
-                    createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping, container, dropdownLinks);
+                    createModpackDiv(name, desc, author, id, links, supported, icon, iconMapping, container, dropdownLinks, frontend_icon_rendering);
                 }
             });
         });
