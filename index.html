@@ -19,7 +19,8 @@
             <footer><p class="smal-text">Created by Simon Kalmi Claesson for personal use, any content on this website is owned by the author and is not permitted to be redistrubuted without crediting the original author, redistributing any assets/parts or the project as a whole as your own is not and never will be allowed.</p></footer>
         </div>
     </noscript>
-    <body><div id="pagecontent">
+    <body>
+    <div id="pagecontent">
         <header>
             <a class="title-link" href="./"><div class="title sideflex">
                 <h1>MinecraftCustomClient</h1>
@@ -63,10 +64,8 @@
             <div id="down-modpacks" class="section">
                 <h3>Modpack downloads:</h3>
                 <p>Specific installers for specific modpacks.</p>
-                <!-- The following section is JS generated -->
                 <div id="modpack-link-container">
                 </div>
-                <!-- End of generated section -->
             </div>
         </main>
         <footer>
@@ -74,8 +73,19 @@
             <p class="smal-text" id="source-link-prefix">Website source: </p><a class="source-link" href="https://github.com/sbamboo/mcc-web">Github.com</a>
             <p class="smal-text" id="website-build-date">Website Build: 2023-11-21 (Failed check, might be incorrect)</p>
         </footer>
+
+        <div id="zipgen-popup">
+            <span class="close-button">&times;</span>
+            <h3>Generating Modpack Zip...</h3>
+            <p id="zipgen-status">Initializing...</p>
+            <progress id="zipgen-progress" value="0" max="100"></progress>
+            <p id="zipgen-current-file"></p>
+        </div>
+
     </div></body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="./js/linkshortener.js"></script>
+    <script src="./js/modpack-parsing.js"></script>
     <script src="./js/display-modpacks.js"></script>
     <script src="./js/scroll-preselect.js"></script>
     <script src="./js/get-lastmodify.js"></script>

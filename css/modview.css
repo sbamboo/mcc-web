@@ -114,7 +114,7 @@
 }
 
 .modrinth-download {
-    width: 160px;
+    width: 11em;
     border-color: #2f4236;
     background-image: linear-gradient(to bottom, #00000000, #26262633);
 }
@@ -126,7 +126,7 @@
 }
 
 .modrinth-site {
-    width: 115px;
+    width: 7.5em;
     border-color: #183220;
     background-image: linear-gradient(to bottom, #072c13, #041c0b);
 }
@@ -139,7 +139,7 @@
 
 
 .curseforge-download {
-    width: 170px;
+    width: 12em;
     border-color: #4b362f;
     background-image: linear-gradient(to bottom, #00000000, #26262633);
 }
@@ -151,7 +151,7 @@
 }
 
 .curseforge-site {
-    width: 130px;
+    width: 10.4em;
     border-color: #4b362f;
     background-image: linear-gradient(to bottom, #2d130b, #1f0c07);
 }
@@ -175,7 +175,7 @@
 }
 
 .blob-download {
-    width: 150px;
+    width: 10em;
     border-color: #a5a5a5;
     background-image: linear-gradient(to bottom, #00000000, #26262633);
 }
@@ -232,26 +232,26 @@
     border: 1px solid #404040; /* var(--border) */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: fit-content;
-  }
+}
   
-  .modview-compatibility-checker h2 {
+.modview-compatibility-checker h2 {
     color: #3b82f6; /* var(--primary) */
     margin-top: 0;
     margin-bottom: 20px;
     font-size: 1.5em;
     font-weight: 600;
-  }
+}
   
-  .compatibility-controls {
+.compatibility-controls {
     display: flex;
     flex-wrap: wrap; /* Allow wrapping on smaller screens */
     justify-content: center;
     gap: 12px;
     margin-bottom: 20px;
-  }
+}
   
-  /* Dropdown (Select) Styling */
-  #minecraftVersionSelect {
+/* Dropdown (Select) Styling */
+#minecraftVersionSelect {
     appearance: none; /* Remove default browser styling */
     background-color: #404040; /* var(--input) */
     border: 1px solid #404040; /* var(--border) */
@@ -263,8 +263,8 @@
     cursor: pointer;
     outline: none;
     transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
     min-width: 180px; /* Ensure a decent width */
     position: relative; /* For custom arrow */
     background-image: url("data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23a1a1aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-down\"><path d=\"m6 9 6 6 6-6\"/></svg>");
@@ -272,26 +272,26 @@
     background-position: right 12px center;
     background-size: 1em;
     padding-right: 32px; /* Make space for the custom arrow */
-  }
+}
   
-  #minecraftVersionSelect:hover {
+#minecraftVersionSelect:hover {
     border-color: #3b82f6; /* var(--primary) */
-  }
+}
   
-  #minecraftVersionSelect:focus {
+#minecraftVersionSelect:focus {
     border-color: #3b82f6; /* var(--ring) */
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* Primary color with transparency */
-  }
+}
   
-  #minecraftVersionSelect:disabled {
+#minecraftVersionSelect:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     background-color: #52525b; /* var(--muted) */
     border-color: #404040; /* var(--border) */
-  }
+}
   
-  /* Button Styling */
-  #checkCompatibilityButton {
+/* Button Styling */
+#checkCompatibilityButton {
     /* Base Button Styles */
     display: inline-flex;
     align-items: center;
@@ -304,155 +304,160 @@
     cursor: pointer;
     outline: none;
     transition:
-      background-color 0.2s ease,
-      color 0.2s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
     font-weight: 500; /* Slightly bolder text */
   
     /* Primary Button Variant (for this button) */
     background-color: #3b82f6; /* var(--primary) */
     color: #ffffff; /* var(--primary-foreground) */
     border: 1px solid transparent; /* To prevent jump on hover */
-  }
+}
   
-  #checkCompatibilityButton:hover {
+#checkCompatibilityButton:hover {
     background-color: color-mix(
-      in srgb,
-      #3b82f6 90%,
-      black
+        in srgb,
+        #3b82f6 90%,
+        black
     ); /* Slightly darker on hover */
-  }
+}
   
-  #checkCompatibilityButton:focus-visible {
+#checkCompatibilityButton:focus-visible {
     /* Focus ring similar to Shadcn */
     outline: 2px solid transparent;
     outline-offset: 2px;
     border-color: #3b82f6; /* var(--ring) */
     box-shadow: 0 0 0 2px #3b82f6; /* var(--ring) */
-  }
+}
   
-  #checkCompatibilityButton:active {
+#checkCompatibilityButton:active {
     background-color: color-mix(
       in srgb,
       #3b82f6 80%,
       black
     ); /* Even darker on active */
-  }
+}
   
-  #checkCompatibilityButton:disabled {
+#checkCompatibilityButton:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background-color: #3f3f46; /* var(--secondary) */
     color: #f8f8f8; /* var(--secondary-foreground) */
     border-color: #404040; /* var(--border) */
-  }
+}
   
-  /* Compatibility Results Text */
-  #compatibilityResults {
+/* Compatibility Results Text */
+#compatibilityResults {
     font-size: 1em;
     line-height: 1.6;
     color: #a1a1aa; /* var(--muted-foreground) */
     margin-top: 15px;
     min-height: 1.6em; /* Prevent layout shift while loading */
-  }
+}
   
-  #compatibilityResults p span {
+#compatibilityResults p span {
     font-weight: 600;
-  }
+}
   
-  /* Specific colors for results */
-  #compatibilityResults p span[style*="color: aqua"] {
+/* Specific colors for results */
+#compatibilityResults p span[style*="color: aqua"] {
     color: aqua !important; /* Kept aqua as it was inline */
-  }
+}
   
-  #compatibilityResults p span[style*="color: green"] {
+#compatibilityResults p span[style*="color: green"] {
     color: #4caf50 !important; /* A vibrant green for success */
-  }
+}
   
-  #compatibilityResults p span[style*="color: orange"] {
+#compatibilityResults p span[style*="color: orange"] {
     color: #ff9800 !important; /* A vibrant orange for unchecked */
-  }
+}
   
-  #compatibilityResults p span[style*="color: red"] {
+#compatibilityResults p span[style*="color: red"] {
     color: #ef4444 !important; /* A vibrant red for not updated */
-  }
+}
   
-  /* Styling for the new details/summary dropdowns */
-  #compatibilityResults details {
+/* Styling for the new details/summary dropdowns */
+#compatibilityResults details {
     background-color: #262626; /* var(--card) */
     border: 1px solid #404040; /* var(--border) */
     border-radius: 0.5rem; /* var(--radius) */
     margin-top: 10px;
     text-align: left; /* Align text left within the details block */
     color: #f8f8f8; /* var(--card-foreground) */
-  }
+}
   
-  #compatibilityResults summary {
+#compatibilityResults summary {
     padding: 10px 15px;
     cursor: pointer;
     font-weight: 600;
     list-style: none; /* Remove default marker */
     position: relative; /* For custom arrow */
     color: #3b82f6; /* var(--primary) */
-  }
+}
   
-  /* Custom arrow for summary */
-  #compatibilityResults summary::after {
+/* Custom arrow for summary */
+#compatibilityResults summary::after {
     content: "▼"; /* Down arrow */
     position: absolute;
     right: 15px;
     transition: transform 0.2s ease;
-  }
+}
   
-  #compatibilityResults details[open] summary::after {
+#compatibilityResults details[open] summary::after {
     content: "▲"; /* Up arrow when open */
     transform: rotate(0deg); /* Reset rotation */
-  }
+}
   
-  #compatibilityResults ul {
+#compatibilityResults ul {
     list-style-type: none; /* Remove bullet points */
     padding: 0 15px 10px 15px; /* Adjust padding */
     margin: 0;
     max-height: 200px; /* Limit height for scroll if many items */
     overflow-y: auto; /* Enable scrolling */
     border-top: 1px solid #404040; /* Separator line */
-  }
+}
   
-  #compatibilityResults li {
+#compatibilityResults li {
     padding: 5px 0;
     border-bottom: 1px dotted #52525b; /* Lighter separator between list items */
-  }
+}
   
-  #compatibilityResults li:last-child {
+#compatibilityResults li:last-child {
     border-bottom: none; /* No border for the last item */
-  }
+}
   
-  #compatibilityResults li a {
+#compatibilityResults li a {
     color: #a1a1aa; /* var(--muted-foreground) */
     text-decoration: none;
     transition: color 0.2s ease;
-  }
+}
   
-  #compatibilityResults li a:hover {
+#compatibilityResults li a:hover {
     color: #3b82f6; /* var(--primary) */
     text-decoration: underline;
-  }
+}
   
-  /* Responsive adjustments */
-  @media (max-width: 600px) {
+/* Responsive adjustments */
+@media (max-width: 600px) {
     .compatibility-controls {
-      flex-direction: column;
-      align-items: stretch;
+        flex-direction: column;
+        align-items: stretch;
     }
   
     #minecraftVersionSelect,
     #checkCompatibilityButton {
-      width: 100%;
-      max-width: unset; /* Override min-width on small screens */
+        width: 100%;
+        max-width: unset; /* Override min-width on small screens */
     }
-  }
+}
   
-  .compatibility-dropdown-container > h2 {
+.compatibility-dropdown-container > h2 {
     margin-top: 20px;
-  }
+}
+
+.custom-download,
+.customArchive-download {
+    width: 18.2em;
+}

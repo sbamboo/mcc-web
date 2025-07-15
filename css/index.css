@@ -388,7 +388,6 @@ h3.repo-value {
 .icon-button-wrapper img {
     width: 19px;
     height: 19px;
-    margin-right: 5px;
     margin-right: 3px;
 }
 .icon-button-wrapper p {
@@ -407,4 +406,73 @@ h3.repo-value {
 }
 .notice-b,.notice-p {
     font-size: 16px !important;
+}
+
+
+#zipgen-popup {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    top: 50px; 
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    color: #eee;
+    text-align: center;
+}
+
+#zipgen-popup.show {
+    display: block;
+}
+
+#zipgen-popup h3 {
+    margin-top: 0;
+    color: #fff;
+}
+
+#zipgen-popup progress {
+    width: 100%;
+    height: 25px;
+    margin: 15px 0;
+    border-radius: 5px;
+    background-color: #555;
+}
+
+#zipgen-popup progress::-webkit-progress-bar {
+    background-color: #555;
+    border-radius: 5px;
+}
+
+#zipgen-popup progress::-webkit-progress-value {
+    background-color: #4CAF50;
+    border-radius: 5px;
+}
+
+#zipgen-popup progress::-moz-progress-bar {
+    background-color: #4CAF50;
+    border-radius: 5px;
+}
+
+#zipgen-popup p {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+#zipgen-popup .close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5em;
+    color: #aaa;
+    cursor: pointer;
+}
+
+#zipgen-popup .close-button:hover {
+    color: #fff;
 }
