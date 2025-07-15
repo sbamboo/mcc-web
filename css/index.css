@@ -118,6 +118,10 @@ a:visited {
     padding-bottom: 0px;
 }
 
+.modpack-os-down-zipgen {
+    cursor: pointer;
+}
+
 .legacy-link {
     color: #787878;
     text-decoration: none;
