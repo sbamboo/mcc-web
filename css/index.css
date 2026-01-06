@@ -190,8 +190,9 @@ a:visited {
     color: #d1984e;
 }
 
-.section p {
-    font-size: 18.5px;
+.section > p,
+.section p:not(:where(.modpack-wrapper-outer p)) {
+    font-size: 18px;
 }
 
 .modpack-down,.divvable-section {
@@ -251,14 +252,14 @@ a:visited {
     color: gray;
 }
 
-.modpack-info p {
+.modpack-info p:not(.modpack-id) {
     font-size: 17px;
 }
 
 .modpack-id {
     color: #373737;
     margin-left: 12px;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .smal-text {
@@ -390,8 +391,8 @@ h3.repo-value {
     flex-direction: row;
 }
 .icon-button-wrapper img {
-    width: 19px;
-    height: 19px;
+    width: 18px;
+    height: 18px;
     margin-right: 3px;
 }
 .icon-button-wrapper p {
@@ -479,4 +480,47 @@ h3.repo-value {
 
 #zipgen-popup .close-button:hover {
     color: #fff;
+}
+
+.modpack-wrapper .collapsible {
+    font-size: 0.91rem;
+}
+
+.modpack-hgroup {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.modpack-hgroup > .modpack-down {
+    flex: 1 1 300px;
+}
+
+#down-installer .button {
+    padding: 0.5rem;
+}
+
+#down-installer code {
+    background-color: #ffffff1f;
+    padding: 1px;
+    border-radius: 0.25rem;
+}
+
+.section > h3 {
+    font-size: 1.35rem;
+    margin-bottom: 0.3rem;
+}
+
+.section > h3 ~ p {
+    margin-bottom: 0.5rem;
+}
+
+.section .inst-promo-img-wrapper {
+    margin-top: 0.7rem;
+    margin-bottom: 0.5rem;
+}
+
+.section .inst-promo-img-wrapper ~ i {
+    margin-bottom: 0.3rem;
+    display: block;
 }

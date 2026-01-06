@@ -140,8 +140,8 @@ function createModpackDiv(
     icon,
     iconMapping,
     container,
-    genmode_dropdownLinks,
     frontend_icon_rendering = null,
+    use_v1_presentation = false,
 ) {
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
@@ -167,12 +167,9 @@ function createModpackDiv(
     if (frontend_icon_rendering == "pixelated") {
         modpack_icon_options = ` style="image-rendering: pixelated;"`;
     }
-    if (genmode_dropdownLinks === "expanded" || genmode_dropdownLinks === "collapsed") {
-        if (genmode_dropdownLinks === "collapsed") {
-            xtra = " collapsible-collapsed";
-        } else {
-            xtra = "";
-        }
+
+    // V2 Presentation
+    if (!use_v1_presentation) {
         div.innerHTML = `
             <div class="modpack-wrapper-outer">
                 <div class="modpack-icon-wrapper">
@@ -185,16 +182,12 @@ function createModpackDiv(
                         <p class="modpack-author">By: ${author}</p>
                         <p class="modpack-id inline">[MdpkId:${id}]</p>
                     </div>
-                    <b class="collapsible${xtra}">Downloads:</b>
+
+                    <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="icon-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
+                    <a class="button os-down-alt modpack-os-down-zipgen" data-modpack-id="${name}">Modpack (zip)</a>
+
+                    <b class="collapsible collapsible-collapsed">Additional:</b>
                     <div class="collapsible-content vflex">
-                        <div class="hflex">
-                            <a class="button modviewer" href="./modview.html?modpack=${urlSafename}">
-                                <div class="icon-button-wrapper">
-                                    <img src="./images/modview/modviewer.png" alt="Modview icon">
-                                    <p>Open in modviewer</p>
-                                </div>
-                            </a>
-                        </div>
                         <div class="hflex">
                             <a class="button os-down modpack-os-down modpack-os-down-sb" href="${links.qiWinX86Link}">
                                 <div class="icon-button-wrapper">
@@ -210,7 +203,6 @@ function createModpackDiv(
                             </a>
                         </div>
                         <div class="hflex">
-                            <a class="button os-down-alt modpack-os-down-zipgen" data-modpack-id="${name}">Modpack (zip)</a>
                             <a class="legacy-link link-ul" href="${links.modpackLink}">Modpack/listing</a>
                             <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
                         </div>
@@ -223,7 +215,9 @@ function createModpackDiv(
                 this.classList.toggle("collapsible-collapsed");
             });
         });
+    
     } else {
+        // V1 presentation
         div.innerHTML = `
             <div class="modpack-wrapper-outer">
                 <div class="modpack-icon-wrapper">
@@ -247,6 +241,7 @@ function createModpackDiv(
         `;
     }
     container.appendChild(div);
+    return div;
 }
 
 const zipgenPopup = document.getElementById("zipgen-popup");
@@ -266,6 +261,44 @@ let modpackParser = null;
 const parentUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo";
 const repoUrl = parentUrl + "/repo.json";
 
+function splitModpackVariant(name) {
+    // Order matters: more specific first
+    const rules = [
+        {
+            type: "DOT",
+            regex: /^(.*)\.(E|C)$/,
+            normalize: (base) => base,
+        },
+        {
+            type: "PR",
+            regex: /^(.*)_(E|C)_PR$/,
+            normalize: (base) => base,
+        },
+        {
+            type: "SPACE",
+            regex: /^(.*)\s(E|C)$/,
+            normalize: (base) => base,
+        },
+    ];
+
+    for (const rule of rules) {
+        const match = name.match(rule.regex);
+        if (match) {
+            return {
+                base: rule.normalize(match[1]),
+                variant: match[2],      // "E" or "C"
+                groupType: rule.type,   // DOT | PR | SPACE
+            };
+        }
+    }
+
+    return {
+        base: name,
+        variant: null,
+        groupType: null,
+    };
+}
+
 // Main function to fetch data and create modpack divs
 async function main() {
     modpackParser = new ModpackParser(repoUrl);
@@ -283,6 +316,18 @@ async function main() {
             showHidden_param == 1
         ) {
             showHidden = true;
+        }
+    }
+
+    const oldView_param = urlParams.get("oldView");
+    var oldView = false;
+    if (oldView_param) {
+        if (
+            oldView_param === true ||
+            oldView_param.toLowerCase() === "true" ||
+            oldView_param == 1
+        ) {
+            oldView = true;
         }
     }
 
@@ -311,26 +356,10 @@ async function main() {
     }
     var groups_tree = {};
 
-    const dropdownLinks_param = urlParams.get("dropdownLinks");
-    var dropdownLinks = false;
-    if (dropdownLinks_param) {
-        if (
-            dropdownLinks_param === true ||
-            dropdownLinks_param.toLowerCase() === "true" ||
-            dropdownLinks_param == 1
-        ) {
-            dropdownLinks = "expanded";
-        } else if (
-            dropdownLinks_param.toLowerCase() === "collapsed" ||
-            dropdownLinks_param == 2
-        ) {
-            dropdownLinks = "collapsed";
-        }
-    }
-
     fetch("https://raw.githubusercontent.com/sbamboo/mcc-web/main/images/icons/icons_b64map.json")
         .then((response) => response.json())
         .then((iconMapping) => {
+            const hgroupRegistry = new WeakMap();
             repoData.forEach(
                 ({
                     name,
@@ -448,7 +477,9 @@ async function main() {
                             }
                         }
 
-                        createModpackDiv(
+                        const { base, variant } = splitModpackVariant(name);
+
+                        const outer = createModpackDiv(
                             name,
                             desc,
                             author,
@@ -457,10 +488,37 @@ async function main() {
                             supported,
                             icon,
                             iconMapping,
-                            container,
-                            dropdownLinks,
+                            document.createElement("div"), // TEMP container
                             frontend_icon_rendering,
+                            oldView
                         );
+                        
+                        if (!oldView) {
+                            // --- H-GROUP LOGIC ---
+                            if (!hgroupRegistry.has(container)) {
+                                hgroupRegistry.set(container, new Map());
+                            }
+                            
+                            const groupMap = hgroupRegistry.get(container);
+                            
+                            if (variant) {
+                                let hgroup = groupMap.get(base);
+                            
+                                if (!hgroup) {
+                                    hgroup = document.createElement("div");
+                                    hgroup.classList.add("modpack-hgroup");
+                                    groupMap.set(base, hgroup);
+                                    container.appendChild(hgroup);
+                                }
+                            
+                                hgroup.appendChild(outer);
+                            } else {
+                                // Non .E / .C modpacks behave normally
+                                container.appendChild(outer);
+                            }
+                        } else {
+                            container.appendChild(outer);
+                        }
                     }
                 },
             );
