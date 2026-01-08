@@ -319,6 +319,26 @@ async function main() {
         }
     }
 
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+
+    function applyOldViewIfNeeded(e) {
+        const url = new URL(window.location.href);
+
+        // Respect explicit user choice
+        if (url.searchParams.has("oldView")) return;
+
+        if (e.matches) {
+            url.searchParams.set("oldView", "true");
+            window.location.replace(url.toString());
+        }
+    }
+
+    // Run once on load
+    applyOldViewIfNeeded(mediaQuery);
+
+    // Watch for changes (rotation, resize, foldables)
+    mediaQuery.addEventListener("change", applyOldViewIfNeeded);
+
     const oldView_param = urlParams.get("oldView");
     var oldView = false;
     if (oldView_param) {
