@@ -86,6 +86,7 @@ a:visited {
     width: 650px;
     height: auto;
     border-radius: 15px;
+    max-width: 100%;
 }
 
 .minecraft-wall-background {
@@ -208,6 +209,10 @@ a:visited {
     flex-direction: row;
 }
 
+.modpack-wrapper {
+    max-width: calc(100% - 100px);
+}
+
 .modpack-wrapper b {
     color: #c8c8c8;
     margin-bottom: 3px;
@@ -260,6 +265,8 @@ a:visited {
     color: #373737;
     margin-left: 12px;
     font-size: 13px;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .smal-text {
