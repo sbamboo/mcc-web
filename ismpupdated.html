@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.C.C - Version Checker</title>
+    <link rel="icon" type="image/png" href="./images/favicon_128.png">
+
+    <style>
+        :root {
+            --bg-base: #181818;
+            --bg-card: #1f1f1f;;
+            --border: rgba(255, 255, 255, 0.06);
+            --text: #e8eaed;
+            --text-muted: #8b919a;
+            --text-faint: #5c626c;
+            --link: #7ab8ff;
+            --link-visited: #c4a5f5;
+            --shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            --font-sans: "Open Sans", sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+
+            min-height: 100dvh;
+            font-family: var(--font-sans);
+            font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+            font-weight: 400;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg-base);
+        }
+
+        a {
+            color: var(--link);
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+            transition: color 0.15s ease;
+        }
+
+        a:hover {
+            color: #a8d4ff;
+        }
+
+        a:visited {
+            color: var(--link-visited);
+        }
+
+        .page {
+            max-width: 59rem;
+            margin: 0 auto;
+            padding: clamp(1.5rem, 4vw, 2.75rem) clamp(1rem, 4vw, 1.5rem) 3rem;
+        }
+
+        .page-header {
+            margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+            padding-bottom: clamp(1.25rem, 3vw, 1.75rem);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-header-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.65rem;
+        }
+
+        .page-header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
+        }
+
+        .page-header-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        .page-header-back-link,
+        .page-header-home-link {
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 0.4rem 0.85rem;
+            border-radius: 0.3rem;
+            border: 1px solid var(--border);
+            background: rgba(122, 184, 255, 0.14);
+            color: var(--text);
+            text-decoration: none;
+            flex-shrink: 0;
+            transition:
+                background-color 0.15s ease,
+                border-color 0.15s ease;
+        }
+
+        .page-header-back-link:hover,
+        .page-header-home-link:hover {
+            background: rgba(122, 184, 255, 0.22);
+            border-color: rgba(122, 184, 255, 0.35);
+            color: var(--text);
+        }
+
+        .page-header-back-link:focus-visible,
+        .page-header-home-link:focus-visible {
+            outline: 2px solid rgba(122, 184, 255, 0.45);
+            outline-offset: 2px;
+        }
+
+        .page-header-logo {
+            width: clamp(2.25rem, 1.35rem + 2.5vw, 3rem);
+            height: auto;
+            flex-shrink: 0;
+            display: block;
+        }
+
+        .page-header-title-group h1 {
+            font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.25rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 0;
+            color: var(--text);
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem 1.35rem 1.35rem;
+            box-shadow: var(--shadow);
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        section h2 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 0.35rem;
+        }
+
+        section:has(.comming-soon) h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .comming-soon {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            color: var(--text-faint);
+            padding: 0.35rem 0.65rem;
+            border-radius: 0.25rem;
+            border: 1px dashed var(--border);
+        }
+
+        .comming-soon::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-faint);
+            opacity: 0.6;
+        }
+
+        .grayout {
+            color: var(--text-muted);
+        }
+
+        .modpack-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 0.65rem 1.1rem;
+            margin-top: 0.85rem;
+        }
+
+        .toolbar-dropdown-field {
+            flex: 1 1 11rem;
+            min-width: min(100%, 10.5rem);
+            max-width: 18rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .toolbar-dropdown-field--modpack {
+            flex: 1 1 15.97rem;
+            min-width: min(100%, 15.3rem);
+            max-width: 23.3rem;
+        }
+
+        .toolbar-dropdown-field label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--text-faint);
+        }
+
+        .toolbar-dropdown-control {
+            width: 100%;
+            font: inherit;
+            font-size: 0.9rem;
+            line-height: 1.35;
+            padding: 0.45rem 1.75rem 0.45rem 0.55rem;
+            border-radius: 0.3rem;
+            border: 1px solid var(--border);
+            background-color: var(--bg-base);
+            color: var(--text);
+            cursor: pointer;
+            box-sizing: border-box;
+            min-height: calc(0.9rem + 0.9em);
+        }
+
+        select.toolbar-dropdown-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b919a' d='M2.5 4.5L6 8l3.5-3.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.55rem center;
+        }
+
+        .toolbar-dropdown-control:focus,
+        .toolbar-dropdown-control:focus-visible {
+            outline: 2px solid rgba(122, 184, 255, 0.45);
+            outline-offset: 1px;
+        }
+
+        .modpack-flavors-panel {
+            margin-top: 0;
+            position: relative;
+            width: 100%;
+        }
+
+        .modpack-flavors-summary.toolbar-dropdown-control {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.35rem;
+            list-style: none;
+            text-align: left;
+            margin: 0;
+        }
+
+        .modpack-flavors-summary.toolbar-dropdown-control::-webkit-details-marker {
+            display: none;
+        }
+
+        .modpack-summary-text {
+            min-width: 0;
+            flex: 1 1 auto;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .modpack-flavors-summary.toolbar-dropdown-control::after {
+            content: "";
+            width: 0.45rem;
+            height: 0.45rem;
+            flex-shrink: 0;
+            margin-left: auto;
+            border-right: 2px solid var(--text-muted);
+            border-bottom: 2px solid var(--text-muted);
+            transform: rotate(45deg) translateY(-0.12rem);
+            transition: transform 0.15s ease;
+        }
+
+        details[open]
+            > .modpack-flavors-summary.toolbar-dropdown-control::after {
+            transform: rotate(-135deg) translateY(0.08rem);
+        }
+
+        .mc-show-snapshots-label,
+        .mc-show-hidden-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.88rem;
+            color: var(--text);
+            cursor: pointer;
+            flex-shrink: 0;
+            padding-bottom: 0.35rem;
+            user-select: none;
+        }
+
+        .mc-show-snapshots-label input,
+        .mc-show-hidden-label input {
+            width: 1rem;
+            height: 1rem;
+            accent-color: var(--link);
+            cursor: pointer;
+        }
+
+        html.ismp-ui-nohidden .mc-show-hidden-label {
+            display: none !important;
+        }
+
+        html.ismp-ui-nosnap .mc-show-snapshots-label {
+            display: none !important;
+        }
+
+        .ismp-guide-section {
+            display: none;
+        }
+
+        html.ismp-show-guide .ismp-guide-section {
+            display: block;
+        }
+
+        .ismp-guide-lede {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0 0 1rem;
+            max-width: 52rem;
+            line-height: 1.55;
+        }
+
+        .ismp-guide-params {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.05rem;
+        }
+
+        .ismp-guide-param {
+            margin: 0 0 0.35rem;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            color: var(--text);
+        }
+
+        .ismp-guide-param code {
+            font-size: 0.92em;
+            font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono",
+                Menlo, Consolas, monospace;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 0.12rem 0.35rem;
+            border-radius: 0.2rem;
+            border: 1px solid var(--border);
+        }
+
+        .ismp-guide-desc {
+            margin: 0;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+            padding-left: 0.15rem;
+            max-width: 52rem;
+        }
+
+        .compat-check-actions {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .compat-check-button {
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 0.55rem 1.15rem;
+            border-radius: 0.3rem;
+            border: 1px solid var(--border);
+            background: rgba(122, 184, 255, 0.14);
+            color: var(--text);
+            cursor: pointer;
+            transition:
+                background-color 0.15s ease,
+                border-color 0.15s ease;
+        }
+
+        .compat-check-button:hover {
+            background: rgba(122, 184, 255, 0.22);
+            border-color: rgba(122, 184, 255, 0.35);
+        }
+
+        .compat-check-button:focus-visible {
+            outline: 2px solid rgba(122, 184, 255, 0.45);
+            outline-offset: 2px;
+        }
+
+        .compat-check-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .compat-check-button:disabled:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border);
+        }
+
+        .modpack-flavors-list {
+            list-style: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + 0.25rem);
+            z-index: 8;
+            margin: 0;
+            padding: 0.35rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-height: min(55vh, 22rem);
+            overflow-y: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.3rem;
+            box-shadow: var(--shadow);
+        }
+
+        .modpack-flavor-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.45rem 0.55rem;
+            margin: 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background-color 0.12s ease;
+        }
+
+        .modpack-flavor-item:last-child {
+            border-bottom: none;
+        }
+
+        .modpack-flavor-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .modpack-flavor-item.is-selected {
+            background: rgba(122, 184, 255, 0.12);
+        }
+
+        .modpack-flavor-icon {
+            width: 2.75rem;
+            height: 2.75rem;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .modpack-flavor-meta {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .modpack-flavor-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        .modpack-flavor-mcver {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            line-height: 1.35;
+        }
+
+        .compat-check-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 1rem 1.25rem;
+        }
+
+        .compat-progress-root {
+            flex: 1 1 12rem;
+            min-width: min(100%, 14rem);
+            max-width: 26rem;
+        }
+
+        .compat-progress-root .progressdrop_container {
+            margin-top: 0;
+        }
+
+        .compat-progress-root .progressdrop_bar {
+            background-color: var(--link);
+        }
+
+        .compat-progress-root .progressdrop_meta {
+            color: var(--text-muted);
+        }
+
+        .compat-modrinth-results {
+            margin-top: 0.85rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .compat-modrinth-results .compat-modrinth-progress-host .progressdrop_container {
+            margin-top: 0;
+        }
+
+        .compat-modrinth-results .compat-modrinth-progress-host .progressdrop_bar {
+            background-color: var(--link);
+        }
+
+        .compat-modrinth-results .compat-modrinth-progress-host .progressdrop_meta {
+            color: var(--text-muted);
+        }
+
+        .compat-modrinth-orange {
+            color: #e8a23d;
+            margin: 0;
+        }
+
+        .compat-mc-stat-mix {
+            color: var(--link);
+        }
+
+        .compat-mc-stat-ok {
+            color: #6bcf7f;
+        }
+
+        .compat-mc-stat-bad {
+            color: #f07178;
+        }
+
+        .compat-mc-stat-skip {
+            color: #e8a23d;
+        }
+
+        .compat-modrinth-details {
+            margin-top: 0.65rem;
+        }
+
+        .compat-modrinth-details summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--link);
+        }
+
+        .compat-modrinth-details ul {
+            margin: 0.4rem 0 0 1.2rem;
+            padding: 0;
+        }
+
+        .compat-modrinth-scroll-list {
+            max-height: 14rem;
+            overflow-y: auto;
+            margin-top: 0.4rem;
+            padding-right: 0.35rem;
+        }
+
+        .compat-modrinth-scroll-list ul {
+            margin-top: 0;
+        }
+
+        .compat-listing-mods-ul {
+            list-style: disc;
+        }
+
+        .compat-not-updated-modrinth-li {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.25rem 0.45rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .compat-not-updated-modrinth-li:last-child {
+            margin-bottom: 0;
+        }
+
+        button.compat-not-updated-modrinth-info {
+            font: inherit;
+            font-size: 0.95em;
+            line-height: 1;
+            padding: 0;
+            margin: 0;
+            border: none;
+            background: none;
+            color: var(--text-faint);
+            cursor: pointer;
+            vertical-align: baseline;
+            transition: color 0.12s ease;
+        }
+
+        button.compat-not-updated-modrinth-info:hover:not(:disabled) {
+            color: var(--text-muted);
+        }
+
+        button.compat-not-updated-modrinth-info:disabled,
+        button.compat-not-updated-modrinth-info.is-done {
+            color: var(--text-faint);
+            cursor: default;
+            opacity: 0.65;
+        }
+
+        .compat-not-updated-modrinth-version {
+            color: var(--text-muted);
+            font-size: 0.88em;
+        }
+
+        .compat-modrinth-summary-host {
+            margin-top: 0.65rem;
+        }
+
+        .compat-modrinth-progress-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .compat-modrinth-progress-row .compat-modrinth-progress-host {
+            flex: 1 1 12rem;
+            min-width: 0;
+        }
+
+        .compat-modrinth-cancel {
+            flex-shrink: 0;
+            margin-top: 0.15rem;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.4rem 0.9rem;
+            border-radius: 0.3rem;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition:
+                background-color 0.15s ease,
+                border-color 0.15s ease;
+        }
+
+        .compat-modrinth-cancel:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: var(--text);
+        }
+
+        .compat-modrinth-cancel:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+    </style>
+
+    <link
+        rel="stylesheet"
+        href="./js/libs/progressdrop_a0.0.4/progressdrop.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="./js/libs/progressdrop_a0.0.4/progressdrop.min.js"></script>
+    <script>
+        const parentUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo";
+        const repoUrl = parentUrl + "/repo.json";
+
+        function compareMcVer(version1, version2, textPlacement = "last") {
+            const PRE_RANK = { snapshot_n: 0, pre: 1, rc: 2, release: 3 };
+
+            const stripNumericPrerelease = (s) => {
+                const patterns = [
+                    [/[-_]snapshot[-_](\d+)$/i, "snapshot_n"],
+                    [/[-_]pre[-_](\d+)$/i, "pre"],
+                    [/[-_]pre(\d+)$/i, "pre"],
+                    [/[-_]rc[-_](\d+)$/i, "rc"],
+                    [/[-_]rc(\d+)$/i, "rc"],
+                ];
+                for (const [re, kind] of patterns) {
+                    const m = s.match(re);
+                    if (!m) continue;
+                    const tail = m[0];
+                    return {
+                        core: s.slice(0, -tail.length),
+                        preKind: kind,
+                        preNum: parseInt(m[1], 10) || 0,
+                    };
+                }
+                return { core: s, preKind: "release", preNum: 0 };
+            };
+
+            const parseVersion = (raw) => {
+                let s = String(raw).trim();
+                let textPlaceholder = "";
+
+                const pre = stripNumericPrerelease(s);
+                s = pre.core;
+
+                const weeklyOnly = /^(\d{2})w(\d{1,2})([a-z])?$/i.exec(s);
+                if (weeklyOnly) {
+                    const yy = parseInt(weeklyOnly[1], 10);
+                    const ww = parseInt(weeklyOnly[2], 10);
+                    const letter = weeklyOnly[3]
+                        ? weeklyOnly[3].toLowerCase().charCodeAt(0) - 96
+                        : 0;
+                    const baseParts = [100 + yy, ww, letter, 0, 0];
+                    while (baseParts.length < 5) baseParts.push(0);
+                    return {
+                        baseParts,
+                        preKind: pre.preKind,
+                        preNum: pre.preNum,
+                        textPlaceholder,
+                    };
+                }
+
+                const textMatch = s.match(/^(.+?)([a-zA-Z_]+)$/);
+                if (
+                    textMatch &&
+                    /\d/.test(textMatch[1]) &&
+                    !/[.\-_]$/.test(textMatch[1])
+                ) {
+                    s = textMatch[1];
+                    textPlaceholder = textMatch[2];
+                }
+
+                let beta = false;
+                if (/^b/i.test(s)) {
+                    beta = true;
+                    s = s.replace(/^b/i, "");
+                }
+
+                const baseParts = s
+                    .split(/[.\-_]+/)
+                    .filter((p) => p.length > 0)
+                    .map((part) => {
+                        const n = parseInt(part, 10);
+                        return Number.isFinite(n) ? n : 0;
+                    });
+
+                const merged = beta ? [0, ...baseParts] : baseParts;
+                while (merged.length < 5) merged.push(0);
+
+                return {
+                    baseParts: merged,
+                    preKind: pre.preKind,
+                    preNum: pre.preNum,
+                    textPlaceholder,
+                };
+            };
+
+            const p1 = parseVersion(version1);
+            const p2 = parseVersion(version2);
+
+            const compareBaseVersions = () => {
+                const n = Math.max(p1.baseParts.length, p2.baseParts.length);
+                for (let i = 0; i < n; i++) {
+                    const a = p1.baseParts[i] || 0;
+                    const b = p2.baseParts[i] || 0;
+                    if (a > b) return 1;
+                    if (a < b) return -1;
+                }
+                return 0;
+            };
+
+            const comparePrerelease = () => {
+                const r1 = PRE_RANK[p1.preKind] ?? 0;
+                const r2 = PRE_RANK[p2.preKind] ?? 0;
+                if (r1 > r2) return 1;
+                if (r1 < r2) return -1;
+                if (p1.preNum > p2.preNum) return 1;
+                if (p1.preNum < p2.preNum) return -1;
+                return 0;
+            };
+
+            const compareTextPlaceholders = () => {
+                const t1 = p1.textPlaceholder;
+                const t2 = p2.textPlaceholder;
+                if (textPlacement === "last") {
+                    if (t1 && !t2) return 1;
+                    if (!t1 && t2) return -1;
+                    if (t1 && t2) return t1.localeCompare(t2);
+                } else {
+                    if (t1 && !t2) return -1;
+                    if (!t1 && t2) return 1;
+                    if (t1 && t2) return t1.localeCompare(t2);
+                }
+                return 0;
+            };
+
+            const bc = compareBaseVersions();
+            if (bc !== 0) return bc;
+
+            const pc = comparePrerelease();
+            if (pc !== 0) return pc;
+
+            return compareTextPlaceholders();
+        }
+
+        async function fetchRepoData(repoUrl) {
+            try {
+                const response = await fetch(repoUrl);
+                const data = await response.json();
+                return data.flavors;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                return [];
+            }
+        }
+
+        const iconMapUrl =
+            "https://raw.githubusercontent.com/sbamboo/mcc-web/main/images/icons/icons_b64map.json";
+
+        async function fetchIconMapping() {
+            try {
+                const response = await fetch(iconMapUrl);
+                if (!response.ok) throw new Error(String(response.status));
+                return await response.json();
+            } catch (error) {
+                console.error("Error fetching icon map:", error);
+                return {};
+            }
+        }
+
+        async function fetchMinecraftVersionManifest() {
+            const response = await fetch(
+                "https://piston-meta.mojang.com/mc/game/version_manifest.json",
+            );
+            if (!response.ok) {
+                throw new Error(
+                    `Failed to fetch Minecraft versions: ${response.statusText}`,
+                );
+            }
+            return response.json();
+        }
+
+        function safeDecodeUriParam(value) {
+            if (value == null) return "";
+            const s = String(value).trim();
+            if (s === "") return "";
+            try {
+                return decodeURIComponent(s.replace(/\+/g, " "));
+            } catch {
+                return s;
+            }
+        }
+
+        function isUrlTruthyParam(raw) {
+            if (raw == null) return false;
+            const s = String(raw).trim().toLowerCase();
+            return s === "true" || s === "1" || s === "yes";
+        }
+
+        function findFlavorByMccmp(flavors, rawQuery) {
+            if (!Array.isArray(flavors) || rawQuery == null) return null;
+            const q = safeDecodeUriParam(rawQuery).trim();
+            if (q === "") return null;
+            const qLower = q.toLowerCase();
+            return (
+                flavors.find((f) => {
+                    if (!f) return false;
+                    const name = f.name != null ? String(f.name).trim() : "";
+                    const id = f.id != null ? String(f.id).trim() : "";
+                    return (
+                        name === q ||
+                        id === q ||
+                        name.toLowerCase() === qLower ||
+                        id.toLowerCase() === qLower
+                    );
+                }) ?? null
+            );
+        }
+
+        function fullyDecodeBootUrlValue(raw) {
+            if (raw == null) return "";
+            let s = String(raw).trim();
+            if (s === "") return "";
+            /* Query values may use + for space (application/x-www-form-urlencoded). */
+            s = s.replace(/\+/g, " ");
+            /* Peel layers in case the whole URL was encoded more than once. */
+            for (let i = 0; i < 8; i++) {
+                try {
+                    const next = decodeURIComponent(s);
+                    if (next === s) break;
+                    s = next;
+                } catch {
+                    break;
+                }
+            }
+            return s.trim();
+        }
+
+        function parseNavUrlBootParam(raw) {
+            const s = fullyDecodeBootUrlValue(raw);
+            if (s === "") return null;
+            try {
+                const u = new URL(s, window.location.href);
+                if (u.protocol === "javascript:" || u.protocol === "data:")
+                    return null;
+                return u.href;
+            } catch {
+                return null;
+            }
+        }
+
+        function applyPageHeaderNavBootParams(params) {
+            const backRaw = params.get("backurl");
+            const homeRaw = params.get("homeurl");
+            const backHref =
+                backRaw != null ? parseNavUrlBootParam(backRaw) : null;
+            const homeHref =
+                homeRaw != null ? parseNavUrlBootParam(homeRaw) : null;
+            if (!backHref && !homeHref) return;
+            const row = document.querySelector(".page-header-heading");
+            if (!row) return;
+            const actions = document.createElement("div");
+            actions.className = "page-header-nav-actions";
+            if (backHref) {
+                const a = document.createElement("a");
+                a.className = "page-header-back-link";
+                a.href = backHref;
+                a.textContent = "Go Back";
+                actions.appendChild(a);
+            }
+            if (homeHref) {
+                const a = document.createElement("a");
+                a.className = "page-header-home-link";
+                a.href = homeHref;
+                a.textContent = "MCC Web";
+                a.target = "_blank";
+                a.rel = "noopener noreferrer";
+                actions.appendChild(a);
+            }
+            row.appendChild(actions);
+        }
+
+        function applyIsmpToolbarUiBootParams(params) {
+            const root = document.documentElement;
+            if (isUrlTruthyParam(params.get("ui.mccnohidden"))) {
+                root.classList.add("ismp-ui-nohidden");
+            }
+            if (isUrlTruthyParam(params.get("ui.mccnosnap"))) {
+                root.classList.add("ismp-ui-nosnap");
+            }
+        }
+
+        function applyGuideSectionBootParam(params) {
+            if (params.has("guide")) {
+                document.documentElement.classList.add("ismp-show-guide");
+            }
+        }
+
+        function scrollToIsmpSection(sValue) {
+            const idByS = {
+                mcc: "section-mcc",
+                "modrinth.mp": "section-modrinth-mp",
+                "modrinth.mod": "section-modrinth-mod",
+                guide: "section-guide",
+            };
+            const id = idByS[String(sValue || "").trim()];
+            if (!id) return;
+            const el = document.getElementById(id);
+            if (el) {
+                requestAnimationFrame(() =>
+                    el.scrollIntoView({ behavior: "smooth", block: "start" }),
+                );
+            }
+        }
+
+        function resolveFlavorIconSrc(iconRaw, iconMapping, defaultSrc) {
+            if (iconRaw == null || String(iconRaw).trim() === "") {
+                return defaultSrc;
+            }
+            const key = String(iconRaw).trim();
+            if (
+                iconMapping &&
+                Object.prototype.hasOwnProperty.call(iconMapping, key)
+            ) {
+                const mapped = iconMapping[key];
+                if (mapped != null && String(mapped).trim() !== "") {
+                    return mapped;
+                }
+                return defaultSrc;
+            }
+            return key;
+        }
+
+        function base64ToUint8Array(b64) {
+            const clean = String(b64).replace(/\s/g, "");
+            const binary = atob(clean);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+        function compatProgressHost() {
+            return document.getElementById("compat-progress-root");
+        }
+
+        function clearCompatProgress() {
+            const root = compatProgressHost();
+            if (root) root.innerHTML = "";
+        }
+
+        async function compatFetchArrayBuffer(url, name) {
+            clearCompatProgress();
+            const root = compatProgressHost();
+            if (!root || typeof ProgressLoader === "undefined") {
+                const res = await fetch(url);
+                if (!res.ok) {
+                    throw new Error("fetch failed: " + res.status);
+                }
+                return res.arrayBuffer();
+            }
+            const loader = new ProgressLoader(root);
+            const response = await loader.fetch(
+                url,
+                name,
+                true,
+                true,
+                false,
+                false,
+            );
+            return response.arrayBuffer();
+        }
+
+        async function compatLoadZipAndRun(buf, run) {
+            if (typeof JSZip === "undefined") {
+                throw new Error("JSZip is not loaded");
+            }
+            clearCompatProgress();
+            const root = compatProgressHost();
+            let bar = null;
+            if (root && typeof ProgressLoader !== "undefined") {
+                const loader = new ProgressLoader(root);
+                bar = loader.createProgressBar(
+                    "Loading archive...",
+                    true,
+                    0,
+                    100,
+                );
+                bar.update(12);
+            }
+            const zip = await JSZip.loadAsync(buf);
+            if (bar) bar.update(62);
+            const result = await run(zip);
+            if (bar) {
+                bar.complete();
+                bar.cleanUp();
+            }
+            return result;
+        }
+
+        function normalizeZipPath(p) {
+            return String(p).replace(/\\/g, "/");
+        }
+
+        function findListingJsonPath(zip) {
+            let found = null;
+            zip.forEach((relPath, entry) => {
+                if (entry.dir) return;
+                const p = normalizeZipPath(relPath);
+                if (/(^|\/)listing\.json$/i.test(p)) {
+                    if (!found || p.length < found.length) {
+                        found = relPath;
+                    }
+                }
+            });
+            return found;
+        }
+
+        async function parseMlistingFromZip(zip) {
+            const path = findListingJsonPath(zip);
+            if (!path) {
+                throw new Error("No listing.json found in mlisting archive");
+            }
+            const file = zip.file(path);
+            if (!file || file.dir) {
+                throw new Error("listing.json entry not readable");
+            }
+            const text = await file.async("string");
+            const listing = JSON.parse(text);
+            return listing;
+        }
+
+        function bufferLooksLikeZip(buf) {
+            if (!buf || buf.byteLength < 2) return false;
+            const a = new Uint8Array(buf, 0, 2);
+            return a[0] === 0x50 && a[1] === 0x4b;
+        }
+
+        async function logListingFromFetchedBuffer(buf) {
+            if (bufferLooksLikeZip(buf)) {
+                return await compatLoadZipAndRun(buf, (zip) =>
+                    parseMlistingFromZip(zip),
+                );
+            }
+            clearCompatProgress();
+            const root = compatProgressHost();
+            let bar = null;
+            if (root && typeof ProgressLoader !== "undefined") {
+                const loader = new ProgressLoader(root);
+                bar = loader.createProgressBar(
+                    "Parsing listing...",
+                    true,
+                    0,
+                    100,
+                );
+                bar.update(25);
+            }
+            const text = new TextDecoder("utf-8").decode(buf);
+            const listing = JSON.parse(text);
+            if (bar) bar.update(85);
+            if (bar) {
+                bar.complete();
+                bar.cleanUp();
+            }
+            return listing;
+        }
+
+        function logLegacyModsFileList(zip) {
+            const names = [];
+            zip.forEach((relPath, entry) => {
+                if (entry.dir) return;
+                const p = normalizeZipPath(relPath);
+                const m = /^mods\/(.+)$/i.exec(p);
+                if (m) names.push(m[1]);
+            });
+            names.sort();
+            console.log("legacy mods/ file list:", names);
+            return names;
+        }
+
+        async function logLegacyArchiveZip(data) {
+            return await compatLoadZipAndRun(data, (zip) => {
+                return logLegacyModsFileList(zip);
+            });
+        }
+
+        function compatModrinthResultsEl() {
+            return document.getElementById("compat-modrinth-results");
+        }
+
+        function clearCompatModrinthResults() {
+            const el = compatModrinthResultsEl();
+            if (el) el.innerHTML = "";
+        }
+
+        function generateRandomString(length) {
+            const chars =
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let out = "";
+            for (let i = 0; i < length; i++) {
+                out += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return out;
+        }
+
+        async function fetchModrinthLatestVersionDisplayLabel(
+            projectId,
+            modLoader,
+        ) {
+            const ua = `minecraftcustomclient-website-compat@${generateRandomString(
+                8,
+            )}`;
+            const opts = { headers: { "User-Agent": ua } };
+            const loader = modLoader != null && String(modLoader).trim() !== ""
+                ? String(modLoader).trim()
+                : "fabric";
+            const encLoader = encodeURIComponent(JSON.stringify([loader]));
+            let url = `https://api.modrinth.com/v2/project/${encodeURIComponent(
+                projectId,
+            )}/version?loaders=${encLoader}`;
+            let res = await fetch(url, opts);
+            if (!res.ok && res.status !== 404) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+            let arr = await res.json();
+            if (!Array.isArray(arr)) arr = [];
+            if (arr.length === 0) {
+                url = `https://api.modrinth.com/v2/project/${encodeURIComponent(
+                    projectId,
+                )}/version`;
+                res = await fetch(url, opts);
+                if (!res.ok && res.status !== 404) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                arr = await res.json();
+                if (!Array.isArray(arr)) arr = [];
+            }
+            if (arr.length === 0) {
+                return "No published versions found.";
+            }
+            const v = arr[0];
+            const label =
+                (v.version_number != null &&
+                    String(v.version_number).trim()) ||
+                (v.name != null && String(v.name).trim()) ||
+                (v.id != null && String(v.id).trim()) ||
+                "(version)";
+            let extra = "";
+            if (Array.isArray(v.game_versions) && v.game_versions.length > 0) {
+                const gv = v.game_versions.slice(0, 4);
+                const tail = v.game_versions.length > 4 ? ", …" : "";
+                extra = ` · MC ${gv.join(", ")}${tail}`;
+            }
+            return label + extra;
+        }
+
+        async function onCompatModrinthNotUpdatedInfoClick(ev) {
+            const btn = ev.target.closest(".compat-not-updated-modrinth-info");
+            if (!btn) return;
+            const panel = document.getElementById("compat-modrinth-results");
+            if (!panel || !panel.contains(btn)) return;
+            ev.preventDefault();
+            if (btn.disabled || btn.dataset.compatFetching === "1") return;
+            const projectId = btn.getAttribute("data-project-id");
+            const modLoader =
+                btn.getAttribute("data-mod-loader") || "fabric";
+            if (!projectId) return;
+            const out = btn.nextElementSibling;
+            if (
+                !out ||
+                !out.classList.contains("compat-not-updated-modrinth-version")
+            ) {
+                return;
+            }
+
+            btn.dataset.compatFetching = "1";
+            out.textContent = "Loading…";
+            try {
+                const label = await fetchModrinthLatestVersionDisplayLabel(
+                    projectId,
+                    modLoader,
+                );
+                out.textContent = label;
+                btn.disabled = true;
+                btn.classList.add("is-done");
+            } catch (err) {
+                console.error(err);
+                out.textContent = "Could not load version.";
+            } finally {
+                delete btn.dataset.compatFetching;
+            }
+        }
+
+        function listingDefaultModloader(listing) {
+            if (!listing || typeof listing !== "object") return "fabric";
+            return (
+                listing.modloader ||
+                listing.modLoader ||
+                listing.loader ||
+                "fabric"
+            );
+        }
+
+        function sourceIsCountedAsModrinthForCheck(mod) {
+            if (!mod || mod.type !== "modrinth" || !mod.url) return false;
+            const modrinthId = mod.url
+                .split("/versions/")[0]
+                .split("/")
+                .filter(Boolean)
+                .pop();
+            return Boolean(modrinthId);
+        }
+
+        function extractModrinthModsFromListing(listing) {
+            if (!listing || !Array.isArray(listing.sources)) return [];
+            const defaultLoader = listingDefaultModloader(listing);
+            const out = [];
+            for (const mod of listing.sources) {
+                if (!sourceIsCountedAsModrinthForCheck(mod)) continue;
+                const modrinthId = mod.url
+                    .split("/versions/")[0]
+                    .split("/")
+                    .filter(Boolean)
+                    .pop();
+                out.push({
+                    id: modrinthId,
+                    filename: mod.filename || modrinthId,
+                    modloader: mod.modloader || defaultLoader,
+                });
+            }
+            return out;
+        }
+
+        function compatCheckingLabel(n, total, skipped) {
+            return `Checking compatibility... (${n}/${total} checked on Modrinth, ${skipped} skipped)`;
+        }
+
+        async function runIsmpModrinthCompatibilityCheck(
+            allModrinthMods,
+            totalModsInModpack,
+            skippedCount,
+            selectedVersion,
+            progressHost,
+            resultsHost,
+            cancelState,
+            listing,
+        ) {
+            const modrinthModsToCheck = allModrinthMods.length;
+            let updatedModsCount = 0;
+            const notUpdatedMods = [];
+
+            const modrinthCompatUserAgent = `minecraftcustomclient-website-compat@${generateRandomString(
+                8,
+            )}`;
+            console.log("Modrinth API User-Agent:", modrinthCompatUserAgent);
+
+            progressHost.innerHTML = "";
+            let bar = null;
+            if (typeof ProgressLoader !== "undefined") {
+                const loader = new ProgressLoader(progressHost);
+                bar = loader.createProgressBar(
+                    compatCheckingLabel(0, modrinthModsToCheck, skippedCount),
+                    true,
+                    0,
+                    100,
+                );
+            }
+
+            for (let i = 0; i < modrinthModsToCheck; i++) {
+                if (cancelState && cancelState.cancelled) {
+                    break;
+                }
+
+                const mod = allModrinthMods[i];
+                const projectId = mod.id;
+                const modLoader = mod.modloader;
+                const modrinthProjectUrl = `https://modrinth.com/mod/${projectId}`;
+
+                if (bar) {
+                    bar.updateName(
+                        compatCheckingLabel(
+                            i + 1,
+                            modrinthModsToCheck,
+                            skippedCount,
+                        ),
+                    );
+                }
+
+                try {
+                    const compatibility_modrinth_api_requestOptions = {
+                        headers: {
+                            "User-Agent": modrinthCompatUserAgent,
+                        },
+                    };
+                    const modrinthVersionsResponse = await fetch(
+                        `https://api.modrinth.com/v2/project/${projectId}/version?game_versions=["${selectedVersion}"]&loaders=["${modLoader}"]`,
+                        compatibility_modrinth_api_requestOptions,
+                    );
+                    if (
+                        !modrinthVersionsResponse.ok &&
+                        modrinthVersionsResponse.status !== 404
+                    ) {
+                        throw new Error(
+                            `HTTP error! status: ${modrinthVersionsResponse.status}`,
+                        );
+                    }
+                    const modrinthVersions =
+                        await modrinthVersionsResponse.json();
+
+                    if (modrinthVersions.length > 0) {
+                        updatedModsCount++;
+                    } else {
+                        notUpdatedMods.push({
+                            name: mod.filename,
+                            url: modrinthProjectUrl,
+                            projectId,
+                            modLoader,
+                        });
+                    }
+                } catch (error) {
+                    console.error(
+                        `Error checking Modrinth mod ${projectId} (${mod.filename}):`,
+                        error,
+                    );
+                    notUpdatedMods.push({
+                        name: mod.filename,
+                        url: modrinthProjectUrl,
+                        projectId,
+                        modLoader,
+                    });
+                }
+
+                if (bar) {
+                    bar.update(((i + 1) / modrinthModsToCheck) * 100);
+                }
+            }
+
+            if (bar) {
+                bar.complete();
+                bar.cleanUp();
+            }
+
+            const progressRow = progressHost.closest(".compat-modrinth-progress-row");
+            progressRow?.querySelector(".compat-modrinth-cancel")?.remove();
+
+            if (cancelState && cancelState.cancelled) {
+                resultsHost.innerHTML =
+                    '<p class="compat-modrinth-orange">Check cancelled.</p>';
+                return;
+            }
+
+            const notCheckedMods = buildSkippedNotCheckedEntries(listing);
+            const uncheckedModsCount = notCheckedMods.length;
+
+            const percentageUpdatedOverall =
+                totalModsInModpack > 0
+                    ? (
+                          (updatedModsCount / totalModsInModpack) *
+                          100
+                      ).toFixed(2)
+                    : "0.00";
+
+            const modrinthPercentageUpdated =
+                modrinthModsToCheck > 0
+                    ? (
+                          (updatedModsCount / modrinthModsToCheck) *
+                          100
+                      ).toFixed(2)
+                    : "0.00";
+
+            const uncheckedProportionPercentage =
+                totalModsInModpack > 0
+                    ? (
+                          (uncheckedModsCount / totalModsInModpack) *
+                          100
+                      ).toFixed(2)
+                    : "0.00";
+
+            const notUpdatedNonMc =
+                totalModsInModpack -
+                updatedModsCount -
+                uncheckedModsCount;
+
+            resultsHost.innerHTML = `
+                <p>
+                    <span class="compat-mc-stat-mix">${percentageUpdatedOverall}% (${updatedModsCount})</span>
+                    updated to ${escapeHtml(selectedVersion)} out of
+                    <span class="compat-mc-stat-mix">${totalModsInModpack}</span>
+                    [
+                    <span class="compat-mc-stat-ok">${modrinthPercentageUpdated}% (${updatedModsCount})</span> Modrinth,
+                    <span class="compat-mc-stat-bad">${(
+                        100 - Number(percentageUpdatedOverall)
+                    ).toFixed(2)}% (${notUpdatedNonMc})</span> not updated Modrinth,
+                    <span class="compat-mc-stat-skip">${uncheckedProportionPercentage}% (${uncheckedModsCount})</span> skipped
+                    ]
+                </p>
+                ${
+                    notUpdatedMods.length > 0
+                        ? `
+                <details class="compat-modrinth-details">
+                    <summary>Not updated Modrinth mods (${notUpdatedMods.length})</summary>
+                    <div class="compat-modrinth-scroll-list">
+                        <ul>
+                            ${notUpdatedMods
+                                .map((m) => {
+                                    const pid = escapeHtml(m.projectId ?? "");
+                                    const ldr = escapeHtml(m.modLoader ?? "fabric");
+                                    return `<li class="compat-not-updated-modrinth-li"><a href="${escapeHtml(m.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(m.name)}</a><button type="button" class="compat-not-updated-modrinth-info" title="Click to fetch the current version" aria-label="Fetch latest Modrinth version for this loader" data-project-id="${pid}" data-mod-loader="${ldr}">🛈</button><span class="compat-not-updated-modrinth-version" aria-live="polite"></span></li>`;
+                                })
+                                .join("")}
+                        </ul>
+                    </div>
+                </details>`
+                        : ""
+                }
+                ${
+                    notCheckedMods.length > 0
+                        ? `
+                <details class="compat-modrinth-details">
+                    <summary>Skipped / not checked (${notCheckedMods.length})</summary>
+                    <div class="compat-modrinth-scroll-list">
+                        <ul>
+                            ${notCheckedMods
+                                .map((m) =>
+                                    m.url
+                                        ? `<li><a href="${escapeHtml(m.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(m.name)}</a></li>`
+                                        : `<li>${escapeHtml(m.name)}</li>`,
+                                )
+                                .join("")}
+                        </ul>
+                    </div>
+                </details>`
+                        : ""
+                }
+            `;
+        }
+
+        function escapeHtml(s) {
+            return String(s)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function downloadBlobFile(blob, filename) {
+            const name =
+                filename != null && String(filename).trim() !== ""
+                    ? String(filename).split(/[/\\]/).pop()
+                    : "download";
+            const u = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = u;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(u), 800);
+        }
+
+        function safeHttpUrl(url) {
+            if (url == null || String(url).trim() === "") return null;
+            try {
+                const u = new URL(String(url).trim(), window.location.href);
+                if (u.protocol === "http:" || u.protocol === "https:")
+                    return u.href;
+            } catch (_) {
+                /* ignore */
+            }
+            return null;
+        }
+
+        function buildSkippedNotCheckedEntries(listing) {
+            if (!listing || !Array.isArray(listing.sources)) return [];
+            const out = [];
+            for (const mod of listing.sources) {
+                if (!mod) continue;
+                if (sourceIsCountedAsModrinthForCheck(mod)) continue;
+                const name =
+                    mod.filename != null && String(mod.filename).trim() !== ""
+                        ? String(mod.filename)
+                        : mod.type != null && String(mod.type).trim() !== ""
+                          ? `(unnamed — ${mod.type})`
+                          : "(unnamed entry)";
+                const rawUrl = mod.url != null ? String(mod.url).trim() : "";
+                const url = rawUrl ? safeHttpUrl(rawUrl) : null;
+                out.push({ name, url });
+            }
+            return out;
+        }
+
+        function findZipPathForModFile(zip, filenameHint) {
+            if (!zip || filenameHint == null) return null;
+            const base = normalizeZipPath(String(filenameHint))
+                .split("/")
+                .filter(Boolean)
+                .pop();
+            if (!base) return null;
+            let found = null;
+            zip.forEach((relPath, entry) => {
+                if (entry.dir) return;
+                const p = normalizeZipPath(relPath);
+                const leaf = p.split("/").filter(Boolean).pop();
+                if (leaf === base) {
+                    if (!found || p.length < found.length) {
+                        found = relPath;
+                    }
+                }
+            });
+            return found;
+        }
+
+        async function populateListingModsUl(ul, sources, zipBuffer) {
+            if (!ul || !Array.isArray(sources)) return;
+            let zip = null;
+            if (zipBuffer) {
+                try {
+                    zip = await JSZip.loadAsync(zipBuffer);
+                } catch (err) {
+                    console.warn(
+                        "Could not open mlisting zip for embedded file links:",
+                        err,
+                    );
+                }
+            }
+            for (const mod of sources) {
+                if (!mod || typeof mod !== "object") continue;
+                const li = document.createElement("li");
+                const label =
+                    mod.filename != null && String(mod.filename).trim() !== ""
+                        ? String(mod.filename)
+                        : "(unnamed entry)";
+                const type =
+                    mod.type != null && String(mod.type).trim() !== ""
+                        ? String(mod.type)
+                        : "";
+
+                if (
+                    type === "customB64" ||
+                    type === "customArchiveB64"
+                ) {
+                    const b64 = mod.base64;
+                    if (typeof b64 === "string" && b64.replace(/\s/g, "") !== "") {
+                        const a = document.createElement("a");
+                        a.href = "#";
+                        a.textContent = label;
+                        a.addEventListener("click", (e) => {
+                            e.preventDefault();
+                            try {
+                                const bytes = base64ToUint8Array(b64);
+                                const blob = new Blob([bytes], {
+                                    type: "application/octet-stream",
+                                });
+                                downloadBlobFile(blob, label);
+                            } catch (err) {
+                                console.error(
+                                    "Embedded mod download failed:",
+                                    err,
+                                );
+                            }
+                        });
+                        li.appendChild(a);
+                    } else {
+                        li.textContent = `${label} (${type}, no data)`;
+                    }
+                    ul.appendChild(li);
+                    continue;
+                }
+
+                const rawUrl = mod.url != null ? String(mod.url).trim() : "";
+                const safe = rawUrl ? safeHttpUrl(rawUrl) : null;
+                if (safe) {
+                    const a = document.createElement("a");
+                    a.href = safe;
+                    a.target = "_blank";
+                    a.rel = "noopener noreferrer";
+                    a.textContent = label;
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                    continue;
+                }
+
+                if (zip) {
+                    const zp = findZipPathForModFile(zip, label);
+                    if (zp) {
+                        const zpath = zp;
+                        const a = document.createElement("a");
+                        a.href = "#";
+                        a.textContent = label;
+                        a.addEventListener("click", async (e) => {
+                            e.preventDefault();
+                            try {
+                                const entry = zip.file(zpath);
+                                if (!entry || entry.dir) return;
+                                const blob = await entry.async("blob");
+                                downloadBlobFile(blob, label);
+                            } catch (err) {
+                                console.error("Zip mod download failed:", err);
+                            }
+                        });
+                        li.appendChild(a);
+                        ul.appendChild(li);
+                        continue;
+                    }
+                }
+
+                li.textContent = type ? `${label} (${type})` : label;
+                ul.appendChild(li);
+            }
+        }
+
+        function uint8ViewToArrayBuffer(u8) {
+            if (!u8 || !u8.byteLength) {
+                return new ArrayBuffer(0);
+            }
+            return u8.buffer.slice(
+                u8.byteOffset,
+                u8.byteOffset + u8.byteLength,
+            );
+        }
+
+        async function populateLegacyModsUl(ul, modFilenames, zipBuffer) {
+            if (!ul || !Array.isArray(modFilenames)) return;
+            let zip = null;
+            if (zipBuffer && zipBuffer.byteLength > 0) {
+                try {
+                    zip = await JSZip.loadAsync(zipBuffer);
+                } catch (err) {
+                    console.warn(
+                        "Could not open legacy archive for mod downloads:",
+                        err,
+                    );
+                }
+            }
+            for (const name of modFilenames) {
+                const li = document.createElement("li");
+                const label =
+                    name != null && String(name).trim() !== ""
+                        ? String(name)
+                        : "(unnamed)";
+                if (zip) {
+                    const zpath = findZipPathForModFile(zip, label);
+                    if (zpath) {
+                        const pathHeld = zpath;
+                        const a = document.createElement("a");
+                        a.href = "#";
+                        a.textContent = label;
+                        a.addEventListener("click", async (e) => {
+                            e.preventDefault();
+                            try {
+                                const entry = zip.file(pathHeld);
+                                if (!entry || entry.dir) return;
+                                const blob = await entry.async("blob");
+                                downloadBlobFile(blob, label);
+                            } catch (err) {
+                                console.error("Legacy mod download failed:", err);
+                            }
+                        });
+                        li.appendChild(a);
+                        ul.appendChild(li);
+                        continue;
+                    }
+                }
+                li.textContent = label;
+                ul.appendChild(li);
+            }
+        }
+
+        async function loadAndLogModpackSource(flavor) {
+            const sourceType = flavor.sourceType;
+            const source = flavor.source;
+
+            switch (sourceType) {
+                case "included": {
+                    clearCompatProgress();
+                    const root = compatProgressHost();
+                    let bar = null;
+                    if (root && typeof ProgressLoader !== "undefined") {
+                        const loader = new ProgressLoader(root);
+                        bar = loader.createProgressBar(
+                            "Reading listing...",
+                            true,
+                            0,
+                            100,
+                        );
+                        bar.update(35);
+                    }
+                    const listing =
+                        typeof source === "string" ? JSON.parse(source) : source;
+                    if (bar) bar.update(90);
+                    if (bar) {
+                        bar.complete();
+                        bar.cleanUp();
+                    }
+                    return { mode: "v2", listing };
+                }
+                case "mlisting": {
+                    const url = String(source).trim();
+                    if (!url) throw new Error("mlisting source URL is empty");
+                    const buf = await compatFetchArrayBuffer(
+                        url,
+                        "Fetching mlisting...",
+                    );
+                    const listing = await compatLoadZipAndRun(buf, (zip) =>
+                        parseMlistingFromZip(zip),
+                    );
+                    return { mode: "v2", listing, mlistingZipBuffer: buf };
+                }
+                case "urlListing": {
+                    const url = String(source).trim();
+                    if (!url) {
+                        throw new Error("urlListing source URL is empty");
+                    }
+                    const buf = await compatFetchArrayBuffer(
+                        url,
+                        "Fetching listing...",
+                    );
+                    const listing = await logListingFromFetchedBuffer(buf);
+                    return { mode: "v2", listing };
+                }
+                case "legacy": {
+                    const url =
+                        source && source.url != null
+                            ? String(source.url).trim()
+                            : "";
+                    if (!url) throw new Error("legacy source.url is empty");
+                    const buf = await compatFetchArrayBuffer(
+                        url,
+                        "Fetching legacy archive...",
+                    );
+                    const files = await logLegacyArchiveZip(buf);
+                    return {
+                        mode: "legacy",
+                        files,
+                        legacyZipBuffer: buf,
+                    };
+                }
+                case "legacyB64": {
+                    clearCompatProgress();
+                    const root = compatProgressHost();
+                    let b64Bar = null;
+                    if (root && typeof ProgressLoader !== "undefined") {
+                        const loader = new ProgressLoader(root);
+                        b64Bar = loader.createProgressBar(
+                            "Loading legacy base64 archive...",
+                            true,
+                            0,
+                            100,
+                        );
+                        b64Bar.update(28);
+                    }
+                    const b64 =
+                        source && source.base64 != null
+                            ? String(source.base64)
+                            : "";
+                    if (!b64) throw new Error("legacyB64 base64 is empty");
+                    const bytes = base64ToUint8Array(b64);
+                    if (b64Bar) {
+                        b64Bar.update(95);
+                        b64Bar.complete();
+                        b64Bar.cleanUp();
+                    }
+                    const files = await logLegacyArchiveZip(bytes);
+                    return {
+                        mode: "legacy",
+                        files,
+                        legacyZipBuffer: uint8ViewToArrayBuffer(bytes),
+                    };
+                }
+                default:
+                    console.warn("Unknown sourceType:", sourceType);
+                    clearCompatProgress();
+                    {
+                        const root = compatProgressHost();
+                        if (root && typeof ProgressLoader !== "undefined") {
+                            const loader = new ProgressLoader(root);
+                            const bar = loader.createProgressBar(
+                                "Unknown source type.",
+                                true,
+                                0,
+                                100,
+                            );
+                            bar.complete();
+                            bar.cleanUp();
+                        }
+                    }
+                    return { mode: "unknown" };
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            const urlBootParams = new URLSearchParams(window.location.search);
+            applyPageHeaderNavBootParams(urlBootParams);
+            applyIsmpToolbarUiBootParams(urlBootParams);
+            applyGuideSectionBootParam(urlBootParams);
+
+            const [flavors, iconMapping, versionManifest] = await Promise.all([
+                fetchRepoData(repoUrl),
+                fetchIconMapping(),
+                fetchMinecraftVersionManifest().catch((err) => {
+                    console.error(err);
+                    return null;
+                }),
+            ]);
+
+            const mcManifestVersions = versionManifest?.versions ?? [];
+            const mcVersionSelect = document.getElementById("mc-version-select");
+            const mcShowSnapshots = document.getElementById(
+                "mc-show-snapshots",
+            );
+            if (mcShowSnapshots && urlBootParams.has("mccnonrel")) {
+                mcShowSnapshots.checked = true;
+            }
+            let selectedModpackFlavor = null;
+            const compatCheckButton = document.getElementById(
+                "compat-check-button",
+            );
+
+            function updateCompatCheckButtonState() {
+                if (!compatCheckButton) return;
+                const modpackOk = selectedModpackFlavor != null;
+                const opt = mcVersionSelect?.selectedOptions?.[0];
+                const raw = mcVersionSelect?.value?.trim() ?? "";
+                const versionOk =
+                    raw !== "" && opt != null && opt.disabled !== true;
+                compatCheckButton.disabled = !(modpackOk && versionOk);
+            }
+
+            function applyMcVersionList() {
+                if (!mcVersionSelect || mcManifestVersions.length === 0) return;
+                const showSnapshots = mcShowSnapshots?.checked === true;
+                let versions = showSnapshots
+                    ? mcManifestVersions.slice()
+                    : mcManifestVersions.filter((v) => v.type === "release");
+                versions.sort(
+                    (a, b) =>
+                        new Date(b.releaseTime) - new Date(a.releaseTime),
+                );
+                const prevId = mcVersionSelect.value;
+                mcVersionSelect.innerHTML = "";
+                for (const v of versions) {
+                    const opt = document.createElement("option");
+                    opt.value = v.id;
+                    opt.textContent = v.id;
+                    mcVersionSelect.appendChild(opt);
+                }
+                if (prevId && versions.some((v) => v.id === prevId)) {
+                    mcVersionSelect.value = prevId;
+                }
+                updateCompatCheckButtonState();
+            }
+
+            if (mcVersionSelect) {
+                if (mcManifestVersions.length === 0) {
+                    const opt = document.createElement("option");
+                    opt.textContent = "Could not load versions";
+                    opt.disabled = true;
+                    mcVersionSelect.appendChild(opt);
+                } else {
+                    applyMcVersionList();
+                    mcShowSnapshots?.addEventListener("change", applyMcVersionList);
+                }
+                mcVersionSelect.addEventListener(
+                    "change",
+                    updateCompatCheckButtonState,
+                );
+            }
+            updateCompatCheckButtonState();
+            // Sort by flavor.mcver newest at the top and then by flavor.name alphabetically
+            flavors.sort((a, b) => {
+                const mcverCompare = compareMcVer(b.mcver, a.mcver);
+                if (mcverCompare !== 0) return mcverCompare;
+                return b.name.localeCompare(a.name);
+            });
+
+            const flavorListEl = document.getElementById("modpack-flavors-list");
+            const modpackSelectedLabel = document.getElementById(
+                "modpack-selected-label",
+            );
+            const modpackFlavorsDetails = flavorListEl?.closest("details");
+            const mccShowHidden = document.getElementById("mcc-show-hidden");
+            if (mccShowHidden && isUrlTruthyParam(urlBootParams.get("mccshowall"))) {
+                mccShowHidden.checked = true;
+            }
+            const defaultModpackIcon = "./images/modpack_default.png";
+            const modpackSummaryPlaceholder = "Choose a modpack…";
+
+            function flavorIsHiddenForList(f) {
+                return f && f.hidden === true;
+            }
+
+            function getModpackListFlavors() {
+                const showHidden = mccShowHidden?.checked === true;
+                return showHidden
+                    ? flavors.slice()
+                    : flavors.filter((f) => !flavorIsHiddenForList(f));
+            }
+
+            function rebuildModpackFlavorList() {
+                if (!flavorListEl) return;
+                const listFlavors = getModpackListFlavors();
+
+                if (
+                    selectedModpackFlavor &&
+                    flavorIsHiddenForList(selectedModpackFlavor) &&
+                    mccShowHidden?.checked !== true
+                ) {
+                    selectedModpackFlavor = null;
+                    if (modpackSelectedLabel) {
+                        modpackSelectedLabel.textContent =
+                            modpackSummaryPlaceholder;
+                    }
+                }
+
+                flavorListEl.innerHTML = "";
+                for (const flavor of listFlavors) {
+                    const li = document.createElement("li");
+                    li.className = "modpack-flavor-item";
+                    li.addEventListener("click", () => {
+                        selectModpackFlavor(flavor, li);
+                    });
+
+                    const img = document.createElement("img");
+                    img.className = "modpack-flavor-icon";
+                    const iconSrc = resolveFlavorIconSrc(
+                        flavor.icon,
+                        iconMapping,
+                        defaultModpackIcon,
+                    );
+                    img.src = iconSrc;
+                    img.alt = "";
+                    img.addEventListener(
+                        "error",
+                        function onFlavorIconErr() {
+                            img.removeEventListener("error", onFlavorIconErr);
+                            if (img.dataset.iconFallbackApplied === "1")
+                                return;
+                            img.dataset.iconFallbackApplied = "1";
+                            img.src = defaultModpackIcon;
+                        },
+                    );
+                    if (flavor.frontend_icon_rendering === "pixelated") {
+                        img.setAttribute(
+                            "style",
+                            "image-rendering: pixelated;",
+                        );
+                    }
+
+                    const meta = document.createElement("div");
+                    meta.className = "modpack-flavor-meta";
+
+                    const nameEl = document.createElement("div");
+                    nameEl.className = "modpack-flavor-name";
+                    nameEl.textContent = flavor.name ?? "";
+
+                    const mcverEl = document.createElement("div");
+                    mcverEl.className = "modpack-flavor-mcver";
+                    mcverEl.textContent =
+                        flavor.mcver != null ? String(flavor.mcver) : "";
+
+                    meta.append(nameEl, mcverEl);
+                    li.append(img, meta);
+                    flavorListEl.appendChild(li);
+                }
+
+                if (selectedModpackFlavor) {
+                    const idx = listFlavors.indexOf(selectedModpackFlavor);
+                    if (idx >= 0) {
+                        const items =
+                            flavorListEl.querySelectorAll(".modpack-flavor-item");
+                        const li = items[idx];
+                        if (li) {
+                            selectModpackFlavor(selectedModpackFlavor, li);
+                        }
+                    } else {
+                        selectedModpackFlavor = null;
+                        if (modpackSelectedLabel) {
+                            modpackSelectedLabel.textContent =
+                                modpackSummaryPlaceholder;
+                        }
+                    }
+                }
+                updateCompatCheckButtonState();
+            }
+
+            mccShowHidden?.addEventListener("change", rebuildModpackFlavorList);
+
+            function selectModpackFlavor(flavor, liEl) {
+                if (!flavorListEl) return;
+                selectedModpackFlavor = flavor;
+                flavorListEl
+                    .querySelectorAll(".modpack-flavor-item")
+                    .forEach((el) => {
+                        el.classList.toggle("is-selected", el === liEl);
+                    });
+                if (modpackSelectedLabel) {
+                    modpackSelectedLabel.textContent =
+                        flavor.name != null && String(flavor.name).trim() !== ""
+                            ? String(flavor.name)
+                            : modpackSummaryPlaceholder;
+                }
+                if (modpackFlavorsDetails) {
+                    modpackFlavorsDetails.open = false;
+                }
+                updateCompatCheckButtonState();
+            }
+
+            compatCheckButton?.addEventListener("click", async function () {
+                const minecraftVersionToCheck = mcVersionSelect?.value ?? null;
+                clearCompatModrinthResults();
+                try {
+                    if (selectedModpackFlavor == null) return;
+
+                    const payload = await loadAndLogModpackSource(
+                        selectedModpackFlavor,
+                    );
+                    clearCompatProgress();
+
+                    const panel = compatModrinthResultsEl();
+                    if (!panel) return;
+
+                    if (payload.mode === "legacy") {
+                        const legacyFiles = Array.isArray(payload.files)
+                            ? payload.files
+                            : [];
+                        const n = legacyFiles.length;
+                        panel.innerHTML =
+                            '<p class="compat-modrinth-orange">This compatibility checker only supports v2 listings that include Modrinth metadata. Legacy archives only list files under <code>mods/</code>, so Modrinth cannot be checked here yet.</p>' +
+                            `<details class="compat-modrinth-details">
+                                <summary>mods/ files (${n})</summary>
+                                <div class="compat-modrinth-scroll-list">
+                                    <ul id="compat-legacy-mods-ul" class="compat-listing-mods-ul"></ul>
+                                </div>
+                            </details>`;
+                        await populateLegacyModsUl(
+                            document.getElementById("compat-legacy-mods-ul"),
+                            legacyFiles,
+                            payload.legacyZipBuffer ?? null,
+                        );
+                        return;
+                    }
+
+                    if (payload.mode === "unknown") {
+                        panel.innerHTML =
+                            '<p class="compat-modrinth-orange">Unknown or unsupported <code>sourceType</code> for this checker.</p>';
+                        return;
+                    }
+
+                    if (payload.mode !== "v2" || !payload.listing) {
+                        panel.innerHTML =
+                            '<p class="compat-modrinth-orange">Could not read a v2 listing for compatibility.</p>';
+                        return;
+                    }
+
+                    const listing = payload.listing;
+                    const sources = Array.isArray(listing.sources)
+                        ? listing.sources
+                        : [];
+                    const totalMods = sources.length;
+                    const allModrinthMods =
+                        extractModrinthModsFromListing(listing);
+
+                    if (allModrinthMods.length === 0) {
+                        const entWord = totalMods === 1 ? "entry" : "entries";
+                        panel.innerHTML = `<p class="compat-modrinth-orange">This tool can only check Modrinth mods for now. This listing has no Modrinth mods (${totalMods} ${entWord} skipped).</p>
+                            <details class="compat-modrinth-details">
+                                <summary>Listing mods (${totalMods})</summary>
+                                <div class="compat-modrinth-scroll-list">
+                                    <ul id="compat-listing-mods-ul" class="compat-listing-mods-ul"></ul>
+                                </div>
+                            </details>`;
+                        await populateListingModsUl(
+                            document.getElementById("compat-listing-mods-ul"),
+                            sources,
+                            payload.mlistingZipBuffer ?? null,
+                        );
+                        return;
+                    }
+
+                    const skippedCount = totalMods - allModrinthMods.length;
+                    panel.innerHTML =
+                        '<div class="compat-modrinth-progress-row">' +
+                        '<div class="compat-modrinth-progress-host"></div>' +
+                        '<button type="button" class="compat-modrinth-cancel">Cancel</button>' +
+                        "</div>" +
+                        '<div class="compat-modrinth-summary-host"></div>';
+                    const progressHost = panel.querySelector(
+                        ".compat-modrinth-progress-host",
+                    );
+                    const resultsHost = panel.querySelector(
+                        ".compat-modrinth-summary-host",
+                    );
+                    const cancelBtn = panel.querySelector(
+                        ".compat-modrinth-cancel",
+                    );
+                    const cancelState = { cancelled: false };
+                    cancelBtn?.addEventListener("click", function onCancel() {
+                        cancelState.cancelled = true;
+                        cancelBtn.disabled = true;
+                    });
+                    await runIsmpModrinthCompatibilityCheck(
+                        allModrinthMods,
+                        totalMods,
+                        skippedCount,
+                        minecraftVersionToCheck,
+                        progressHost,
+                        resultsHost,
+                        cancelState,
+                        listing,
+                    );
+                } catch (err) {
+                    console.error("Modpack source load failed:", err);
+                    clearCompatProgress();
+                    const root = compatProgressHost();
+                    if (root && typeof ProgressLoader !== "undefined") {
+                        const loader = new ProgressLoader(root);
+                        const bar = loader.createProgressBar(
+                            "Error — see console.",
+                            true,
+                            0,
+                            100,
+                        );
+                        bar.complete();
+                        setTimeout(() => bar.cleanUp(), 1800);
+                    }
+                    const panel = compatModrinthResultsEl();
+                    if (panel) {
+                        panel.innerHTML =
+                            '<p class="compat-modrinth-orange">Error loading modpack or running checks — see console.</p>';
+                    }
+                }
+            });
+
+            rebuildModpackFlavorList();
+
+            const bootMcverRaw = urlBootParams.get("mcver");
+            if (
+                bootMcverRaw &&
+                mcVersionSelect &&
+                mcManifestVersions.length > 0
+            ) {
+                const want = safeDecodeUriParam(bootMcverRaw).trim();
+                if (want !== "") {
+                    if (want.toLowerCase() === "*latest") {
+                        const firstOk = Array.from(
+                            mcVersionSelect.options,
+                        ).find(
+                            (o) =>
+                                o.disabled !== true &&
+                                o.value.trim() !== "",
+                        );
+                        if (firstOk) {
+                            mcVersionSelect.value = firstOk.value;
+                        }
+                    } else {
+                        const versionOptionExists = () =>
+                            Array.from(mcVersionSelect.options).some(
+                                (o) =>
+                                    o.value === want && o.disabled !== true,
+                            );
+                        if (!versionOptionExists() && mcShowSnapshots) {
+                            mcShowSnapshots.checked = true;
+                            applyMcVersionList();
+                        }
+                        if (versionOptionExists()) {
+                            mcVersionSelect.value = want;
+                        }
+                    }
+                }
+            }
+
+            const bootMccmp = urlBootParams.get("mccmp");
+            if (bootMccmp != null && flavorListEl && flavors.length > 0) {
+                const mccmpDecoded = safeDecodeUriParam(bootMccmp).trim();
+                const hit =
+                    mccmpDecoded.toLowerCase() === "*latest"
+                        ? flavors[0]
+                        : findFlavorByMccmp(flavors, bootMccmp);
+                if (hit) {
+                    const idx = flavors.indexOf(hit);
+                    const items = flavorListEl.querySelectorAll(
+                        ".modpack-flavor-item",
+                    );
+                    const li = items[idx];
+                    if (li) {
+                        selectModpackFlavor(hit, li);
+                    }
+                }
+            }
+
+            const bootSection = urlBootParams.get("s");
+            if (bootSection) {
+                scrollToIsmpSection(bootSection);
+            }
+
+            updateCompatCheckButtonState();
+
+            if (urlBootParams.has("mccauto")) {
+                updateCompatCheckButtonState();
+                if (compatCheckButton && !compatCheckButton.disabled) {
+                    compatCheckButton.click();
+                }
+            }
+
+            document
+                .getElementById("compat-modrinth-results")
+                ?.addEventListener("click", onCompatModrinthNotUpdatedInfoClick);
+        });
+    </script>
+</head>
+<body>
+    <noscript>
+        <style type="text/css">
+            .page {
+                display: none;
+            }
+
+            .noscriptmsg {
+                max-width: 59rem;
+                margin: clamp(1rem, 4vw, 1.5rem) auto 0;
+                padding: clamp(1.35rem, 3.5vw, 1.75rem) clamp(1.15rem, 3.5vw, 1.5rem) clamp(1.35rem, 3.5vw, 1.75rem);
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 0.5rem;
+                box-shadow: var(--shadow);
+            }
+
+            .noscriptmsg-title {
+                font-size: clamp(1.35rem, 1.15rem + 1vw, 1.7rem);
+                font-weight: 700;
+                letter-spacing: -0.02em;
+                line-height: 1.2;
+                margin-bottom: 0.85rem;
+                color: var(--text);
+            }
+
+            .noscriptmsg-lede {
+                font-size: 1rem;
+                line-height: 1.7;
+                color: var(--text-muted);
+                max-width: 56rem;
+            }
+
+            .noscriptmsg-lede a {
+                font-weight: 600;
+            }
+
+            .noscriptmsg-footer {
+                margin-top: 2rem;
+                padding-top: 1.35rem;
+                border-top: 1px solid var(--border);
+            }
+
+            .noscriptmsg-legal {
+                font-size: 0.8125rem;
+                line-height: 1.7;
+                color: var(--text-faint);
+                max-width: 56rem;
+            }
+        </style>
+        <div class="noscriptmsg">
+            <h2 class="noscriptmsg-title">JavaScript is disabled</h2>
+            <p class="noscriptmsg-lede">
+                This page needs JavaScript to work. <a href="https://www.enable-javascript.com/" rel="noopener noreferrer">See here</a> for instructions on how to turn it on in common browsers.
+            </p>
+            <footer class="noscriptmsg-footer">
+                <p class="noscriptmsg-legal">
+                    Created by Simon Kalmi Claesson for personal use. Any
+                    content on this website is owned by the author and is not
+                    permitted to be redistributed without crediting the
+                    original author. Redistributing any assets, parts, or the
+                    project as a whole as your own is not and never will be
+                    allowed.
+                </p>
+            </footer>
+        </div>
+    </noscript>
+
+    <div class="page">
+        <header class="page-header">
+            <div class="page-header-heading">
+                <div class="page-header-title-group">
+                    <img
+                        class="page-header-logo"
+                        src="./images/favicon2_128.png"
+                        alt=""
+                        width="128"
+                        height="128"
+                    />
+                    <h1>Version checker</h1>
+                </div>
+            </div>
+            <i class="grayout">This is a tool to check what is updated to a specific minecraft version.</i>
+        </header>
+
+        <main>
+            <section id="section-mcc">
+                <h2>MinecraftCustomClient Modpacks</h2>
+                <div class="modpack-toolbar">
+                    <div
+                        class="toolbar-dropdown-field toolbar-dropdown-field--modpack"
+                    >
+                        <label id="modpack-select-label">Select modpack</label>
+                        <details
+                            class="modpack-flavors-panel"
+                            aria-labelledby="modpack-select-label"
+                        >
+                            <summary
+                                class="modpack-flavors-summary toolbar-dropdown-control"
+                            >
+                                <span
+                                    class="modpack-summary-text"
+                                    id="modpack-selected-label"
+                                >Choose a modpack…</span>
+                            </summary>
+                            <ul
+                                id="modpack-flavors-list"
+                                class="modpack-flavors-list"
+                            ></ul>
+                        </details>
+                    </div>
+                    <label class="mc-show-hidden-label" for="mcc-show-hidden">
+                        <input
+                            type="checkbox"
+                            id="mcc-show-hidden"
+                        />
+                        Show hidden
+                    </label>
+                    <div class="toolbar-dropdown-field">
+                        <label for="mc-version-select">Check for version</label>
+                        <select
+                            id="mc-version-select"
+                            class="toolbar-dropdown-control"
+                        ></select>
+                    </div>
+                    <label class="mc-show-snapshots-label">
+                        <input
+                            type="checkbox"
+                            id="mc-show-snapshots"
+                        />
+                        Snapshots
+                    </label>
+                </div>
+                <div class="compat-check-actions compat-check-row">
+                    <button
+                        type="button"
+                        class="compat-check-button"
+                        id="compat-check-button"
+                    >
+                        Check Compatability
+                    </button>
+                    <div
+                        id="compat-progress-root"
+                        class="compat-progress-root"
+                        aria-live="polite"
+                    ></div>
+                </div>
+                <div
+                    id="compat-modrinth-results"
+                    class="compat-modrinth-results"
+                    aria-live="polite"
+                ></div>
+            </section>
+
+            <section id="section-modrinth-mp">
+                <h2>Modrinth Modpacks</h2>
+                <span class="comming-soon">Coming soon…</span>
+            </section>
+
+            <section id="section-modrinth-mod">
+                <h2>Modrinth Mods</h2>
+                <span class="comming-soon">Coming soon…</span>
+            </section>
+
+            <section
+                id="section-guide"
+                class="ismp-guide-section"
+                aria-label="URL query parameter guide"
+            >
+                <h2>Guide</h2>
+                <p class="ismp-guide-lede">
+                    These query parameters are read <strong>once when the page loads</strong>.
+                    Join them with <code>&amp;</code> like any query string; percent-encode a value if it contains <code>&amp;</code> or <code>?</code> itself.
+                </p>
+                <ul class="ismp-guide-params">
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?guide</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Presence (any value) shows this section so you can link to documentation.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?s=mcc | modrinth.mp | modrinth.mod | guide</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Scrolls smoothly to that main section. <code>mcc</code> is the MinecraftCustomClient modpacks block; <code>guide</code> scrolls here when this section is visible (add <code>?guide</code>).
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?mccmp=name | id | *latest</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Pre-selects a modpack matching flavor <code>name</code> or <code>id</code> (case-insensitive); value may be URL-encoded. <code>*latest</code> picks the first row after the usual Minecraft-version / name sort. Respects “Show hidden”: hidden modpacks are excluded unless that box is on or <code>?mccshowall=true</code>.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?mcver=version | *latest</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Pre-selects that Minecraft version in the dropdown (exact id from the manifest). <code>*latest</code> selects the first option in the current list (releases only unless snapshots are enabled). If the version is missing, snapshots are turned on once and the list is rebuilt.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?mccnonrel</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Presence flag: checks “Snapshots” before the version list is first filled so pre-releases appear in the version picker.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?mccauto</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Presence flag: after other boot logic, programmatically runs the compatibility check if the button is enabled (modpack + version both set).
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?mccshowall=true | 1 | yes</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Checks “Show hidden” so modpack flavors with <code>hidden: true</code> are listed (comparison is strict <code>true</code> on the flavor object).
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?homeurl=URL</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Adds a right-aligned <strong>MCC Web</strong> header link. <code>URL</code> is http(s), same-site relative, or multiply percent-encoded; <code>javascript:</code> / <code>data:</code> blocked. Opens in a new tab.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?backurl=URL</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Same URL rules as <code>homeurl</code>. Shows <strong>Go Back</strong> (same tab). With both params, <strong>Go Back</strong> sits to the left of <strong>MCC Web</strong>.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?ui.mccnohidden=true | 1 | yes</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Hides the “Show hidden” checkbox UI; you can still include hidden modpacks via <code>mccshowall</code>.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?ui.mccnosnap=true | 1 | yes</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Hides the “Snapshots” checkbox UI; <code>mccnonrel</code> can still enable snapshot versions.
+                        </p>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

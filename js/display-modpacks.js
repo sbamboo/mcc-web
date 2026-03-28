@@ -143,6 +143,19 @@ function createModpackDiv(
     frontend_icon_rendering = null,
     use_v1_presentation = false,
 ) {
+    let showHidden = new URLSearchParams(location.search).get("showHidden");
+    if (showHidden) {
+        if (
+            showHidden === true ||
+            showHidden.toLowerCase() === "true" ||
+            showHidden == 1
+        ) {
+            showHidden = true;
+        } else {
+            showHidden = false;
+        }
+    }
+
     const div = document.createElement("div");
     div.id = makeQueryStringSafe(name);
     if (supported != true) {
@@ -183,7 +196,7 @@ function createModpackDiv(
                         <p class="modpack-id inline">[MdpkId:${id}]</p>
                     </div>
 
-                    <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="icon-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
+                    <a class="button modviewer" href="./modview.html?modpack=${urlSafename}${showHidden?'&showHidden=true':''}"><div class="icon-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
                     <a class="button os-down-alt modpack-os-down-zipgen" data-modpack-id="${name}">Modpack (zip)</a>
 
                     <b class="collapsible collapsible-collapsed">Additional:</b>
@@ -233,7 +246,7 @@ function createModpackDiv(
                     <a class="button os-down modpack-os-down" href="${links.qiWinX86Link}">Installer - Windows (exe)</a>
                     <a class="button os-down modpack-os-down" href="${links.bundleLink}">Installer - Others (zip)</a>
                     <a class="button os-down-alt modpack-os-down-zipgen" data-modpack-id="${name}">Modpack (zip)</a>
-                    <a class="button modviewer" href="./modview.html?modpack=${urlSafename}"><div class="icon-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
+                    <a class="button modviewer" href="./modview.html?modpack=${urlSafename}${showHidden?'&showHidden=true':''}"><div class="icon-button-wrapper"><img src="./images/modview/modviewer.png" alt="Modview icon"><p>Open in modviewer</div></a>
                     <a class="legacy-link link-ul" href="${links.modpackLink}">Modpack/listing</a>
                     <a class="legacy-link" href="${links.buildSrcLink}">BuildSource (zip)</a>
                 </div>

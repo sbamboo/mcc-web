@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="./css/index.css" />
         <link rel="stylesheet" href="./css/modview.css" />
         <link rel="icon" type="image/png" href="./images/favicon_128.png" />
+        <script src="./js/vercheck.js"></script>
         <!-- Include the JSZip library from CDN -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     </head>
@@ -59,11 +60,11 @@
                         </h1>
                     </div>
                 </div>
-                <a class="button big-size ui-btn btn-bellow-margin" href="./"
-                    >Go back</a
-                >
+                <a class="button big-size ui-btn btn-bellow-margin" id="goback-btn" href="./">
+                    Go back
+                </a>
 
-                <div class="modview-compatibility-checker" style="display: none;">
+                <!-- <div class="modview-compatibility-checker" style="display: none;">
                     <details class="compatibility-dropdown-container">
                         <summary class="compatibility-dropdown-summary">
                             Compatibility checker
@@ -77,7 +78,11 @@
                         </div>
                         <p id="compatibilityResults"></p>
                     </details>
-                </div>
+                </div> -->
+
+                <button onclick="openVersionChecker()" class="button big-size ui-btn btn-bellow-margin">
+                    Open Compatibility Checker
+                </button>
             </main>
             <footer>
                 <p class="smal-text">
@@ -102,6 +107,11 @@
         <!-- Include the new ModpackParser script BEFORE your main script -->
         <script src="./js/modpack-parsing.js"></script>
         <script>
+            const showHidden = new URLSearchParams(location.search).get("showHidden") === "true";
+            if (showHidden) {
+                document.getElementById("goback-btn").href += "?showHidden=true";
+            }
+
             // Global variables (now populated by the parser)
             let modrinthModIds = []; // To store only Modrinth project IDs
             let allModrinthMods = []; // To store full mod objects (id, filename, modloader) for Modrinth mods
@@ -439,6 +449,10 @@
                             : ''
                     }
                 `;
+            }
+
+            function openVersionChecker() {
+                window.open(getVerCheckUrl(urlParams.get('modpack')), "_blank");
             }
 
             // Main logic to fetch and display modpack data using ModpackParser
