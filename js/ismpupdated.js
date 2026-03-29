@@ -676,6 +676,103 @@ class VerCheck {
     }
 
     /**
+     * Build Modrinth `/v2/search` facets for **mod** projects (not modpacks).
+     * Same filter shape as {@link VerCheck#buildModrinthModpackSearchFacets}.
+     *
+     * @param {{
+     *   categories?: string[],
+     *   loaders?: string[],
+     *   environment?: { client?: boolean, server?: boolean },
+     *   openSourceOnly?: boolean,
+     * }} [filters]
+     * @returns {string} JSON string for the `facets` query parameter
+     */
+    buildModrinthModSearchFacets(filters = {}) {
+        const facetGroups = [["project_type:mod"]];
+        const cats = Array.isArray(filters.categories)
+            ? filters.categories
+                  .map((c) => String(c ?? "").trim())
+                  .filter((c) => c !== "")
+            : [];
+        const loaders = Array.isArray(filters.loaders)
+            ? filters.loaders
+                  .map((l) => String(l ?? "").trim())
+                  .filter((l) => l !== "")
+            : [];
+        if (cats.length > 0) {
+            facetGroups.push(cats.map((c) => `categories:${c}`));
+        }
+        if (loaders.length > 0) {
+            facetGroups.push(loaders.map((l) => `categories:${l}`));
+        }
+        const env = filters.environment || {};
+        if (env.client === true) {
+            facetGroups.push(["client_side:required", "client_side:optional"]);
+        }
+        if (env.server === true) {
+            facetGroups.push(["server_side:required", "server_side:optional"]);
+        }
+        if (filters.openSourceOnly === true) {
+            facetGroups.push(["open_source:true"]);
+        }
+        return JSON.stringify(facetGroups);
+    }
+
+    /**
+     * Search Modrinth for mod projects ({@link https://api.modrinth.com}).
+     * Empty `query` returns `{ hits: [], totalHits: 0 }` without a network call.
+     *
+     * @param {string} query
+     * @param {{
+     *   limit?: number,
+     *   offset?: number,
+     *   signal?: AbortSignal,
+     *   filters?: {
+     *     categories?: string[],
+     *     loaders?: string[],
+     *     environment?: { client?: boolean, server?: boolean },
+     *     openSourceOnly?: boolean,
+     *   },
+     * }} [options]
+     * @returns {Promise<{ hits: object[], totalHits: number, limit: number, offset: number }>}
+     */
+    async searchModrinthMods(query, options = {}) {
+        const q = String(query ?? "").trim();
+        if (!q) {
+            return { hits: [], totalHits: 0, limit: 0, offset: 0 };
+        }
+        const limit = Math.min(Math.max(Number(options.limit) || 20, 1), 100);
+        const offset = Math.max(Number(options.offset) || 0, 0);
+        const facets = this.buildModrinthModSearchFacets(options.filters ?? {});
+        const ua = `minecraftcustomclient-website-modrinth-mod@${this.generateRandomString(
+            8,
+        )}`;
+        const url =
+            "https://api.modrinth.com/v2/search" +
+            `?query=${encodeURIComponent(q)}` +
+            `&facets=${encodeURIComponent(facets)}` +
+            `&limit=${encodeURIComponent(String(limit))}` +
+            `&offset=${encodeURIComponent(String(offset))}`;
+        const res = await fetch(url, {
+            headers: { "User-Agent": ua },
+            signal: options.signal ?? undefined,
+        });
+        if (!res.ok) {
+            throw new Error(`Modrinth search HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        const hits = Array.isArray(data.hits) ? data.hits : [];
+        const totalHits =
+            typeof data.total_hits === "number" ? data.total_hits : hits.length;
+        return {
+            hits,
+            totalHits,
+            limit: typeof data.limit === "number" ? data.limit : limit,
+            offset: typeof data.offset === "number" ? data.offset : offset,
+        };
+    }
+
+    /**
      * Search Modrinth for modpack projects ({@link https://api.modrinth.com}).
      * Empty `query` returns `{ hits: [], totalHits: 0 }` without a network call.
      *
@@ -728,6 +825,107 @@ class VerCheck {
             totalHits,
             limit: typeof data.limit === "number" ? data.limit : limit,
             offset: typeof data.offset === "number" ? data.offset : offset,
+        };
+    }
+
+    /**
+     * Lists all published file versions for a Modrinth project (paginated).
+     *
+     * @param {string} projectId
+     * @param {{ signal?: AbortSignal }} [options]
+     * @returns {Promise<object[]>}
+     */
+    async fetchModrinthProjectVersions(projectId, options = {}) {
+        const pid = String(projectId ?? "").trim();
+        if (!pid) {
+            throw new Error("Modrinth project id is empty");
+        }
+        const ua = `minecraftcustomclient-website-modrinth-ver@${this.generateRandomString(
+            8,
+        )}`;
+        const signal = options.signal;
+        const all = [];
+        let offset = 0;
+        const limit = 100;
+        for (;;) {
+            const url =
+                `https://api.modrinth.com/v2/project/${encodeURIComponent(
+                    pid,
+                )}/version?limit=${encodeURIComponent(String(limit))}` +
+                `&offset=${encodeURIComponent(String(offset))}`;
+            const res = await fetch(url, {
+                headers: { "User-Agent": ua },
+                signal,
+            });
+            if (!res.ok) {
+                throw new Error(`Modrinth versions HTTP ${res.status}`);
+            }
+            const chunk = await res.json();
+            if (!Array.isArray(chunk) || chunk.length === 0) {
+                break;
+            }
+            all.push(...chunk);
+            if (chunk.length < limit) {
+                break;
+            }
+            offset += limit;
+        }
+        return all;
+    }
+
+    /**
+     * Whether the project has at least one file version that lists the given
+     * Minecraft version in `game_versions`, and the union of all declared MC
+     * versions (newest first per {@link VerCheck#compareMcVer}).
+     *
+     * @param {string} projectId
+     * @param {string} minecraftVersion
+     * @param {{ signal?: AbortSignal }} [options]
+     * @returns {Promise<{
+     *   supportsSelected: boolean,
+     *   selectedMinecraftVersion: string,
+     *   allGameVersions: string[],
+     *   otherGameVersions: string[],
+     *   fileVersionCount: number,
+     * }>}
+     */
+    async checkModrinthModUpdatedForMcVersion(
+        projectId,
+        minecraftVersion,
+        options = {},
+    ) {
+        const mc = String(minecraftVersion ?? "").trim();
+        if (!mc) {
+            throw new Error("Minecraft version is empty");
+        }
+        const versions = await this.fetchModrinthProjectVersions(
+            projectId,
+            options,
+        );
+        const gameSet = new Set();
+        for (const v of versions) {
+            const gv = v?.game_versions;
+            if (!Array.isArray(gv)) {
+                continue;
+            }
+            for (const x of gv) {
+                const s = String(x ?? "").trim();
+                if (s) {
+                    gameSet.add(s);
+                }
+            }
+        }
+        const allGameVersions = [...gameSet].sort((a, b) =>
+            this.compareMcVer(b, a),
+        );
+        const supportsSelected = gameSet.has(mc);
+        const otherGameVersions = allGameVersions.filter((v) => v !== mc);
+        return {
+            supportsSelected,
+            selectedMinecraftVersion: mc,
+            allGameVersions,
+            otherGameVersions,
+            fileVersionCount: versions.length,
         };
     }
 
