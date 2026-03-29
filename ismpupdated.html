@@ -201,6 +201,26 @@
             margin-top: 0.85rem;
         }
 
+        .modpack-toolbar--align-center {
+            align-items: center;
+        }
+
+        .modpack-toolbar--align-center .mc-show-snapshots-label,
+        .modpack-toolbar--align-center .mc-show-hidden-label {
+            padding-bottom: 0;
+        }
+
+        /* Match vertical offset of controls that sit under uppercase field labels */
+        .modpack-toolbar--align-center > .modrinth-mp-filter-anchor,
+        .modpack-toolbar--align-center > .mc-show-snapshots-label {
+            margin-top: calc(0.78rem * 1.35 + 0.25rem);
+        }
+
+        .modrinth-mp-filter-anchor {
+            position: relative;
+            flex-shrink: 0;
+        }
+
         .toolbar-dropdown-field {
             flex: 1 1 11rem;
             min-width: min(100%, 10.5rem);
@@ -491,6 +511,423 @@
             line-height: 1.35;
         }
 
+        .toolbar-dropdown-field--modrinth-mp-search {
+            flex: 1 1 15.97rem;
+            min-width: min(100%, 15.3rem);
+            max-width: 23.3rem;
+        }
+
+        .modrinth-mp-search-stack {
+            position: relative;
+            width: 100%;
+        }
+
+        .modrinth-mp-search-input.toolbar-dropdown-control {
+            cursor: text;
+        }
+
+        #modrinth-mp-search-input {
+            padding: calc(0.65rem + (2.875rem - 2.6458125rem) / 2) 1.75rem
+                calc(0.65rem + (2.875rem - 2.6458125rem) / 2) 0.55rem;
+        }
+
+        #modrinth-mp-selected-bar {
+            padding: 0.25rem 1.75rem 0.25rem 0.55rem;
+        }
+
+        .modrinth-mp-results {
+            list-style: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + 0.25rem);
+            z-index: 8;
+            margin: 0;
+            padding: 0.35rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-height: min(55vh, 22rem);
+            overflow-y: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.3rem;
+            box-shadow: var(--shadow);
+        }
+
+        .modrinth-mp-results[hidden] {
+            display: none !important;
+        }
+
+        .modrinth-mp-result-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.45rem 0.55rem;
+            margin: 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background-color 0.12s ease;
+        }
+
+        .modrinth-mp-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .modrinth-mp-result-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .modrinth-mp-result-icon {
+            width: 2.75rem;
+            height: 2.75rem;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .modrinth-mp-result-meta {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .modrinth-mp-result-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        .modrinth-mp-result-mcver {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            line-height: 1.35;
+        }
+
+        .modrinth-mp-results-msg {
+            padding: 0.5rem 0.65rem;
+            margin: 0;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            border-bottom: none;
+            cursor: default;
+        }
+
+        .modrinth-mp-results-msg:hover {
+            background: transparent;
+        }
+
+        .modrinth-mp-selected-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: default;
+        }
+
+        .modrinth-mp-selected-bar[hidden] {
+            display: none !important;
+        }
+
+        .modrinth-mp-selected-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .modrinth-mp-selected-title {
+            min-width: 0;
+            flex: 1 1 auto;
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.35;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .modrinth-mp-selected-clear {
+            flex-shrink: 0;
+            margin-left: auto;
+            font: inherit;
+            font-size: 1.35rem;
+            font-weight: 400;
+            line-height: 1;
+            width: 2rem;
+            height: 2rem;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 0.25rem;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition:
+                background-color 0.12s ease,
+                color 0.12s ease;
+        }
+
+        .modrinth-mp-selected-clear:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
+        .modrinth-mp-filter-btn {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            width: 2.45rem;
+            height: 2.45rem;
+            min-width: 2.45rem;
+            min-height: 2.45rem;
+            padding: 0;
+            border-radius: 0.3rem;
+            border: 1px solid var(--border);
+            background-color: var(--bg-base);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition:
+                background-color 0.15s ease,
+                border-color 0.15s ease,
+                color 0.15s ease;
+        }
+
+        .modrinth-mp-filter-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: var(--text);
+        }
+
+        .modrinth-mp-filter-btn:focus-visible {
+            outline: 2px solid rgba(122, 184, 255, 0.45);
+            outline-offset: 1px;
+        }
+
+        .modrinth-mp-filter-btn svg {
+            width: 1.15rem;
+            height: 1.15rem;
+            display: block;
+        }
+
+        .modrinth-mp-filter-popover {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 0.35rem;
+            z-index: 100;
+            min-width: max(25.5rem, 100%);
+            width: max-content;
+            max-width: min(calc(100vw - 2rem), 36rem);
+            overflow: visible;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.4rem;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.35);
+        }
+
+        .modrinth-mp-filter-popover[hidden] {
+            display: none !important;
+        }
+
+        .modrinth-mp-filter-body {
+            padding: 0.85rem 1rem 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.95rem;
+        }
+
+        .modrinth-mp-filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem 0.75rem;
+        }
+
+        .modrinth-mp-filter-row[data-filter-ms] {
+            flex-wrap: nowrap;
+            gap: 0.5rem 0.65rem;
+        }
+
+        .modrinth-mp-filter-ms-wrap {
+            position: relative;
+            flex: 1 1 auto;
+            min-width: 12rem;
+            max-width: 100%;
+        }
+
+        .modrinth-mp-filter-row[data-filter-ms] .modrinth-mp-filter-ms-wrap {
+            min-width: 14rem;
+        }
+
+        .modrinth-mp-filter-ms-wrap.is-open {
+            z-index: 5;
+        }
+
+        .modrinth-mp-filter-dd-trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            font: inherit;
+            font-size: 0.88rem;
+            line-height: 1.35;
+            padding: 0.42rem 0.55rem;
+            border-radius: 0.3rem;
+            border: 1px solid var(--border);
+            background: var(--bg-base);
+            color: var(--text);
+            cursor: pointer;
+            text-align: left;
+            transition:
+                border-color 0.12s ease,
+                background-color 0.12s ease;
+        }
+
+        .modrinth-mp-filter-dd-trigger:hover {
+            border-color: rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .modrinth-mp-filter-dd-trigger[aria-expanded="true"] {
+            border-color: rgba(122, 184, 255, 0.45);
+        }
+
+        .modrinth-mp-filter-dd-label {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .modrinth-mp-filter-dd-chevron {
+            flex-shrink: 0;
+            font-size: 0.55rem;
+            opacity: 0.75;
+            transition: transform 0.15s ease;
+        }
+
+        .modrinth-mp-filter-ms-wrap.is-open .modrinth-mp-filter-dd-chevron {
+            transform: rotate(180deg);
+        }
+
+        .modrinth-mp-filter-dd-panel {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + 0.25rem);
+            z-index: 4;
+            max-height: min(14rem, 45dvh);
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 0.35rem 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.3rem;
+            box-shadow: var(--shadow);
+        }
+
+        .modrinth-mp-filter-dd-panel[hidden] {
+            display: none !important;
+        }
+
+        .modrinth-mp-filter-dd-item {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.6rem;
+            margin: 0;
+            font-size: 0.88rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: background-color 0.1s ease;
+        }
+
+        .modrinth-mp-filter-dd-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .modrinth-mp-filter-dd-item input {
+            width: 1rem;
+            height: 1rem;
+            accent-color: var(--link);
+            flex-shrink: 0;
+        }
+
+        .modrinth-mp-filter-row-label {
+            flex: 0 0 auto;
+            min-width: 5.75rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+        }
+
+        .modrinth-mp-filter-all {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.85rem;
+            color: var(--text);
+            cursor: pointer;
+            user-select: none;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .modrinth-mp-filter-all input {
+            width: 1rem;
+            height: 1rem;
+            accent-color: var(--link);
+        }
+
+        .modrinth-mp-filter-row--inline-checks .modrinth-mp-filter-inline-checks {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem 1.1rem;
+            flex: 1 1 10rem;
+        }
+
+        .modrinth-mp-filter-row--inline-checks label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+
+        .modrinth-mp-filter-row--inline-checks input {
+            width: 1rem;
+            height: 1rem;
+            accent-color: var(--link);
+        }
+
+        .modrinth-mp-filter-license {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+
+        .modrinth-mp-filter-license input {
+            width: 1rem;
+            height: 1rem;
+            accent-color: var(--link);
+        }
+
         .compat-check-row {
             display: flex;
             flex-wrap: wrap;
@@ -779,10 +1216,37 @@
             if (mcShowSnapshots && urlBootParams.has("mccnonrel")) {
                 mcShowSnapshots.checked = true;
             }
+            const mrMpMcVersionSelect = document.getElementById(
+                "mr-mp-mc-version-select",
+            );
+            const mrMpMcShowSnapshots = document.getElementById(
+                "mr-mp-mc-show-snapshots",
+            );
+            if (mrMpMcShowSnapshots && urlBootParams.has("mccnonrel")) {
+                mrMpMcShowSnapshots.checked = true;
+            }
             let selectedModpackFlavor = null;
             const compatCheckButton = document.getElementById(
                 "compat-check-button",
             );
+            const mrMpCompatCheckButton = document.getElementById(
+                "mr-mp-compat-check-button",
+            );
+            let selectedModrinthModpack = null;
+
+            function updateMrMpCompatCheckButtonState() {
+                if (!mrMpCompatCheckButton) return;
+                const packOk =
+                    selectedModrinthModpack != null &&
+                    String(
+                        selectedModrinthModpack.project_id ?? "",
+                    ).trim() !== "";
+                const opt = mrMpMcVersionSelect?.selectedOptions?.[0];
+                const raw = mrMpMcVersionSelect?.value?.trim() ?? "";
+                const versionOk =
+                    raw !== "" && opt != null && opt.disabled !== true;
+                mrMpCompatCheckButton.disabled = !(packOk && versionOk);
+            }
 
             function updateCompatCheckButtonState() {
                 if (!compatCheckButton) return;
@@ -794,9 +1258,8 @@
                 compatCheckButton.disabled = !(modpackOk && versionOk);
             }
 
-            function applyMcVersionList() {
-                if (!mcVersionSelect || mcManifestVersions.length === 0) return;
-                const showSnapshots = mcShowSnapshots?.checked === true;
+            function applyMcVersionListToSelect(selectEl, showSnapshots) {
+                if (!selectEl || mcManifestVersions.length === 0) return;
                 let versions = showSnapshots
                     ? mcManifestVersions.slice()
                     : mcManifestVersions.filter((v) => v.type === "release");
@@ -804,36 +1267,628 @@
                     (a, b) =>
                         new Date(b.releaseTime) - new Date(a.releaseTime),
                 );
-                const prevId = mcVersionSelect.value;
-                mcVersionSelect.innerHTML = "";
+                const prevId = selectEl.value;
+                selectEl.innerHTML = "";
                 for (const v of versions) {
                     const opt = document.createElement("option");
                     opt.value = v.id;
                     opt.textContent = v.id;
-                    mcVersionSelect.appendChild(opt);
+                    selectEl.appendChild(opt);
                 }
                 if (prevId && versions.some((v) => v.id === prevId)) {
-                    mcVersionSelect.value = prevId;
+                    selectEl.value = prevId;
                 }
+            }
+
+            function applyMcVersionList() {
+                if (!mcVersionSelect || mcManifestVersions.length === 0) return;
+                applyMcVersionListToSelect(
+                    mcVersionSelect,
+                    mcShowSnapshots?.checked === true,
+                );
                 updateCompatCheckButtonState();
             }
 
-            if (mcVersionSelect) {
-                if (mcManifestVersions.length === 0) {
-                    const opt = document.createElement("option");
-                    opt.textContent = "Could not load versions";
-                    opt.disabled = true;
-                    mcVersionSelect.appendChild(opt);
-                } else {
-                    applyMcVersionList();
-                    mcShowSnapshots?.addEventListener("change", applyMcVersionList);
+            function applyMrMpMcVersionList() {
+                if (!mrMpMcVersionSelect || mcManifestVersions.length === 0) {
+                    return;
                 }
-                mcVersionSelect.addEventListener(
+                applyMcVersionListToSelect(
+                    mrMpMcVersionSelect,
+                    mrMpMcShowSnapshots?.checked === true,
+                );
+                updateMrMpCompatCheckButtonState();
+            }
+
+            function bumpMcVersionSelectError(selectEl) {
+                if (!selectEl) return;
+                selectEl.innerHTML = "";
+                const opt = document.createElement("option");
+                opt.textContent = "Could not load versions";
+                opt.disabled = true;
+                selectEl.appendChild(opt);
+            }
+
+            if (mcManifestVersions.length === 0) {
+                bumpMcVersionSelectError(mcVersionSelect);
+                bumpMcVersionSelectError(mrMpMcVersionSelect);
+            } else {
+                applyMcVersionList();
+                applyMrMpMcVersionList();
+                mcShowSnapshots?.addEventListener("change", applyMcVersionList);
+                mrMpMcShowSnapshots?.addEventListener(
                     "change",
-                    updateCompatCheckButtonState,
+                    applyMrMpMcVersionList,
                 );
             }
+            mcVersionSelect?.addEventListener(
+                "change",
+                updateCompatCheckButtonState,
+            );
+            mrMpMcVersionSelect?.addEventListener(
+                "change",
+                updateMrMpCompatCheckButtonState,
+            );
             updateCompatCheckButtonState();
+            updateMrMpCompatCheckButtonState();
+            // —— Modrinth modpack search (typeahead)
+            const modrinthMpSearchInput = document.getElementById(
+                "modrinth-mp-search-input",
+            );
+            const modrinthMpResultsUl = document.getElementById(
+                "modrinth-mp-results",
+            );
+            const modrinthMpSearchStack = document.getElementById(
+                "modrinth-mp-search-stack",
+            );
+            const modrinthMpSelectedBar = document.getElementById(
+                "modrinth-mp-selected-bar",
+            );
+            const modrinthMpSelectedIcon = document.getElementById(
+                "modrinth-mp-selected-icon",
+            );
+            const modrinthMpSelectedTitle = document.getElementById(
+                "modrinth-mp-selected-title",
+            );
+            const modrinthMpClearBtn = document.getElementById(
+                "modrinth-mp-clear",
+            );
+            const defaultModrinthMpIcon = "./images/modpack_default.png";
+            let modrinthMpSearchTimer = null;
+            let modrinthMpSearchAbort = null;
+
+            function hideModrinthMpResults() {
+                if (modrinthMpResultsUl) {
+                    modrinthMpResultsUl.hidden = true;
+                    modrinthMpResultsUl.innerHTML = "";
+                }
+            }
+
+            function showModrinthMpSearchMode() {
+                selectedModrinthModpack = null;
+                if (modrinthMpSearchStack) modrinthMpSearchStack.hidden = false;
+                if (modrinthMpSelectedBar) {
+                    modrinthMpSelectedBar.hidden = true;
+                }
+                hideModrinthMpResults();
+                updateMrMpCompatCheckButtonState();
+            }
+
+            function showModrinthMpSelectedMode(hit) {
+                selectedModrinthModpack = hit;
+                if (modrinthMpSearchStack) modrinthMpSearchStack.hidden = true;
+                if (modrinthMpSelectedBar) {
+                    modrinthMpSelectedBar.hidden = false;
+                }
+                hideModrinthMpResults();
+                if (modrinthMpSearchInput) modrinthMpSearchInput.value = "";
+                const title =
+                    hit.title != null && String(hit.title).trim() !== ""
+                        ? String(hit.title)
+                        : hit.slug ?? hit.project_id ?? "";
+                if (modrinthMpSelectedTitle) {
+                    modrinthMpSelectedTitle.textContent = title;
+                }
+                if (modrinthMpSelectedIcon) {
+                    const iconUrl =
+                        hit.icon_url != null && String(hit.icon_url).trim() !== ""
+                            ? String(hit.icon_url)
+                            : defaultModrinthMpIcon;
+                    modrinthMpSelectedIcon.src = iconUrl;
+                    modrinthMpSelectedIcon.onerror = function once() {
+                        modrinthMpSelectedIcon.removeEventListener(
+                            "error",
+                            once,
+                        );
+                        modrinthMpSelectedIcon.src = defaultModrinthMpIcon;
+                    };
+                }
+                updateMrMpCompatCheckButtonState();
+            }
+
+            function renderModrinthMpResultItems(hits) {
+                if (!modrinthMpResultsUl) return;
+                modrinthMpResultsUl.innerHTML = "";
+                for (const hit of hits) {
+                    const li = document.createElement("li");
+                    li.className = "modrinth-mp-result-item";
+                    li.setAttribute("role", "option");
+                    li.addEventListener("mousedown", (e) => {
+                        e.preventDefault();
+                    });
+                    li.addEventListener("click", () => {
+                        showModrinthMpSelectedMode(hit);
+                    });
+
+                    const img = document.createElement("img");
+                    img.className = "modrinth-mp-result-icon";
+                    img.alt = "";
+                    const iconSrc =
+                        hit.icon_url != null &&
+                        String(hit.icon_url).trim() !== ""
+                            ? String(hit.icon_url)
+                            : defaultModrinthMpIcon;
+                    img.src = iconSrc;
+                    img.addEventListener("error", function onErr() {
+                        img.removeEventListener("error", onErr);
+                        img.src = defaultModrinthMpIcon;
+                    });
+
+                    const meta = document.createElement("div");
+                    meta.className = "modrinth-mp-result-meta";
+                    const nameEl = document.createElement("div");
+                    nameEl.className = "modrinth-mp-result-name";
+                    nameEl.textContent =
+                        hit.title != null ? String(hit.title) : "";
+                    const mcverEl = document.createElement("div");
+                    mcverEl.className = "modrinth-mp-result-mcver";
+                    const gvRaw = Array.isArray(hit.versions)
+                        ? hit.versions
+                        : [];
+                    const gv = gvRaw.slice().reverse();
+                    mcverEl.textContent =
+                        gv.length > 0
+                            ? "Minecraft " + gv.slice(0, 6).join(", ") +
+                              (gv.length > 6 ? ", …" : "")
+                            : "";
+                    meta.append(nameEl, mcverEl);
+                    li.append(img, meta);
+                    modrinthMpResultsUl.appendChild(li);
+                }
+                modrinthMpResultsUl.hidden = hits.length === 0;
+            }
+
+            function getModrinthMpSearchFilterPayload() {
+                const pop = document.getElementById(
+                    "modrinth-mp-filter-popover",
+                );
+                const out = {
+                    categories: [],
+                    loaders: [],
+                    environment: {},
+                    openSourceOnly: false,
+                };
+                if (!pop) return out;
+
+                function selectedSlugs(dataFilterMs) {
+                    const row = pop.querySelector(
+                        `[data-filter-ms="${dataFilterMs}"]`,
+                    );
+                    if (!row) return [];
+                    const allCb = row.querySelector(
+                        ".modrinth-mp-filter-all-cb",
+                    );
+                    if (allCb?.checked) return [];
+                    return [
+                        ...row.querySelectorAll(
+                            '.modrinth-mp-filter-dd-panel input[type="checkbox"]:checked',
+                        ),
+                    ]
+                        .map((inp) => String(inp.value || "").trim())
+                        .filter(Boolean);
+                }
+
+                out.categories = selectedSlugs("category");
+                out.loaders = selectedSlugs("loader");
+
+                const client = document.getElementById(
+                    "modrinth-mp-filter-env-client",
+                );
+                const server = document.getElementById(
+                    "modrinth-mp-filter-env-server",
+                );
+                if (client?.checked === true) out.environment.client = true;
+                if (server?.checked === true) out.environment.server = true;
+
+                const lic = document.getElementById(
+                    "modrinth-mp-filter-license-opensource",
+                );
+                out.openSourceOnly = lic?.checked === true;
+                return out;
+            }
+
+            async function runModrinthMpSearchQuery(q) {
+                if (modrinthMpSearchAbort) modrinthMpSearchAbort.abort();
+                if (!q.trim()) {
+                    hideModrinthMpResults();
+                    return;
+                }
+                modrinthMpSearchAbort = new AbortController();
+                const signal = modrinthMpSearchAbort.signal;
+                if (modrinthMpResultsUl) {
+                    modrinthMpResultsUl.hidden = false;
+                    modrinthMpResultsUl.innerHTML = "";
+                    const li = document.createElement("li");
+                    li.className =
+                        "modrinth-mp-result-item modrinth-mp-results-msg";
+                    li.textContent = "Searching…";
+                    modrinthMpResultsUl.appendChild(li);
+                }
+                try {
+                    const filters = getModrinthMpSearchFilterPayload();
+                    const { hits } = await vercheck.searchModrinthModpacks(q, {
+                        limit: 20,
+                        signal,
+                        filters,
+                    });
+                    if (signal.aborted) return;
+                    if (hits.length === 0) {
+                        if (modrinthMpResultsUl) {
+                            modrinthMpResultsUl.innerHTML = "";
+                            const li = document.createElement("li");
+                            li.className =
+                                "modrinth-mp-result-item modrinth-mp-results-msg";
+                            li.textContent = "No modpacks found.";
+                            modrinthMpResultsUl.appendChild(li);
+                            modrinthMpResultsUl.hidden = false;
+                        }
+                        return;
+                    }
+                    renderModrinthMpResultItems(hits);
+                } catch (err) {
+                    if (signal.aborted) return;
+                    console.error(err);
+                    if (modrinthMpResultsUl) {
+                        modrinthMpResultsUl.innerHTML = "";
+                        const li = document.createElement("li");
+                        li.className =
+                            "modrinth-mp-result-item modrinth-mp-results-msg";
+                        li.textContent = "Could not search Modrinth.";
+                        modrinthMpResultsUl.appendChild(li);
+                        modrinthMpResultsUl.hidden = false;
+                    }
+                }
+            }
+
+            modrinthMpSearchInput?.addEventListener("input", () => {
+                if (modrinthMpSearchStack?.hidden) return;
+                clearTimeout(modrinthMpSearchTimer);
+                const q = modrinthMpSearchInput.value;
+                modrinthMpSearchTimer = setTimeout(() => {
+                    runModrinthMpSearchQuery(q);
+                }, 320);
+            });
+
+            modrinthMpSearchInput?.addEventListener("focus", () => {
+                if (modrinthMpSearchStack?.hidden) return;
+                const q = modrinthMpSearchInput.value?.trim() ?? "";
+                if (q) runModrinthMpSearchQuery(q);
+            });
+
+            document.addEventListener("click", (ev) => {
+                const t = ev.target;
+                if (
+                    modrinthMpSearchStack &&
+                    !modrinthMpSearchStack.hidden &&
+                    modrinthMpResultsUl &&
+                    !modrinthMpResultsUl.hidden
+                ) {
+                    if (!modrinthMpSearchStack.contains(t)) {
+                        hideModrinthMpResults();
+                    }
+                }
+            });
+
+            modrinthMpClearBtn?.addEventListener("click", () => {
+                showModrinthMpSearchMode();
+                modrinthMpSearchInput?.focus();
+            });
+
+            mrMpCompatCheckButton?.addEventListener(
+                "click",
+                async function () {
+                    const minecraftVersionToCheck =
+                        mrMpMcVersionSelect?.value ?? null;
+                    const mrPanel = document.getElementById(
+                        "mr-mp-compat-modrinth-results",
+                    );
+                    if (!mrPanel) return;
+                    mrPanel.innerHTML = "";
+                    try {
+                        if (selectedModrinthModpack == null) return;
+                        const projectId = selectedModrinthModpack.project_id;
+                        if (!projectId) return;
+
+                        const { listing } = await vercheck.withProgressHost(
+                            "#mr-mp-compat-progress-root",
+                            () =>
+                                vercheck.getModrinthModpackModsListingFromMrpack(
+                                    projectId,
+                                    String(minecraftVersionToCheck).trim(),
+                                ),
+                        );
+                        vercheck.clearCompatProgress();
+
+                        const sources = Array.isArray(listing.sources)
+                            ? listing.sources
+                            : [];
+                        const totalMods = sources.length;
+                        const allModrinthMods =
+                            vercheck.extractModrinthModsFromListing(listing);
+
+                        if (allModrinthMods.length === 0) {
+                            const entWord =
+                                totalMods === 1 ? "entry" : "entries";
+                            mrPanel.innerHTML = `<p class="compat-modrinth-orange">This tool can only check Modrinth mods for now. This pack index has no Modrinth-linked mods (${totalMods} ${entWord} skipped).</p>
+                            <details class="compat-modrinth-details">
+                                <summary>Pack files (${totalMods})</summary>
+                                <div class="compat-modrinth-scroll-list">
+                                    <ul id="mr-mp-compat-listing-mods-ul" class="compat-listing-mods-ul"></ul>
+                                </div>
+                            </details>`;
+                            await vercheck.populateListingModsUl(
+                                document.getElementById(
+                                    "mr-mp-compat-listing-mods-ul",
+                                ),
+                                sources,
+                                null,
+                            );
+                            return;
+                        }
+
+                        const skippedCount =
+                            totalMods - allModrinthMods.length;
+                        mrPanel.innerHTML =
+                            '<div class="compat-modrinth-progress-row">' +
+                            '<div class="compat-modrinth-progress-host"></div>' +
+                            '<button type="button" class="compat-modrinth-cancel">Cancel</button>' +
+                            "</div>" +
+                            '<div class="compat-modrinth-summary-host"></div>';
+                        const progressHost = mrPanel.querySelector(
+                            ".compat-modrinth-progress-host",
+                        );
+                        const resultsHost = mrPanel.querySelector(
+                            ".compat-modrinth-summary-host",
+                        );
+                        const cancelBtn = mrPanel.querySelector(
+                            ".compat-modrinth-cancel",
+                        );
+                        const cancelState = { cancelled: false };
+                        cancelBtn?.addEventListener(
+                            "click",
+                            function onCancel() {
+                                cancelState.cancelled = true;
+                                cancelBtn.disabled = true;
+                            },
+                        );
+                        await vercheck.runModrinthPackModrinthCompatibilityCheck(
+                            allModrinthMods,
+                            totalMods,
+                            skippedCount,
+                            minecraftVersionToCheck,
+                            progressHost,
+                            resultsHost,
+                            cancelState,
+                            listing,
+                        );
+                    } catch (err) {
+                        console.error(
+                            "Modrinth pack compat load failed:",
+                            err,
+                        );
+                        vercheck.clearCompatProgress();
+                        const root = document.querySelector(
+                            "#mr-mp-compat-progress-root",
+                        );
+                        if (root && typeof ProgressLoader !== "undefined") {
+                            const loader = new ProgressLoader(root);
+                            const bar = loader.createProgressBar(
+                                "Error — see console.",
+                                true,
+                                0,
+                                100,
+                            );
+                            bar.complete();
+                            setTimeout(() => bar.cleanUp(), 1800);
+                        }
+                        const mrPan = document.getElementById(
+                            "mr-mp-compat-modrinth-results",
+                        );
+                        if (mrPan) {
+                            mrPan.innerHTML =
+                                '<p class="compat-modrinth-orange">Error loading Modrinth pack or running checks — see console.</p>';
+                        }
+                    }
+                },
+            );
+
+            (function setupModrinthMpFilterPopover() {
+                const anchor = document.getElementById("modrinth-mp-filter-anchor");
+                const popover = document.getElementById(
+                    "modrinth-mp-filter-popover",
+                );
+                const openBtn = document.getElementById(
+                    "modrinth-mp-filter-open",
+                );
+                if (!anchor || !popover || !openBtn) return;
+
+                function closeOpenDropdowns() {
+                    popover
+                        .querySelectorAll(".modrinth-mp-filter-ms-wrap.is-open")
+                        .forEach((w) => {
+                            w.classList.remove("is-open");
+                            const trig = w.querySelector(
+                                ".modrinth-mp-filter-dd-trigger",
+                            );
+                            const pan = w.querySelector(
+                                ".modrinth-mp-filter-dd-panel",
+                            );
+                            if (trig) trig.setAttribute("aria-expanded", "false");
+                            if (pan) pan.hidden = true;
+                        });
+                }
+
+                function setPopoverOpen(open) {
+                    popover.hidden = !open;
+                    popover.setAttribute("aria-hidden", open ? "false" : "true");
+                    openBtn.setAttribute("aria-expanded", open ? "true" : "false");
+                    if (!open) closeOpenDropdowns();
+                }
+
+                function syncMsRow(row) {
+                    const allCb = row.querySelector(".modrinth-mp-filter-all-cb");
+                    const labelEl = row.querySelector(".modrinth-mp-filter-dd-label");
+                    const panelEl = row.querySelector(".modrinth-mp-filter-dd-panel");
+                    if (!allCb || !labelEl || !panelEl) return;
+                    const optionInputs = [
+                        ...panelEl.querySelectorAll('input[type="checkbox"]'),
+                    ];
+                    const n = optionInputs.length;
+                    const c = optionInputs.filter((i) => i.checked).length;
+                    const kind = row.getAttribute("data-filter-ms") || "";
+                    const allWord =
+                        kind === "loader" ? "loaders" : "categories";
+
+                    if (n > 0 && c === n) {
+                        allCb.checked = true;
+                        labelEl.textContent = `All ${allWord}`;
+                        return;
+                    }
+
+                    allCb.checked = false;
+                    if (c === 0) {
+                        labelEl.textContent = "Select…";
+                        return;
+                    }
+                    const picked = [];
+                    for (const inp of optionInputs) {
+                        if (inp.checked) {
+                            const t =
+                                inp.closest("label")?.textContent?.trim() ||
+                                inp.value;
+                            picked.push(t.replace(/\s+/g, " "));
+                        }
+                    }
+                    if (picked.length <= 2) {
+                        labelEl.textContent = picked.join(", ");
+                    } else {
+                        labelEl.textContent = `${picked.length} selected`;
+                    }
+                }
+
+                openBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    setPopoverOpen(popover.hidden);
+                });
+
+                document.addEventListener("keydown", (e) => {
+                    if (e.key === "Escape" && !popover.hidden) {
+                        setPopoverOpen(false);
+                    }
+                });
+
+                popover.querySelectorAll("[data-filter-ms]").forEach((row) => {
+                    const allCb = row.querySelector(".modrinth-mp-filter-all-cb");
+                    const panelEl = row.querySelector(
+                        ".modrinth-mp-filter-dd-panel",
+                    );
+                    if (allCb?.checked && panelEl) {
+                        panelEl
+                            .querySelectorAll('input[type="checkbox"]')
+                            .forEach((inp) => {
+                                inp.checked = true;
+                            });
+                    }
+                });
+
+                popover.querySelectorAll("[data-filter-ms]").forEach((row) => {
+                    const wrap = row.querySelector(".modrinth-mp-filter-ms-wrap");
+                    const trigger = row.querySelector(
+                        ".modrinth-mp-filter-dd-trigger",
+                    );
+                    const panelEl = row.querySelector(
+                        ".modrinth-mp-filter-dd-panel",
+                    );
+                    const allCb = row.querySelector(".modrinth-mp-filter-all-cb");
+                    if (!wrap || !trigger || !panelEl || !allCb) return;
+
+                    trigger.addEventListener("click", () => {
+                        const willOpen = panelEl.hidden;
+                        closeOpenDropdowns();
+                        if (willOpen) {
+                            wrap.classList.add("is-open");
+                            panelEl.hidden = false;
+                            trigger.setAttribute("aria-expanded", "true");
+                        }
+                    });
+
+                    allCb.addEventListener("change", () => {
+                        const inputs = panelEl.querySelectorAll(
+                            'input[type="checkbox"]',
+                        );
+                        if (allCb.checked) {
+                            inputs.forEach((inp) => {
+                                inp.checked = true;
+                            });
+                        } else {
+                            inputs.forEach((inp) => {
+                                inp.checked = false;
+                            });
+                        }
+                        syncMsRow(row);
+                    });
+
+                    panelEl.addEventListener("change", () => {
+                        syncMsRow(row);
+                    });
+
+                    syncMsRow(row);
+                });
+
+                document.addEventListener(
+                    "click",
+                    (e) => {
+                        const t = e.target;
+                        if (!(t instanceof Node)) return;
+                        if (!popover.hidden && !anchor.contains(t)) {
+                            setPopoverOpen(false);
+                            return;
+                        }
+                        if (popover.hidden) return;
+                        if (openBtn.contains(t)) return;
+                        if (
+                            popover.querySelector(
+                                ".modrinth-mp-filter-ms-wrap.is-open",
+                            ) == null
+                        ) {
+                            return;
+                        }
+                        const insideSome = Array.from(
+                            popover.querySelectorAll(
+                                ".modrinth-mp-filter-ms-wrap",
+                            ),
+                        ).some((w) => w.contains(t));
+                        if (!insideSome) closeOpenDropdowns();
+                    },
+                    true,
+                );
+
+                popover.addEventListener("change", () => {
+                    const q = modrinthMpSearchInput?.value?.trim() ?? "";
+                    if (q) runModrinthMpSearchQuery(q);
+                });
+            })();
+
             // Sort by flavor.mcver newest at the top and then by flavor.name alphabetically
             flavors.sort((a, b) => {
                 const mcverCompare = vercheck.compareMcVer(b.mcver, a.mcver);
@@ -1091,7 +2146,7 @@
                         bar.complete();
                         setTimeout(() => bar.cleanUp(), 1800);
                     }
-                    const panel = compatModrinthResultsEl();
+                    const panel = vercheck.compatModrinthResultsEl();
                     if (panel) {
                         panel.innerHTML =
                             '<p class="compat-modrinth-orange">Error loading modpack or running checks — see console.</p>';
@@ -1171,12 +2226,13 @@
                 }
             }
 
-            document
-                .getElementById("compat-modrinth-results")
-                ?.addEventListener(
-                    "click",
-                    (e) => vercheck.onCompatModrinthNotUpdatedInfoClick(e),
-                );
+            document.querySelectorAll(".compat-modrinth-results").forEach(
+                (el) => {
+                    el.addEventListener("click", (e) =>
+                        vercheck.onCompatModrinthNotUpdatedInfoClick(e),
+                    );
+                },
+            );
         });
     </script>
 </head>
@@ -1336,7 +2392,321 @@
 
             <section id="section-modrinth-mp">
                 <h2>Modrinth Modpacks</h2>
-                <span class="comming-soon">Coming soon…</span>
+                <div class="modpack-toolbar modpack-toolbar--align-center">
+                    <div
+                        class="toolbar-dropdown-field toolbar-dropdown-field--modrinth-mp-search"
+                    >
+                        <label for="modrinth-mp-search-input"
+                            >Modrinth modpack</label
+                        >
+                        <div class="modrinth-mp-field-body">
+                            <div
+                                id="modrinth-mp-search-stack"
+                                class="modrinth-mp-search-stack"
+                            >
+                                <input
+                                    type="text"
+                                    id="modrinth-mp-search-input"
+                                    class="toolbar-dropdown-control modrinth-mp-search-input"
+                                    placeholder="Search Modrinth…"
+                                    autocomplete="off"
+                                />
+                                <ul
+                                    id="modrinth-mp-results"
+                                    class="modrinth-mp-results"
+                                    role="listbox"
+                                    hidden
+                                ></ul>
+                            </div>
+                            <div
+                                id="modrinth-mp-selected-bar"
+                                class="modrinth-mp-selected-bar toolbar-dropdown-control"
+                                hidden
+                            >
+                                <img
+                                    id="modrinth-mp-selected-icon"
+                                    class="modrinth-mp-selected-icon"
+                                    src="./images/modpack_default.png"
+                                    alt=""
+                                />
+                                <span
+                                    id="modrinth-mp-selected-title"
+                                    class="modrinth-mp-selected-title"
+                                ></span>
+                                <button
+                                    type="button"
+                                    id="modrinth-mp-clear"
+                                    class="modrinth-mp-selected-clear"
+                                    aria-label="Clear modpack selection"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="modrinth-mp-filter-anchor"
+                        id="modrinth-mp-filter-anchor"
+                    >
+                        <button
+                            type="button"
+                            class="modrinth-mp-filter-btn"
+                            id="modrinth-mp-filter-open"
+                            title="Filters"
+                            aria-label="Open modpack search filters"
+                            aria-expanded="false"
+                            aria-controls="modrinth-mp-filter-popover"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 640 640"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    fill="currentColor"
+                                    d="M96 128C78.3 128 64 142.3 64 160C64 177.7 78.3 192 96 192L182.7 192C195 220.3 223.2 240 256 240C288.8 240 317 220.3 329.3 192L544 192C561.7 192 576 177.7 576 160C576 142.3 561.7 128 544 128L329.3 128C317 99.7 288.8 80 256 80C223.2 80 195 99.7 182.7 128L96 128zM96 288C78.3 288 64 302.3 64 320C64 337.7 78.3 352 96 352L342.7 352C355 380.3 383.2 400 416 400C448.8 400 477 380.3 489.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L489.3 288C477 259.7 448.8 240 416 240C383.2 240 355 259.7 342.7 288L96 288zM96 448C78.3 448 64 462.3 64 480C64 497.7 78.3 512 96 512L150.7 512C163 540.3 191.2 560 224 560C256.8 560 285 540.3 297.3 512L544 512C561.7 512 576 497.7 576 480C576 462.3 561.7 448 544 448L297.3 448C285 419.7 256.8 400 224 400C191.2 400 163 419.7 150.7 448L96 448z"
+                                />
+                            </svg>
+                        </button>
+                        <div
+                            id="modrinth-mp-filter-popover"
+                            class="modrinth-mp-filter-popover"
+                            role="group"
+                            aria-label="Modrinth modpack filters"
+                            hidden
+                            aria-hidden="true"
+                        >
+                            <div class="modrinth-mp-filter-body">
+                                <div
+                                    class="modrinth-mp-filter-row"
+                                    data-filter-ms="category"
+                                >
+                                    <span class="modrinth-mp-filter-row-label"
+                                        >Category:</span
+                                    >
+                                    <div class="modrinth-mp-filter-ms-wrap">
+                                        <button
+                                            type="button"
+                                            class="modrinth-mp-filter-dd-trigger"
+                                            aria-expanded="false"
+                                            aria-haspopup="listbox"
+                                        >
+                                            <span
+                                                class="modrinth-mp-filter-dd-label"
+                                                >Select…</span
+                                            >
+                                            <span
+                                                class="modrinth-mp-filter-dd-chevron"
+                                                >▼</span
+                                            >
+                                        </button>
+                                        <div
+                                            class="modrinth-mp-filter-dd-panel"
+                                            role="listbox"
+                                            hidden
+                                        >
+                                            <label
+                                                class="modrinth-mp-filter-dd-item"
+                                                ><input
+                                                    type="checkbox"
+                                                    value="adventure"
+                                                />
+                                                Adventure</label
+                                            >
+                                            <label
+                                                class="modrinth-mp-filter-dd-item"
+                                                ><input
+                                                    type="checkbox"
+                                                    value="kitchen-sink"
+                                                />
+                                                Kitchen sink</label
+                                            >
+                                            <label
+                                                class="modrinth-mp-filter-dd-item"
+                                                ><input
+                                                    type="checkbox"
+                                                    value="magic"
+                                                />
+                                                Magic</label
+                                            >
+                                            <label
+                                                class="modrinth-mp-filter-dd-item"
+                                                ><input
+                                                    type="checkbox"
+                                                    value="technology"
+                                                />
+                                                Technology</label
+                                            >
+                                            <label
+                                                class="modrinth-mp-filter-dd-item"
+                                                ><input
+                                                    type="checkbox"
+                                                    value="optimization"
+                                                />
+                                                Optimization</label
+                                            >
+                                        </div>
+                                    </div>
+                                    <label class="modrinth-mp-filter-all">
+                                        <input
+                                            type="checkbox"
+                                            class="modrinth-mp-filter-all-cb"
+                                            checked
+                                        />
+                                        all
+                                    </label>
+                                </div>
+
+                                <div
+                                    class="modrinth-mp-filter-row"
+                                    data-filter-ms="loader"
+                                >
+                                    <span class="modrinth-mp-filter-row-label"
+                                        >Loader:</span
+                                    >
+                                    <div class="modrinth-mp-filter-ms-wrap">
+                                        <button
+                                            type="button"
+                                            class="modrinth-mp-filter-dd-trigger"
+                                            aria-expanded="false"
+                                            aria-haspopup="listbox"
+                                        >
+                                            <span
+                                                class="modrinth-mp-filter-dd-label"
+                                                >Select…</span
+                                            >
+                                            <span
+                                                class="modrinth-mp-filter-dd-chevron"
+                                                >▼</span
+                                            >
+                                        </button>
+                                        <div
+                                            class="modrinth-mp-filter-dd-panel"
+                                            role="listbox"
+                                            hidden
+                                        >
+                                            <label
+                                                class="modrinth-mp-filter-dd-item"
+                                                ><input
+                                                    type="checkbox"
+                                                    value="fabric"
+                                                />
+                                                Fabric</label
+                                            >
+                                            <label
+                                                class="modrinth-mp-filter-dd-item"
+                                                ><input
+                                                    type="checkbox"
+                                                    value="forge"
+                                                />
+                                                Forge</label
+                                            >
+                                            <label
+                                                class="modrinth-mp-filter-dd-item"
+                                                ><input
+                                                    type="checkbox"
+                                                    value="quilt"
+                                                />
+                                                Quilt</label
+                                            >
+                                            <label
+                                                class="modrinth-mp-filter-dd-item"
+                                                ><input
+                                                    type="checkbox"
+                                                    value="neoforge"
+                                                />
+                                                NeoForge</label
+                                            >
+                                        </div>
+                                    </div>
+                                    <label class="modrinth-mp-filter-all">
+                                        <input
+                                            type="checkbox"
+                                            class="modrinth-mp-filter-all-cb"
+                                            checked
+                                        />
+                                        all
+                                    </label>
+                                </div>
+
+                                <div
+                                    class="modrinth-mp-filter-row modrinth-mp-filter-row--inline-checks"
+                                >
+                                    <span class="modrinth-mp-filter-row-label"
+                                        >Environment:</span
+                                    >
+                                    <div class="modrinth-mp-filter-inline-checks">
+                                        <label
+                                            ><input
+                                                type="checkbox"
+                                                id="modrinth-mp-filter-env-client"
+                                                value="client"
+                                            />
+                                            Client</label
+                                        >
+                                        <label
+                                            ><input
+                                                type="checkbox"
+                                                id="modrinth-mp-filter-env-server"
+                                                value="server"
+                                            />
+                                            Server</label
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="modrinth-mp-filter-row">
+                                    <span class="modrinth-mp-filter-row-label"
+                                        >License:</span
+                                    >
+                                    <label class="modrinth-mp-filter-license">
+                                        <input
+                                            type="checkbox"
+                                            id="modrinth-mp-filter-license-opensource"
+                                        />
+                                        Open source
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbar-dropdown-field">
+                        <label for="mr-mp-mc-version-select"
+                            >Check for version</label
+                        >
+                        <select
+                            id="mr-mp-mc-version-select"
+                            class="toolbar-dropdown-control"
+                        ></select>
+                    </div>
+                    <label class="mc-show-snapshots-label">
+                        <input
+                            type="checkbox"
+                            id="mr-mp-mc-show-snapshots"
+                        />
+                        Snapshots
+                    </label>
+                </div>
+                <div class="compat-check-actions compat-check-row">
+                    <button
+                        type="button"
+                        class="compat-check-button"
+                        id="mr-mp-compat-check-button"
+                        disabled
+                    >
+                        Check Compatability
+                    </button>
+                    <div
+                        id="mr-mp-compat-progress-root"
+                        class="compat-progress-root"
+                        aria-live="polite"
+                    ></div>
+                </div>
+                <div
+                    id="mr-mp-compat-modrinth-results"
+                    class="compat-modrinth-results"
+                    aria-live="polite"
+                ></div>
             </section>
 
             <section id="section-modrinth-mod">

@@ -632,6 +632,105 @@ class VerCheck {
         return out;
     }
 
+    /**
+     * Build Modrinth `/v2/search` `facets` JSON from UI filter state.
+     * Uses AND between facet groups, OR within each group (see Modrinth search docs).
+     *
+     * @param {{
+     *   categories?: string[],
+     *   loaders?: string[],
+     *   environment?: { client?: boolean, server?: boolean },
+     *   openSourceOnly?: boolean,
+     * }} [filters]
+     * @returns {string} JSON string for the `facets` query parameter
+     */
+    buildModrinthModpackSearchFacets(filters = {}) {
+        const facetGroups = [["project_type:modpack"]];
+        const cats = Array.isArray(filters.categories)
+            ? filters.categories
+                  .map((c) => String(c ?? "").trim())
+                  .filter((c) => c !== "")
+            : [];
+        const loaders = Array.isArray(filters.loaders)
+            ? filters.loaders
+                  .map((l) => String(l ?? "").trim())
+                  .filter((l) => l !== "")
+            : [];
+        if (cats.length > 0) {
+            facetGroups.push(cats.map((c) => `categories:${c}`));
+        }
+        if (loaders.length > 0) {
+            facetGroups.push(loaders.map((l) => `categories:${l}`));
+        }
+        const env = filters.environment || {};
+        if (env.client === true) {
+            facetGroups.push(["client_side:required", "client_side:optional"]);
+        }
+        if (env.server === true) {
+            facetGroups.push(["server_side:required", "server_side:optional"]);
+        }
+        if (filters.openSourceOnly === true) {
+            facetGroups.push(["open_source:true"]);
+        }
+        return JSON.stringify(facetGroups);
+    }
+
+    /**
+     * Search Modrinth for modpack projects ({@link https://api.modrinth.com}).
+     * Empty `query` returns `{ hits: [], totalHits: 0 }` without a network call.
+     *
+     * @param {string} query
+     * @param {{
+     *   limit?: number,
+     *   offset?: number,
+     *   signal?: AbortSignal,
+     *   filters?: {
+     *     categories?: string[],
+     *     loaders?: string[],
+     *     environment?: { client?: boolean, server?: boolean },
+     *     openSourceOnly?: boolean,
+     *   },
+     * }} [options]
+     * @returns {Promise<{ hits: object[], totalHits: number, limit: number, offset: number }>}
+     */
+    async searchModrinthModpacks(query, options = {}) {
+        const q = String(query ?? "").trim();
+        if (!q) {
+            return { hits: [], totalHits: 0, limit: 0, offset: 0 };
+        }
+        const limit = Math.min(Math.max(Number(options.limit) || 20, 1), 100);
+        const offset = Math.max(Number(options.offset) || 0, 0);
+        const facets = this.buildModrinthModpackSearchFacets(
+            options.filters ?? {},
+        );
+        const ua = `minecraftcustomclient-website-modrinth-mp@${this.generateRandomString(
+            8,
+        )}`;
+        const url =
+            "https://api.modrinth.com/v2/search" +
+            `?query=${encodeURIComponent(q)}` +
+            `&facets=${encodeURIComponent(facets)}` +
+            `&limit=${encodeURIComponent(String(limit))}` +
+            `&offset=${encodeURIComponent(String(offset))}`;
+        const res = await fetch(url, {
+            headers: { "User-Agent": ua },
+            signal: options.signal ?? undefined,
+        });
+        if (!res.ok) {
+            throw new Error(`Modrinth search HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        const hits = Array.isArray(data.hits) ? data.hits : [];
+        const totalHits =
+            typeof data.total_hits === "number" ? data.total_hits : hits.length;
+        return {
+            hits,
+            totalHits,
+            limit: typeof data.limit === "number" ? data.limit : limit,
+            offset: typeof data.offset === "number" ? data.offset : offset,
+        };
+    }
+
     async fetchModrinthLatestVersionDisplayLabel(projectId, modLoader) {
         const ua = `minecraftcustomclient-website-compat@${this.generateRandomString(
             8,
@@ -665,7 +764,15 @@ class VerCheck {
         if (arr.length === 0) {
             return "No published versions found.";
         }
-        const v = arr[0];
+        const sorted = arr.slice().sort((a, b) => {
+            const ta = Date.parse(String(a.date_published ?? ""));
+            const tb = Date.parse(String(b.date_published ?? ""));
+            if (Number.isFinite(tb) && Number.isFinite(ta) && tb !== ta) {
+                return tb - ta;
+            }
+            return 0;
+        });
+        const v = sorted[0];
         const label =
             (v.version_number != null &&
                 String(v.version_number).trim()) ||
@@ -674,7 +781,7 @@ class VerCheck {
             "(version)";
         let extra = "";
         if (Array.isArray(v.game_versions) && v.game_versions.length > 0) {
-            const gv = v.game_versions.slice(0, 4);
+            const gv = v.game_versions.slice().reverse().slice(0, 4);
             const tail = v.game_versions.length > 4 ? ", …" : "";
             extra = ` · MC ${gv.join(", ")}${tail}`;
         }
@@ -684,8 +791,8 @@ class VerCheck {
     async onCompatModrinthNotUpdatedInfoClick(ev) {
         const btn = ev.target.closest(".compat-not-updated-modrinth-info");
         if (!btn) return;
-        const panel = document.getElementById("compat-modrinth-results");
-        if (!panel || !panel.contains(btn)) return;
+        const panel = btn.closest(".compat-modrinth-results");
+        if (!panel) return;
         ev.preventDefault();
         if (btn.disabled || btn.dataset.compatFetching === "1") return;
         const projectId = btn.getAttribute("data-project-id");
@@ -725,6 +832,268 @@ class VerCheck {
             listing.modLoader ||
             listing.loader ||
             "fabric"
+        );
+    }
+
+    /**
+     * @param {Record<string, unknown>} index
+     * @returns {string}
+     */
+    mrpackDefaultModloaderFromIndex(index) {
+        const d =
+            index && typeof index === "object" && index.dependencies != null
+                ? /** @type {Record<string, unknown>} */ (index.dependencies)
+                : {};
+        const ks = new Set(
+            Object.keys(d).map((k) => String(k).toLowerCase()),
+        );
+        if (ks.has("fabric-loader")) return "fabric";
+        if (ks.has("quilt-loader")) return "quilt";
+        if (ks.has("neoforge")) return "neoforge";
+        if (ks.has("forge")) return "forge";
+        return "fabric";
+    }
+
+    /**
+     * @param {{ downloads?: unknown }} file
+     * @returns {string[]}
+     */
+    modrinthIndexFileDownloadUrls(file) {
+        const d = file?.downloads;
+        if (d == null) return [];
+        if (Array.isArray(d)) {
+            return d.filter((x) => typeof x === "string").map(String);
+        }
+        if (typeof d === "object") {
+            return Object.keys(/** @type {Record<string, unknown>} */ (d));
+        }
+        return [];
+    }
+
+    /**
+     * @param {string} url
+     * @returns {string | null}
+     */
+    extractModrinthProjectIdFromPackDownloadUrl(url) {
+        if (url == null || String(url).trim() === "") return null;
+        try {
+            const u = new URL(String(url).trim());
+            if (!/modrinth\.com$/i.test(u.hostname)) return null;
+            const m = u.pathname.match(/\/data\/([a-zA-Z0-9]+)\//);
+            if (m) return m[1];
+        } catch (_) {
+            /* ignore */
+        }
+        return null;
+    }
+
+    /**
+     * Converts `modrinth.index.json` content into an MCC-style v2 listing
+     * so {@link VerCheck#extractModrinthModsFromListing} / compat check can run.
+     *
+     * @param {object} index
+     * @returns {{ sources: object[], modloader: string }}
+     */
+    modrinthPackIndexToMccStyleListing(index) {
+        const defaultLoader = this.mrpackDefaultModloaderFromIndex(index);
+        const files = Array.isArray(index.files) ? index.files : [];
+        const sources = [];
+        for (const f of files) {
+            if (!f || typeof f !== "object") continue;
+            const path = f.path != null ? String(f.path) : "";
+            const leaf = path.split("/").filter(Boolean).pop() || path || "entry";
+            let projectId = null;
+            for (const u of this.modrinthIndexFileDownloadUrls(f)) {
+                projectId = this.extractModrinthProjectIdFromPackDownloadUrl(u);
+                if (projectId) break;
+            }
+            if (projectId) {
+                sources.push({
+                    type: "modrinth",
+                    filename: leaf,
+                    url: `https://modrinth.com/mod/${projectId}/versions/x`,
+                    modloader: defaultLoader,
+                });
+            } else {
+                sources.push({
+                    type: "unknown",
+                    filename: leaf,
+                    url: "",
+                });
+            }
+        }
+        return { sources, modloader: defaultLoader };
+    }
+
+    findModrinthIndexJsonPath(zip) {
+        let found = null;
+        zip.forEach((relPath, entry) => {
+            if (entry.dir) return;
+            const p = this.normalizeZipPath(relPath);
+            if (/modrinth\.index\.json$/i.test(p)) {
+                if (!found || p.length < this.normalizeZipPath(found).length) {
+                    found = relPath;
+                }
+            }
+        });
+        return found;
+    }
+
+    async parseModrinthMrpackIndexFromZip(zip) {
+        const path = this.findModrinthIndexJsonPath(zip);
+        if (!path) {
+            throw new Error("modrinth.index.json not found in .mrpack");
+        }
+        const file = zip.file(path);
+        if (!file || file.dir) {
+            throw new Error("modrinth.index.json entry not readable");
+        }
+        const text = await file.async("string");
+        return JSON.parse(text);
+    }
+
+    /**
+     * @param {object} version
+     * @returns {object | null}
+     */
+    pickMrpackFileFromVersion(version) {
+        const files = Array.isArray(version?.files) ? version.files : [];
+        const mrpacks = files.filter(
+            (f) =>
+                f &&
+                f.url &&
+                String(f.filename || "")
+                    .toLowerCase()
+                    .endsWith(".mrpack"),
+        );
+        if (mrpacks.length === 0) return null;
+        const primary = mrpacks.find((f) => f.primary);
+        return primary || mrpacks[0];
+    }
+
+    /**
+     * @param {object[]} versions
+     * @returns {object | null}
+     */
+    pickModrinthVersionWithMrpack(versions) {
+        if (!Array.isArray(versions)) return null;
+        for (const v of versions) {
+            if (this.pickMrpackFileFromVersion(v)) return v;
+        }
+        return null;
+    }
+
+    /**
+     * Resolves a Modrinth modpack `.mrpack` download URL for a project + game version.
+     *
+     * @param {string} projectId
+     * @param {string} minecraftVersion
+     * @param {{ signal?: AbortSignal }} [options]
+     */
+    async fetchModrinthModpackMrpackFileUrl(
+        projectId,
+        minecraftVersion,
+        options = {},
+    ) {
+        const pid = String(projectId ?? "").trim();
+        const mc = String(minecraftVersion ?? "").trim();
+        if (!pid) throw new Error("Modrinth project id is empty");
+        if (!mc) throw new Error("Minecraft version is empty");
+        const ua = `minecraftcustomclient-website-mrpack@${this.generateRandomString(
+            8,
+        )}`;
+        const encGv = encodeURIComponent(JSON.stringify([mc]));
+        const signal = options.signal;
+        let res = await fetch(
+            `https://api.modrinth.com/v2/project/${encodeURIComponent(pid)}/version?game_versions=${encGv}`,
+            {
+                headers: { "User-Agent": ua },
+                signal,
+            },
+        );
+        if (!res.ok) {
+            throw new Error(`Modrinth versions HTTP ${res.status}`);
+        }
+        let versions = await res.json();
+        if (!Array.isArray(versions)) versions = [];
+        let versionHit = this.pickModrinthVersionWithMrpack(versions);
+        if (!versionHit) {
+            res = await fetch(
+                `https://api.modrinth.com/v2/project/${encodeURIComponent(pid)}/version`,
+                { headers: { "User-Agent": ua }, signal },
+            );
+            if (!res.ok) {
+                throw new Error(`Modrinth versions HTTP ${res.status}`);
+            }
+            const all = await res.json();
+            versionHit = this.pickModrinthVersionWithMrpack(
+                Array.isArray(all) ? all : [],
+            );
+        }
+        if (!versionHit) {
+            throw new Error(
+                "No .mrpack Modrinth pack version found for this project / game version.",
+            );
+        }
+        const file = this.pickMrpackFileFromVersion(versionHit);
+        if (!file?.url) {
+            throw new Error("Modrinth pack version has no .mrpack file URL");
+        }
+        return { fileUrl: String(file.url), version: versionHit };
+    }
+
+    /**
+     * Downloads the project's `.mrpack` for `minecraftVersion` and returns an MCC-style v2 listing
+     * built from `modrinth.index.json` (progress via {@link VerCheck#compatProgressHost}).
+     *
+     * @param {string} projectId
+     * @param {string} minecraftVersion
+     * @param {{ signal?: AbortSignal }} [options]
+     * @returns {Promise<{ listing: object }>}
+     */
+    async getModrinthModpackModsListingFromMrpack(
+        projectId,
+        minecraftVersion,
+        options = {},
+    ) {
+        const { fileUrl } = await this.fetchModrinthModpackMrpackFileUrl(
+            projectId,
+            minecraftVersion,
+            options,
+        );
+        const buf = await this.compatFetchArrayBuffer(
+            fileUrl,
+            "Fetching Modrinth .mrpack…",
+        );
+        const listing = await this.compatLoadZipAndRun(buf, async (zip) => {
+            const index = await this.parseModrinthMrpackIndexFromZip(zip);
+            return this.modrinthPackIndexToMccStyleListing(index);
+        });
+        return { listing };
+    }
+
+    /**
+     * Runs the same Modrinth-per-mod version check as the ISMP/MCC flow.
+     */
+    async runModrinthPackModrinthCompatibilityCheck(
+        allModrinthMods,
+        totalModsInModpack,
+        skippedCount,
+        selectedVersion,
+        progressHost,
+        resultsHost,
+        cancelState,
+        listing,
+    ) {
+        return this.runIsmpModrinthCompatibilityCheck(
+            allModrinthMods,
+            totalModsInModpack,
+            skippedCount,
+            selectedVersion,
+            progressHost,
+            resultsHost,
+            cancelState,
+            listing,
         );
     }
 
