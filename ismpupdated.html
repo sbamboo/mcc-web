@@ -522,6 +522,7 @@
             border-top: 1px solid var(--border);
             font-size: 0.9rem;
             line-height: 1.45;
+            overflow: visible;
         }
 
         .compat-modrinth-results .compat-modrinth-progress-host .progressdrop_container {
@@ -555,6 +556,67 @@
 
         .compat-mc-stat-skip {
             color: #e8a23d;
+        }
+
+        .compat-mc-stat-total {
+            color: var(--text);
+        }
+
+        .compat-mc-stat-tip {
+            position: relative;
+            cursor: help;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-underline-offset: 2px;
+        }
+
+        /* Keeps :hover on .compat-mc-stat-tip while moving from the stat into the panel (no dead air gap) */
+        .compat-mc-stat-tip::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 100%;
+            height: 12px;
+            z-index: 39;
+        }
+
+        .compat-mc-stat-tip .compat-mc-stat-tip-body {
+            display: none;
+            position: absolute;
+            left: 0;
+            bottom: 100%;
+            z-index: 40;
+            min-width: 11rem;
+            max-width: min(22rem, 92vw);
+            max-height: 16rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            overscroll-behavior: contain;
+            padding: 0.45rem 0.55rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.35rem;
+            box-shadow: var(--shadow);
+            font-size: 0.82rem;
+            line-height: 1.4;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .compat-mc-stat-tip:hover .compat-mc-stat-tip-body,
+        .compat-mc-stat-tip:focus-within .compat-mc-stat-tip-body {
+            display: block;
+        }
+
+        .compat-mc-stat-tip-list {
+            margin: 0;
+            padding-left: 1.15rem;
+            list-style: disc;
+        }
+
+        .compat-mc-stat-tip-list a {
+            color: var(--link);
         }
 
         .compat-modrinth-details {
@@ -631,6 +693,11 @@
 
         .compat-modrinth-summary-host {
             margin-top: 0.65rem;
+            overflow: visible;
+        }
+
+        .compat-modrinth-summary-line {
+            margin: 0;
         }
 
         .compat-modrinth-progress-row {
@@ -680,1198 +747,25 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="./js/libs/progressdrop_a0.0.4/progressdrop.min.js"></script>
+    
+    <script src="./js/ismpupdated.js"></script>
+
     <script>
         const parentUrl = "https://raw.githubusercontent.com/sbamboo/MinecraftCustomClient/main/v2/Repo";
         const repoUrl = parentUrl + "/repo.json";
 
-        function compareMcVer(version1, version2, textPlacement = "last") {
-            const PRE_RANK = { snapshot_n: 0, pre: 1, rc: 2, release: 3 };
-
-            const stripNumericPrerelease = (s) => {
-                const patterns = [
-                    [/[-_]snapshot[-_](\d+)$/i, "snapshot_n"],
-                    [/[-_]pre[-_](\d+)$/i, "pre"],
-                    [/[-_]pre(\d+)$/i, "pre"],
-                    [/[-_]rc[-_](\d+)$/i, "rc"],
-                    [/[-_]rc(\d+)$/i, "rc"],
-                ];
-                for (const [re, kind] of patterns) {
-                    const m = s.match(re);
-                    if (!m) continue;
-                    const tail = m[0];
-                    return {
-                        core: s.slice(0, -tail.length),
-                        preKind: kind,
-                        preNum: parseInt(m[1], 10) || 0,
-                    };
-                }
-                return { core: s, preKind: "release", preNum: 0 };
-            };
-
-            const parseVersion = (raw) => {
-                let s = String(raw).trim();
-                let textPlaceholder = "";
-
-                const pre = stripNumericPrerelease(s);
-                s = pre.core;
-
-                const weeklyOnly = /^(\d{2})w(\d{1,2})([a-z])?$/i.exec(s);
-                if (weeklyOnly) {
-                    const yy = parseInt(weeklyOnly[1], 10);
-                    const ww = parseInt(weeklyOnly[2], 10);
-                    const letter = weeklyOnly[3]
-                        ? weeklyOnly[3].toLowerCase().charCodeAt(0) - 96
-                        : 0;
-                    const baseParts = [100 + yy, ww, letter, 0, 0];
-                    while (baseParts.length < 5) baseParts.push(0);
-                    return {
-                        baseParts,
-                        preKind: pre.preKind,
-                        preNum: pre.preNum,
-                        textPlaceholder,
-                    };
-                }
-
-                const textMatch = s.match(/^(.+?)([a-zA-Z_]+)$/);
-                if (
-                    textMatch &&
-                    /\d/.test(textMatch[1]) &&
-                    !/[.\-_]$/.test(textMatch[1])
-                ) {
-                    s = textMatch[1];
-                    textPlaceholder = textMatch[2];
-                }
-
-                let beta = false;
-                if (/^b/i.test(s)) {
-                    beta = true;
-                    s = s.replace(/^b/i, "");
-                }
-
-                const baseParts = s
-                    .split(/[.\-_]+/)
-                    .filter((p) => p.length > 0)
-                    .map((part) => {
-                        const n = parseInt(part, 10);
-                        return Number.isFinite(n) ? n : 0;
-                    });
-
-                const merged = beta ? [0, ...baseParts] : baseParts;
-                while (merged.length < 5) merged.push(0);
-
-                return {
-                    baseParts: merged,
-                    preKind: pre.preKind,
-                    preNum: pre.preNum,
-                    textPlaceholder,
-                };
-            };
-
-            const p1 = parseVersion(version1);
-            const p2 = parseVersion(version2);
-
-            const compareBaseVersions = () => {
-                const n = Math.max(p1.baseParts.length, p2.baseParts.length);
-                for (let i = 0; i < n; i++) {
-                    const a = p1.baseParts[i] || 0;
-                    const b = p2.baseParts[i] || 0;
-                    if (a > b) return 1;
-                    if (a < b) return -1;
-                }
-                return 0;
-            };
-
-            const comparePrerelease = () => {
-                const r1 = PRE_RANK[p1.preKind] ?? 0;
-                const r2 = PRE_RANK[p2.preKind] ?? 0;
-                if (r1 > r2) return 1;
-                if (r1 < r2) return -1;
-                if (p1.preNum > p2.preNum) return 1;
-                if (p1.preNum < p2.preNum) return -1;
-                return 0;
-            };
-
-            const compareTextPlaceholders = () => {
-                const t1 = p1.textPlaceholder;
-                const t2 = p2.textPlaceholder;
-                if (textPlacement === "last") {
-                    if (t1 && !t2) return 1;
-                    if (!t1 && t2) return -1;
-                    if (t1 && t2) return t1.localeCompare(t2);
-                } else {
-                    if (t1 && !t2) return -1;
-                    if (!t1 && t2) return 1;
-                    if (t1 && t2) return t1.localeCompare(t2);
-                }
-                return 0;
-            };
-
-            const bc = compareBaseVersions();
-            if (bc !== 0) return bc;
-
-            const pc = comparePrerelease();
-            if (pc !== 0) return pc;
-
-            return compareTextPlaceholders();
-        }
-
-        async function fetchRepoData(repoUrl) {
-            try {
-                const response = await fetch(repoUrl);
-                const data = await response.json();
-                return data.flavors;
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                return [];
-            }
-        }
-
-        const iconMapUrl =
-            "https://raw.githubusercontent.com/sbamboo/mcc-web/main/images/icons/icons_b64map.json";
-
-        async function fetchIconMapping() {
-            try {
-                const response = await fetch(iconMapUrl);
-                if (!response.ok) throw new Error(String(response.status));
-                return await response.json();
-            } catch (error) {
-                console.error("Error fetching icon map:", error);
-                return {};
-            }
-        }
-
-        async function fetchMinecraftVersionManifest() {
-            const response = await fetch(
-                "https://piston-meta.mojang.com/mc/game/version_manifest.json",
-            );
-            if (!response.ok) {
-                throw new Error(
-                    `Failed to fetch Minecraft versions: ${response.statusText}`,
-                );
-            }
-            return response.json();
-        }
-
-        function safeDecodeUriParam(value) {
-            if (value == null) return "";
-            const s = String(value).trim();
-            if (s === "") return "";
-            try {
-                return decodeURIComponent(s.replace(/\+/g, " "));
-            } catch {
-                return s;
-            }
-        }
-
-        function isUrlTruthyParam(raw) {
-            if (raw == null) return false;
-            const s = String(raw).trim().toLowerCase();
-            return s === "true" || s === "1" || s === "yes";
-        }
-
-        function findFlavorByMccmp(flavors, rawQuery) {
-            if (!Array.isArray(flavors) || rawQuery == null) return null;
-            const q = safeDecodeUriParam(rawQuery).trim();
-            if (q === "") return null;
-            const qLower = q.toLowerCase();
-            return (
-                flavors.find((f) => {
-                    if (!f) return false;
-                    const name = f.name != null ? String(f.name).trim() : "";
-                    const id = f.id != null ? String(f.id).trim() : "";
-                    return (
-                        name === q ||
-                        id === q ||
-                        name.toLowerCase() === qLower ||
-                        id.toLowerCase() === qLower
-                    );
-                }) ?? null
-            );
-        }
-
-        function fullyDecodeBootUrlValue(raw) {
-            if (raw == null) return "";
-            let s = String(raw).trim();
-            if (s === "") return "";
-            /* Query values may use + for space (application/x-www-form-urlencoded). */
-            s = s.replace(/\+/g, " ");
-            /* Peel layers in case the whole URL was encoded more than once. */
-            for (let i = 0; i < 8; i++) {
-                try {
-                    const next = decodeURIComponent(s);
-                    if (next === s) break;
-                    s = next;
-                } catch {
-                    break;
-                }
-            }
-            return s.trim();
-        }
-
-        function parseNavUrlBootParam(raw) {
-            const s = fullyDecodeBootUrlValue(raw);
-            if (s === "") return null;
-            try {
-                const u = new URL(s, window.location.href);
-                if (u.protocol === "javascript:" || u.protocol === "data:")
-                    return null;
-                return u.href;
-            } catch {
-                return null;
-            }
-        }
-
-        function applyPageHeaderNavBootParams(params) {
-            const backRaw = params.get("backurl");
-            const homeRaw = params.get("homeurl");
-            const backHref =
-                backRaw != null ? parseNavUrlBootParam(backRaw) : null;
-            const homeHref =
-                homeRaw != null ? parseNavUrlBootParam(homeRaw) : null;
-            if (!backHref && !homeHref) return;
-            const row = document.querySelector(".page-header-heading");
-            if (!row) return;
-            const actions = document.createElement("div");
-            actions.className = "page-header-nav-actions";
-            if (backHref) {
-                const a = document.createElement("a");
-                a.className = "page-header-back-link";
-                a.href = backHref;
-                a.textContent = "Go Back";
-                actions.appendChild(a);
-            }
-            if (homeHref) {
-                const a = document.createElement("a");
-                a.className = "page-header-home-link";
-                a.href = homeHref;
-                a.textContent = "MCC Web";
-                a.target = "_blank";
-                a.rel = "noopener noreferrer";
-                actions.appendChild(a);
-            }
-            row.appendChild(actions);
-        }
-
-        function applyIsmpToolbarUiBootParams(params) {
-            const root = document.documentElement;
-            if (isUrlTruthyParam(params.get("ui.mccnohidden"))) {
-                root.classList.add("ismp-ui-nohidden");
-            }
-            if (isUrlTruthyParam(params.get("ui.mccnosnap"))) {
-                root.classList.add("ismp-ui-nosnap");
-            }
-        }
-
-        function applyGuideSectionBootParam(params) {
-            if (params.has("guide")) {
-                document.documentElement.classList.add("ismp-show-guide");
-            }
-        }
-
-        function scrollToIsmpSection(sValue) {
-            const idByS = {
-                mcc: "section-mcc",
-                "modrinth.mp": "section-modrinth-mp",
-                "modrinth.mod": "section-modrinth-mod",
-                guide: "section-guide",
-            };
-            const id = idByS[String(sValue || "").trim()];
-            if (!id) return;
-            const el = document.getElementById(id);
-            if (el) {
-                requestAnimationFrame(() =>
-                    el.scrollIntoView({ behavior: "smooth", block: "start" }),
-                );
-            }
-        }
-
-        function resolveFlavorIconSrc(iconRaw, iconMapping, defaultSrc) {
-            if (iconRaw == null || String(iconRaw).trim() === "") {
-                return defaultSrc;
-            }
-            const key = String(iconRaw).trim();
-            if (
-                iconMapping &&
-                Object.prototype.hasOwnProperty.call(iconMapping, key)
-            ) {
-                const mapped = iconMapping[key];
-                if (mapped != null && String(mapped).trim() !== "") {
-                    return mapped;
-                }
-                return defaultSrc;
-            }
-            return key;
-        }
-
-        function base64ToUint8Array(b64) {
-            const clean = String(b64).replace(/\s/g, "");
-            const binary = atob(clean);
-            const len = binary.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            return bytes;
-        }
-
-        function compatProgressHost() {
-            return document.getElementById("compat-progress-root");
-        }
-
-        function clearCompatProgress() {
-            const root = compatProgressHost();
-            if (root) root.innerHTML = "";
-        }
-
-        async function compatFetchArrayBuffer(url, name) {
-            clearCompatProgress();
-            const root = compatProgressHost();
-            if (!root || typeof ProgressLoader === "undefined") {
-                const res = await fetch(url);
-                if (!res.ok) {
-                    throw new Error("fetch failed: " + res.status);
-                }
-                return res.arrayBuffer();
-            }
-            const loader = new ProgressLoader(root);
-            const response = await loader.fetch(
-                url,
-                name,
-                true,
-                true,
-                false,
-                false,
-            );
-            return response.arrayBuffer();
-        }
-
-        async function compatLoadZipAndRun(buf, run) {
-            if (typeof JSZip === "undefined") {
-                throw new Error("JSZip is not loaded");
-            }
-            clearCompatProgress();
-            const root = compatProgressHost();
-            let bar = null;
-            if (root && typeof ProgressLoader !== "undefined") {
-                const loader = new ProgressLoader(root);
-                bar = loader.createProgressBar(
-                    "Loading archive...",
-                    true,
-                    0,
-                    100,
-                );
-                bar.update(12);
-            }
-            const zip = await JSZip.loadAsync(buf);
-            if (bar) bar.update(62);
-            const result = await run(zip);
-            if (bar) {
-                bar.complete();
-                bar.cleanUp();
-            }
-            return result;
-        }
-
-        function normalizeZipPath(p) {
-            return String(p).replace(/\\/g, "/");
-        }
-
-        function findListingJsonPath(zip) {
-            let found = null;
-            zip.forEach((relPath, entry) => {
-                if (entry.dir) return;
-                const p = normalizeZipPath(relPath);
-                if (/(^|\/)listing\.json$/i.test(p)) {
-                    if (!found || p.length < found.length) {
-                        found = relPath;
-                    }
-                }
-            });
-            return found;
-        }
-
-        async function parseMlistingFromZip(zip) {
-            const path = findListingJsonPath(zip);
-            if (!path) {
-                throw new Error("No listing.json found in mlisting archive");
-            }
-            const file = zip.file(path);
-            if (!file || file.dir) {
-                throw new Error("listing.json entry not readable");
-            }
-            const text = await file.async("string");
-            const listing = JSON.parse(text);
-            return listing;
-        }
-
-        function bufferLooksLikeZip(buf) {
-            if (!buf || buf.byteLength < 2) return false;
-            const a = new Uint8Array(buf, 0, 2);
-            return a[0] === 0x50 && a[1] === 0x4b;
-        }
-
-        async function logListingFromFetchedBuffer(buf) {
-            if (bufferLooksLikeZip(buf)) {
-                return await compatLoadZipAndRun(buf, (zip) =>
-                    parseMlistingFromZip(zip),
-                );
-            }
-            clearCompatProgress();
-            const root = compatProgressHost();
-            let bar = null;
-            if (root && typeof ProgressLoader !== "undefined") {
-                const loader = new ProgressLoader(root);
-                bar = loader.createProgressBar(
-                    "Parsing listing...",
-                    true,
-                    0,
-                    100,
-                );
-                bar.update(25);
-            }
-            const text = new TextDecoder("utf-8").decode(buf);
-            const listing = JSON.parse(text);
-            if (bar) bar.update(85);
-            if (bar) {
-                bar.complete();
-                bar.cleanUp();
-            }
-            return listing;
-        }
-
-        function logLegacyModsFileList(zip) {
-            const names = [];
-            zip.forEach((relPath, entry) => {
-                if (entry.dir) return;
-                const p = normalizeZipPath(relPath);
-                const m = /^mods\/(.+)$/i.exec(p);
-                if (m) names.push(m[1]);
-            });
-            names.sort();
-            console.log("legacy mods/ file list:", names);
-            return names;
-        }
-
-        async function logLegacyArchiveZip(data) {
-            return await compatLoadZipAndRun(data, (zip) => {
-                return logLegacyModsFileList(zip);
-            });
-        }
-
-        function compatModrinthResultsEl() {
-            return document.getElementById("compat-modrinth-results");
-        }
-
-        function clearCompatModrinthResults() {
-            const el = compatModrinthResultsEl();
-            if (el) el.innerHTML = "";
-        }
-
-        function generateRandomString(length) {
-            const chars =
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            let out = "";
-            for (let i = 0; i < length; i++) {
-                out += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return out;
-        }
-
-        async function fetchModrinthLatestVersionDisplayLabel(
-            projectId,
-            modLoader,
-        ) {
-            const ua = `minecraftcustomclient-website-compat@${generateRandomString(
-                8,
-            )}`;
-            const opts = { headers: { "User-Agent": ua } };
-            const loader = modLoader != null && String(modLoader).trim() !== ""
-                ? String(modLoader).trim()
-                : "fabric";
-            const encLoader = encodeURIComponent(JSON.stringify([loader]));
-            let url = `https://api.modrinth.com/v2/project/${encodeURIComponent(
-                projectId,
-            )}/version?loaders=${encLoader}`;
-            let res = await fetch(url, opts);
-            if (!res.ok && res.status !== 404) {
-                throw new Error(`HTTP ${res.status}`);
-            }
-            let arr = await res.json();
-            if (!Array.isArray(arr)) arr = [];
-            if (arr.length === 0) {
-                url = `https://api.modrinth.com/v2/project/${encodeURIComponent(
-                    projectId,
-                )}/version`;
-                res = await fetch(url, opts);
-                if (!res.ok && res.status !== 404) {
-                    throw new Error(`HTTP ${res.status}`);
-                }
-                arr = await res.json();
-                if (!Array.isArray(arr)) arr = [];
-            }
-            if (arr.length === 0) {
-                return "No published versions found.";
-            }
-            const v = arr[0];
-            const label =
-                (v.version_number != null &&
-                    String(v.version_number).trim()) ||
-                (v.name != null && String(v.name).trim()) ||
-                (v.id != null && String(v.id).trim()) ||
-                "(version)";
-            let extra = "";
-            if (Array.isArray(v.game_versions) && v.game_versions.length > 0) {
-                const gv = v.game_versions.slice(0, 4);
-                const tail = v.game_versions.length > 4 ? ", …" : "";
-                extra = ` · MC ${gv.join(", ")}${tail}`;
-            }
-            return label + extra;
-        }
-
-        async function onCompatModrinthNotUpdatedInfoClick(ev) {
-            const btn = ev.target.closest(".compat-not-updated-modrinth-info");
-            if (!btn) return;
-            const panel = document.getElementById("compat-modrinth-results");
-            if (!panel || !panel.contains(btn)) return;
-            ev.preventDefault();
-            if (btn.disabled || btn.dataset.compatFetching === "1") return;
-            const projectId = btn.getAttribute("data-project-id");
-            const modLoader =
-                btn.getAttribute("data-mod-loader") || "fabric";
-            if (!projectId) return;
-            const out = btn.nextElementSibling;
-            if (
-                !out ||
-                !out.classList.contains("compat-not-updated-modrinth-version")
-            ) {
-                return;
-            }
-
-            btn.dataset.compatFetching = "1";
-            out.textContent = "Loading…";
-            try {
-                const label = await fetchModrinthLatestVersionDisplayLabel(
-                    projectId,
-                    modLoader,
-                );
-                out.textContent = label;
-                btn.disabled = true;
-                btn.classList.add("is-done");
-            } catch (err) {
-                console.error(err);
-                out.textContent = "Could not load version.";
-            } finally {
-                delete btn.dataset.compatFetching;
-            }
-        }
-
-        function listingDefaultModloader(listing) {
-            if (!listing || typeof listing !== "object") return "fabric";
-            return (
-                listing.modloader ||
-                listing.modLoader ||
-                listing.loader ||
-                "fabric"
-            );
-        }
-
-        function sourceIsCountedAsModrinthForCheck(mod) {
-            if (!mod || mod.type !== "modrinth" || !mod.url) return false;
-            const modrinthId = mod.url
-                .split("/versions/")[0]
-                .split("/")
-                .filter(Boolean)
-                .pop();
-            return Boolean(modrinthId);
-        }
-
-        function extractModrinthModsFromListing(listing) {
-            if (!listing || !Array.isArray(listing.sources)) return [];
-            const defaultLoader = listingDefaultModloader(listing);
-            const out = [];
-            for (const mod of listing.sources) {
-                if (!sourceIsCountedAsModrinthForCheck(mod)) continue;
-                const modrinthId = mod.url
-                    .split("/versions/")[0]
-                    .split("/")
-                    .filter(Boolean)
-                    .pop();
-                out.push({
-                    id: modrinthId,
-                    filename: mod.filename || modrinthId,
-                    modloader: mod.modloader || defaultLoader,
-                });
-            }
-            return out;
-        }
-
-        function compatCheckingLabel(n, total, skipped) {
-            return `Checking compatibility... (${n}/${total} checked on Modrinth, ${skipped} skipped)`;
-        }
-
-        async function runIsmpModrinthCompatibilityCheck(
-            allModrinthMods,
-            totalModsInModpack,
-            skippedCount,
-            selectedVersion,
-            progressHost,
-            resultsHost,
-            cancelState,
-            listing,
-        ) {
-            const modrinthModsToCheck = allModrinthMods.length;
-            let updatedModsCount = 0;
-            const notUpdatedMods = [];
-
-            const modrinthCompatUserAgent = `minecraftcustomclient-website-compat@${generateRandomString(
-                8,
-            )}`;
-            console.log("Modrinth API User-Agent:", modrinthCompatUserAgent);
-
-            progressHost.innerHTML = "";
-            let bar = null;
-            if (typeof ProgressLoader !== "undefined") {
-                const loader = new ProgressLoader(progressHost);
-                bar = loader.createProgressBar(
-                    compatCheckingLabel(0, modrinthModsToCheck, skippedCount),
-                    true,
-                    0,
-                    100,
-                );
-            }
-
-            for (let i = 0; i < modrinthModsToCheck; i++) {
-                if (cancelState && cancelState.cancelled) {
-                    break;
-                }
-
-                const mod = allModrinthMods[i];
-                const projectId = mod.id;
-                const modLoader = mod.modloader;
-                const modrinthProjectUrl = `https://modrinth.com/mod/${projectId}`;
-
-                if (bar) {
-                    bar.updateName(
-                        compatCheckingLabel(
-                            i + 1,
-                            modrinthModsToCheck,
-                            skippedCount,
-                        ),
-                    );
-                }
-
-                try {
-                    const compatibility_modrinth_api_requestOptions = {
-                        headers: {
-                            "User-Agent": modrinthCompatUserAgent,
-                        },
-                    };
-                    const modrinthVersionsResponse = await fetch(
-                        `https://api.modrinth.com/v2/project/${projectId}/version?game_versions=["${selectedVersion}"]&loaders=["${modLoader}"]`,
-                        compatibility_modrinth_api_requestOptions,
-                    );
-                    if (
-                        !modrinthVersionsResponse.ok &&
-                        modrinthVersionsResponse.status !== 404
-                    ) {
-                        throw new Error(
-                            `HTTP error! status: ${modrinthVersionsResponse.status}`,
-                        );
-                    }
-                    const modrinthVersions =
-                        await modrinthVersionsResponse.json();
-
-                    if (modrinthVersions.length > 0) {
-                        updatedModsCount++;
-                    } else {
-                        notUpdatedMods.push({
-                            name: mod.filename,
-                            url: modrinthProjectUrl,
-                            projectId,
-                            modLoader,
-                        });
-                    }
-                } catch (error) {
-                    console.error(
-                        `Error checking Modrinth mod ${projectId} (${mod.filename}):`,
-                        error,
-                    );
-                    notUpdatedMods.push({
-                        name: mod.filename,
-                        url: modrinthProjectUrl,
-                        projectId,
-                        modLoader,
-                    });
-                }
-
-                if (bar) {
-                    bar.update(((i + 1) / modrinthModsToCheck) * 100);
-                }
-            }
-
-            if (bar) {
-                bar.complete();
-                bar.cleanUp();
-            }
-
-            const progressRow = progressHost.closest(".compat-modrinth-progress-row");
-            progressRow?.querySelector(".compat-modrinth-cancel")?.remove();
-
-            if (cancelState && cancelState.cancelled) {
-                resultsHost.innerHTML =
-                    '<p class="compat-modrinth-orange">Check cancelled.</p>';
-                return;
-            }
-
-            const notCheckedMods = buildSkippedNotCheckedEntries(listing);
-            const uncheckedModsCount = notCheckedMods.length;
-
-            const percentageUpdatedOverall =
-                totalModsInModpack > 0
-                    ? (
-                          (updatedModsCount / totalModsInModpack) *
-                          100
-                      ).toFixed(2)
-                    : "0.00";
-
-            const modrinthPercentageUpdated =
-                modrinthModsToCheck > 0
-                    ? (
-                          (updatedModsCount / modrinthModsToCheck) *
-                          100
-                      ).toFixed(2)
-                    : "0.00";
-
-            const uncheckedProportionPercentage =
-                totalModsInModpack > 0
-                    ? (
-                          (uncheckedModsCount / totalModsInModpack) *
-                          100
-                      ).toFixed(2)
-                    : "0.00";
-
-            const notUpdatedNonMc =
-                totalModsInModpack -
-                updatedModsCount -
-                uncheckedModsCount;
-
-            resultsHost.innerHTML = `
-                <p>
-                    <span class="compat-mc-stat-mix">${percentageUpdatedOverall}% (${updatedModsCount})</span>
-                    updated to ${escapeHtml(selectedVersion)} out of
-                    <span class="compat-mc-stat-mix">${totalModsInModpack}</span>
-                    [
-                    <span class="compat-mc-stat-ok">${modrinthPercentageUpdated}% (${updatedModsCount})</span> Modrinth,
-                    <span class="compat-mc-stat-bad">${(
-                        100 - Number(percentageUpdatedOverall)
-                    ).toFixed(2)}% (${notUpdatedNonMc})</span> not updated Modrinth,
-                    <span class="compat-mc-stat-skip">${uncheckedProportionPercentage}% (${uncheckedModsCount})</span> skipped
-                    ]
-                </p>
-                ${
-                    notUpdatedMods.length > 0
-                        ? `
-                <details class="compat-modrinth-details">
-                    <summary>Not updated Modrinth mods (${notUpdatedMods.length})</summary>
-                    <div class="compat-modrinth-scroll-list">
-                        <ul>
-                            ${notUpdatedMods
-                                .map((m) => {
-                                    const pid = escapeHtml(m.projectId ?? "");
-                                    const ldr = escapeHtml(m.modLoader ?? "fabric");
-                                    return `<li class="compat-not-updated-modrinth-li"><a href="${escapeHtml(m.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(m.name)}</a><button type="button" class="compat-not-updated-modrinth-info" title="Click to fetch the current version" aria-label="Fetch latest Modrinth version for this loader" data-project-id="${pid}" data-mod-loader="${ldr}">🛈</button><span class="compat-not-updated-modrinth-version" aria-live="polite"></span></li>`;
-                                })
-                                .join("")}
-                        </ul>
-                    </div>
-                </details>`
-                        : ""
-                }
-                ${
-                    notCheckedMods.length > 0
-                        ? `
-                <details class="compat-modrinth-details">
-                    <summary>Skipped / not checked (${notCheckedMods.length})</summary>
-                    <div class="compat-modrinth-scroll-list">
-                        <ul>
-                            ${notCheckedMods
-                                .map((m) =>
-                                    m.url
-                                        ? `<li><a href="${escapeHtml(m.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(m.name)}</a></li>`
-                                        : `<li>${escapeHtml(m.name)}</li>`,
-                                )
-                                .join("")}
-                        </ul>
-                    </div>
-                </details>`
-                        : ""
-                }
-            `;
-        }
-
-        function escapeHtml(s) {
-            return String(s)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;");
-        }
-
-        function downloadBlobFile(blob, filename) {
-            const name =
-                filename != null && String(filename).trim() !== ""
-                    ? String(filename).split(/[/\\]/).pop()
-                    : "download";
-            const u = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = u;
-            a.download = name;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(u), 800);
-        }
-
-        function safeHttpUrl(url) {
-            if (url == null || String(url).trim() === "") return null;
-            try {
-                const u = new URL(String(url).trim(), window.location.href);
-                if (u.protocol === "http:" || u.protocol === "https:")
-                    return u.href;
-            } catch (_) {
-                /* ignore */
-            }
-            return null;
-        }
-
-        function buildSkippedNotCheckedEntries(listing) {
-            if (!listing || !Array.isArray(listing.sources)) return [];
-            const out = [];
-            for (const mod of listing.sources) {
-                if (!mod) continue;
-                if (sourceIsCountedAsModrinthForCheck(mod)) continue;
-                const name =
-                    mod.filename != null && String(mod.filename).trim() !== ""
-                        ? String(mod.filename)
-                        : mod.type != null && String(mod.type).trim() !== ""
-                          ? `(unnamed — ${mod.type})`
-                          : "(unnamed entry)";
-                const rawUrl = mod.url != null ? String(mod.url).trim() : "";
-                const url = rawUrl ? safeHttpUrl(rawUrl) : null;
-                out.push({ name, url });
-            }
-            return out;
-        }
-
-        function findZipPathForModFile(zip, filenameHint) {
-            if (!zip || filenameHint == null) return null;
-            const base = normalizeZipPath(String(filenameHint))
-                .split("/")
-                .filter(Boolean)
-                .pop();
-            if (!base) return null;
-            let found = null;
-            zip.forEach((relPath, entry) => {
-                if (entry.dir) return;
-                const p = normalizeZipPath(relPath);
-                const leaf = p.split("/").filter(Boolean).pop();
-                if (leaf === base) {
-                    if (!found || p.length < found.length) {
-                        found = relPath;
-                    }
-                }
-            });
-            return found;
-        }
-
-        async function populateListingModsUl(ul, sources, zipBuffer) {
-            if (!ul || !Array.isArray(sources)) return;
-            let zip = null;
-            if (zipBuffer) {
-                try {
-                    zip = await JSZip.loadAsync(zipBuffer);
-                } catch (err) {
-                    console.warn(
-                        "Could not open mlisting zip for embedded file links:",
-                        err,
-                    );
-                }
-            }
-            for (const mod of sources) {
-                if (!mod || typeof mod !== "object") continue;
-                const li = document.createElement("li");
-                const label =
-                    mod.filename != null && String(mod.filename).trim() !== ""
-                        ? String(mod.filename)
-                        : "(unnamed entry)";
-                const type =
-                    mod.type != null && String(mod.type).trim() !== ""
-                        ? String(mod.type)
-                        : "";
-
-                if (
-                    type === "customB64" ||
-                    type === "customArchiveB64"
-                ) {
-                    const b64 = mod.base64;
-                    if (typeof b64 === "string" && b64.replace(/\s/g, "") !== "") {
-                        const a = document.createElement("a");
-                        a.href = "#";
-                        a.textContent = label;
-                        a.addEventListener("click", (e) => {
-                            e.preventDefault();
-                            try {
-                                const bytes = base64ToUint8Array(b64);
-                                const blob = new Blob([bytes], {
-                                    type: "application/octet-stream",
-                                });
-                                downloadBlobFile(blob, label);
-                            } catch (err) {
-                                console.error(
-                                    "Embedded mod download failed:",
-                                    err,
-                                );
-                            }
-                        });
-                        li.appendChild(a);
-                    } else {
-                        li.textContent = `${label} (${type}, no data)`;
-                    }
-                    ul.appendChild(li);
-                    continue;
-                }
-
-                const rawUrl = mod.url != null ? String(mod.url).trim() : "";
-                const safe = rawUrl ? safeHttpUrl(rawUrl) : null;
-                if (safe) {
-                    const a = document.createElement("a");
-                    a.href = safe;
-                    a.target = "_blank";
-                    a.rel = "noopener noreferrer";
-                    a.textContent = label;
-                    li.appendChild(a);
-                    ul.appendChild(li);
-                    continue;
-                }
-
-                if (zip) {
-                    const zp = findZipPathForModFile(zip, label);
-                    if (zp) {
-                        const zpath = zp;
-                        const a = document.createElement("a");
-                        a.href = "#";
-                        a.textContent = label;
-                        a.addEventListener("click", async (e) => {
-                            e.preventDefault();
-                            try {
-                                const entry = zip.file(zpath);
-                                if (!entry || entry.dir) return;
-                                const blob = await entry.async("blob");
-                                downloadBlobFile(blob, label);
-                            } catch (err) {
-                                console.error("Zip mod download failed:", err);
-                            }
-                        });
-                        li.appendChild(a);
-                        ul.appendChild(li);
-                        continue;
-                    }
-                }
-
-                li.textContent = type ? `${label} (${type})` : label;
-                ul.appendChild(li);
-            }
-        }
-
-        function uint8ViewToArrayBuffer(u8) {
-            if (!u8 || !u8.byteLength) {
-                return new ArrayBuffer(0);
-            }
-            return u8.buffer.slice(
-                u8.byteOffset,
-                u8.byteOffset + u8.byteLength,
-            );
-        }
-
-        async function populateLegacyModsUl(ul, modFilenames, zipBuffer) {
-            if (!ul || !Array.isArray(modFilenames)) return;
-            let zip = null;
-            if (zipBuffer && zipBuffer.byteLength > 0) {
-                try {
-                    zip = await JSZip.loadAsync(zipBuffer);
-                } catch (err) {
-                    console.warn(
-                        "Could not open legacy archive for mod downloads:",
-                        err,
-                    );
-                }
-            }
-            for (const name of modFilenames) {
-                const li = document.createElement("li");
-                const label =
-                    name != null && String(name).trim() !== ""
-                        ? String(name)
-                        : "(unnamed)";
-                if (zip) {
-                    const zpath = findZipPathForModFile(zip, label);
-                    if (zpath) {
-                        const pathHeld = zpath;
-                        const a = document.createElement("a");
-                        a.href = "#";
-                        a.textContent = label;
-                        a.addEventListener("click", async (e) => {
-                            e.preventDefault();
-                            try {
-                                const entry = zip.file(pathHeld);
-                                if (!entry || entry.dir) return;
-                                const blob = await entry.async("blob");
-                                downloadBlobFile(blob, label);
-                            } catch (err) {
-                                console.error("Legacy mod download failed:", err);
-                            }
-                        });
-                        li.appendChild(a);
-                        ul.appendChild(li);
-                        continue;
-                    }
-                }
-                li.textContent = label;
-                ul.appendChild(li);
-            }
-        }
-
-        async function loadAndLogModpackSource(flavor) {
-            const sourceType = flavor.sourceType;
-            const source = flavor.source;
-
-            switch (sourceType) {
-                case "included": {
-                    clearCompatProgress();
-                    const root = compatProgressHost();
-                    let bar = null;
-                    if (root && typeof ProgressLoader !== "undefined") {
-                        const loader = new ProgressLoader(root);
-                        bar = loader.createProgressBar(
-                            "Reading listing...",
-                            true,
-                            0,
-                            100,
-                        );
-                        bar.update(35);
-                    }
-                    const listing =
-                        typeof source === "string" ? JSON.parse(source) : source;
-                    if (bar) bar.update(90);
-                    if (bar) {
-                        bar.complete();
-                        bar.cleanUp();
-                    }
-                    return { mode: "v2", listing };
-                }
-                case "mlisting": {
-                    const url = String(source).trim();
-                    if (!url) throw new Error("mlisting source URL is empty");
-                    const buf = await compatFetchArrayBuffer(
-                        url,
-                        "Fetching mlisting...",
-                    );
-                    const listing = await compatLoadZipAndRun(buf, (zip) =>
-                        parseMlistingFromZip(zip),
-                    );
-                    return { mode: "v2", listing, mlistingZipBuffer: buf };
-                }
-                case "urlListing": {
-                    const url = String(source).trim();
-                    if (!url) {
-                        throw new Error("urlListing source URL is empty");
-                    }
-                    const buf = await compatFetchArrayBuffer(
-                        url,
-                        "Fetching listing...",
-                    );
-                    const listing = await logListingFromFetchedBuffer(buf);
-                    return { mode: "v2", listing };
-                }
-                case "legacy": {
-                    const url =
-                        source && source.url != null
-                            ? String(source.url).trim()
-                            : "";
-                    if (!url) throw new Error("legacy source.url is empty");
-                    const buf = await compatFetchArrayBuffer(
-                        url,
-                        "Fetching legacy archive...",
-                    );
-                    const files = await logLegacyArchiveZip(buf);
-                    return {
-                        mode: "legacy",
-                        files,
-                        legacyZipBuffer: buf,
-                    };
-                }
-                case "legacyB64": {
-                    clearCompatProgress();
-                    const root = compatProgressHost();
-                    let b64Bar = null;
-                    if (root && typeof ProgressLoader !== "undefined") {
-                        const loader = new ProgressLoader(root);
-                        b64Bar = loader.createProgressBar(
-                            "Loading legacy base64 archive...",
-                            true,
-                            0,
-                            100,
-                        );
-                        b64Bar.update(28);
-                    }
-                    const b64 =
-                        source && source.base64 != null
-                            ? String(source.base64)
-                            : "";
-                    if (!b64) throw new Error("legacyB64 base64 is empty");
-                    const bytes = base64ToUint8Array(b64);
-                    if (b64Bar) {
-                        b64Bar.update(95);
-                        b64Bar.complete();
-                        b64Bar.cleanUp();
-                    }
-                    const files = await logLegacyArchiveZip(bytes);
-                    return {
-                        mode: "legacy",
-                        files,
-                        legacyZipBuffer: uint8ViewToArrayBuffer(bytes),
-                    };
-                }
-                default:
-                    console.warn("Unknown sourceType:", sourceType);
-                    clearCompatProgress();
-                    {
-                        const root = compatProgressHost();
-                        if (root && typeof ProgressLoader !== "undefined") {
-                            const loader = new ProgressLoader(root);
-                            const bar = loader.createProgressBar(
-                                "Unknown source type.",
-                                true,
-                                0,
-                                100,
-                            );
-                            bar.complete();
-                            bar.cleanUp();
-                        }
-                    }
-                    return { mode: "unknown" };
-            }
-        }
+        const vercheck = new VerCheck();
 
         document.addEventListener("DOMContentLoaded", async function() {
             const urlBootParams = new URLSearchParams(window.location.search);
-            applyPageHeaderNavBootParams(urlBootParams);
-            applyIsmpToolbarUiBootParams(urlBootParams);
-            applyGuideSectionBootParam(urlBootParams);
+            vercheck.applyPageHeaderNavBootParams(urlBootParams);
+            vercheck.applyIsmpToolbarUiBootParams(urlBootParams);
+            vercheck.applyGuideSectionBootParam(urlBootParams);
 
             const [flavors, iconMapping, versionManifest] = await Promise.all([
-                fetchRepoData(repoUrl),
-                fetchIconMapping(),
-                fetchMinecraftVersionManifest().catch((err) => {
+                vercheck.fetchRepoData(repoUrl),
+                vercheck.fetchIconMapping(),
+                vercheck.fetchMinecraftVersionManifest().catch((err) => {
                     console.error(err);
                     return null;
                 }),
@@ -1942,7 +836,7 @@
             updateCompatCheckButtonState();
             // Sort by flavor.mcver newest at the top and then by flavor.name alphabetically
             flavors.sort((a, b) => {
-                const mcverCompare = compareMcVer(b.mcver, a.mcver);
+                const mcverCompare = vercheck.compareMcVer(b.mcver, a.mcver);
                 if (mcverCompare !== 0) return mcverCompare;
                 return b.name.localeCompare(a.name);
             });
@@ -1953,7 +847,7 @@
             );
             const modpackFlavorsDetails = flavorListEl?.closest("details");
             const mccShowHidden = document.getElementById("mcc-show-hidden");
-            if (mccShowHidden && isUrlTruthyParam(urlBootParams.get("mccshowall"))) {
+            if (mccShowHidden && vercheck.isUrlTruthyParam(urlBootParams.get("mccshowall"))) {
                 mccShowHidden.checked = true;
             }
             const defaultModpackIcon = "./images/modpack_default.png";
@@ -1996,7 +890,7 @@
 
                     const img = document.createElement("img");
                     img.className = "modpack-flavor-icon";
-                    const iconSrc = resolveFlavorIconSrc(
+                    const iconSrc = vercheck.resolveFlavorIconSrc(
                         flavor.icon,
                         iconMapping,
                         defaultModpackIcon,
@@ -2081,16 +975,16 @@
 
             compatCheckButton?.addEventListener("click", async function () {
                 const minecraftVersionToCheck = mcVersionSelect?.value ?? null;
-                clearCompatModrinthResults();
+                vercheck.clearCompatModrinthResults();
                 try {
                     if (selectedModpackFlavor == null) return;
 
-                    const payload = await loadAndLogModpackSource(
+                    const payload = await vercheck.loadAndLogModpackSource(
                         selectedModpackFlavor,
                     );
-                    clearCompatProgress();
+                    vercheck.clearCompatProgress();
 
-                    const panel = compatModrinthResultsEl();
+                    const panel = vercheck.compatModrinthResultsEl();
                     if (!panel) return;
 
                     if (payload.mode === "legacy") {
@@ -2106,7 +1000,7 @@
                                     <ul id="compat-legacy-mods-ul" class="compat-listing-mods-ul"></ul>
                                 </div>
                             </details>`;
-                        await populateLegacyModsUl(
+                        await vercheck.populateLegacyModsUl(
                             document.getElementById("compat-legacy-mods-ul"),
                             legacyFiles,
                             payload.legacyZipBuffer ?? null,
@@ -2132,7 +1026,7 @@
                         : [];
                     const totalMods = sources.length;
                     const allModrinthMods =
-                        extractModrinthModsFromListing(listing);
+                        vercheck.extractModrinthModsFromListing(listing);
 
                     if (allModrinthMods.length === 0) {
                         const entWord = totalMods === 1 ? "entry" : "entries";
@@ -2143,7 +1037,7 @@
                                     <ul id="compat-listing-mods-ul" class="compat-listing-mods-ul"></ul>
                                 </div>
                             </details>`;
-                        await populateListingModsUl(
+                        await vercheck.populateListingModsUl(
                             document.getElementById("compat-listing-mods-ul"),
                             sources,
                             payload.mlistingZipBuffer ?? null,
@@ -2172,7 +1066,7 @@
                         cancelState.cancelled = true;
                         cancelBtn.disabled = true;
                     });
-                    await runIsmpModrinthCompatibilityCheck(
+                    await vercheck.runIsmpModrinthCompatibilityCheck(
                         allModrinthMods,
                         totalMods,
                         skippedCount,
@@ -2184,8 +1078,8 @@
                     );
                 } catch (err) {
                     console.error("Modpack source load failed:", err);
-                    clearCompatProgress();
-                    const root = compatProgressHost();
+                    vercheck.clearCompatProgress();
+                    const root = vercheck.compatProgressHost();
                     if (root && typeof ProgressLoader !== "undefined") {
                         const loader = new ProgressLoader(root);
                         const bar = loader.createProgressBar(
@@ -2213,7 +1107,7 @@
                 mcVersionSelect &&
                 mcManifestVersions.length > 0
             ) {
-                const want = safeDecodeUriParam(bootMcverRaw).trim();
+                const want = vercheck.safeDecodeUriParam(bootMcverRaw).trim();
                 if (want !== "") {
                     if (want.toLowerCase() === "*latest") {
                         const firstOk = Array.from(
@@ -2245,13 +1139,14 @@
 
             const bootMccmp = urlBootParams.get("mccmp");
             if (bootMccmp != null && flavorListEl && flavors.length > 0) {
-                const mccmpDecoded = safeDecodeUriParam(bootMccmp).trim();
+                const mccmpDecoded = vercheck.safeDecodeUriParam(bootMccmp).trim();
+                const listFlavors = getModpackListFlavors();
                 const hit =
                     mccmpDecoded.toLowerCase() === "*latest"
-                        ? flavors[0]
-                        : findFlavorByMccmp(flavors, bootMccmp);
+                        ? listFlavors[0]
+                        : vercheck.findFlavorByMccmp(flavors, bootMccmp);
                 if (hit) {
-                    const idx = flavors.indexOf(hit);
+                    const idx = listFlavors.indexOf(hit);
                     const items = flavorListEl.querySelectorAll(
                         ".modpack-flavor-item",
                     );
@@ -2264,7 +1159,7 @@
 
             const bootSection = urlBootParams.get("s");
             if (bootSection) {
-                scrollToIsmpSection(bootSection);
+                vercheck.scrollToIsmpSection(bootSection);
             }
 
             updateCompatCheckButtonState();
@@ -2278,7 +1173,10 @@
 
             document
                 .getElementById("compat-modrinth-results")
-                ?.addEventListener("click", onCompatModrinthNotUpdatedInfoClick);
+                ?.addEventListener(
+                    "click",
+                    (e) => vercheck.onCompatModrinthNotUpdatedInfoClick(e),
+                );
         });
     </script>
 </head>
