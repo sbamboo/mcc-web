@@ -442,6 +442,153 @@
             border-color: var(--border);
         }
 
+        .compat-filter-libs-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            align-self: center;
+            font-size: 0.88rem;
+            color: var(--text);
+            cursor: pointer;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .compat-filter-libs-label input {
+            width: 1rem;
+            height: 1rem;
+            accent-color: var(--link);
+            cursor: pointer;
+        }
+
+        .dep-conflict-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        .dep-conflict-dialog {
+            width: min(36rem, 100%);
+            max-height: min(80vh, 42rem);
+            overflow: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+            padding: 1rem 1.15rem 1.15rem;
+        }
+
+        .dep-conflict-dialog h3 {
+            font-size: 1.05rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .dep-conflict-dialog > p,
+        .dep-conflict-req,
+        .dep-conflict-error {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .dep-conflict-project {
+            margin-top: 0.95rem;
+        }
+
+        .dep-conflict-project h4 {
+            font-size: 0.95rem;
+        }
+
+        .dep-conflict-project-link {
+            color: var(--link);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .dep-conflict-project-link:hover {
+            text-decoration: underline;
+        }
+
+        .dep-conflict-select option.dep-conflict-wrong-loader {
+            color: #e85d5d;
+        }
+
+        .dep-conflict-all {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0.55rem 0 0.15rem;
+            font-size: 0.86rem;
+            cursor: pointer;
+        }
+
+        .dep-conflict-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.45rem;
+            margin: 0.55rem 0 0.15rem;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+
+        .dep-conflict-req {
+            margin: 0.1rem 0 0 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .dep-conflict-req-list {
+            margin: 0.1rem 0 0.2rem 2.55rem;
+            padding: 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            list-style: disc;
+        }
+
+        .dep-conflict-select {
+            display: none;
+            width: 100%;
+            margin-top: 0.45rem;
+            font: inherit;
+            font-size: 0.88rem;
+            padding: 0.4rem 0.5rem;
+            border-radius: 0.3rem;
+            border: 1px solid var(--border);
+            background: var(--bg-base);
+            color: var(--text);
+        }
+
+        .dep-conflict-select.is-open {
+            display: block;
+        }
+
+        .dep-conflict-continue {
+            background: #2d8a4e;
+            border-color: #3aa864;
+            color: #f4fff7;
+        }
+
+        .dep-conflict-continue:hover {
+            background: #349a58;
+            border-color: #46c072;
+        }
+
+        .dep-conflict-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1rem;
+        }
+
+        .dep-conflict-error {
+            margin-top: 0.6rem;
+            color: #e0a060;
+        }
+
         .modpack-flavors-list {
             list-style: none;
             position: absolute;
@@ -1313,9 +1460,34 @@
                 mrModMcShowSnapshots.checked = true;
             }
             let selectedModpackFlavor = null;
+            let attemptDownloadBusy = false;
             const compatCheckButton = document.getElementById(
                 "compat-check-button",
             );
+            const attemptDownloadButton = document.getElementById(
+                "attempt-download-button",
+            );
+            const filterLibsLabel = document.getElementById("filter-libs-label");
+            const filterLibsCheckbox = document.getElementById("filter-libs");
+            const prismProfileLabel = document.getElementById(
+                "prism-profile-label",
+            );
+            const prismProfileCheckbox = document.getElementById("prism-profile");
+            if (attemptDownloadButton && urlBootParams.has("showdown")) {
+                attemptDownloadButton.hidden = false;
+                if (
+                    filterLibsLabel &&
+                    !vercheck.isUrlTruthyParam(urlBootParams.get("ui.nofilterlibs"))
+                ) {
+                    filterLibsLabel.hidden = false;
+                }
+                if (
+                    prismProfileLabel &&
+                    !vercheck.isUrlTruthyParam(urlBootParams.get("ui.noprismdown"))
+                ) {
+                    prismProfileLabel.hidden = false;
+                }
+            }
             const mrMpCompatCheckButton = document.getElementById(
                 "mr-mp-compat-check-button",
             );
@@ -1421,6 +1593,13 @@
                 const versionOk =
                     raw !== "" && opt != null && opt.disabled !== true;
                 compatCheckButton.disabled = !(modpackOk && versionOk);
+                if (
+                    attemptDownloadButton &&
+                    attemptDownloadButton.hidden !== true
+                ) {
+                    attemptDownloadButton.disabled =
+                        attemptDownloadBusy || !(modpackOk && versionOk);
+                }
             }
 
             function applyMcVersionListToSelect(selectEl, showSnapshots) {
@@ -2834,6 +3013,1667 @@
                 }
             });
 
+            function zipPathToken(raw) {
+                const s = String(raw ?? "").trim() || "unknown";
+                return s.replace(/[\\/:*?"<>|\s]+/g, "_");
+            }
+
+            function zipLeafName(raw, fallback) {
+                const leaf = String(raw ?? "")
+                    .split(/[/\\]/)
+                    .filter(Boolean)
+                    .pop();
+                const name = (leaf && leaf.trim()) || fallback || "mod.jar";
+                return name.replace(/[\\/:*?"<>|]/g, "_");
+            }
+
+            function takeUniqueZipPath(used, folder, filename) {
+                const leaf = zipLeafName(filename, "mod.jar");
+                let path = folder + "/" + leaf;
+                if (!used.has(path)) {
+                    used.add(path);
+                    return path;
+                }
+                const dot = leaf.lastIndexOf(".");
+                const stem = dot > 0 ? leaf.slice(0, dot) : leaf;
+                const ext = dot > 0 ? leaf.slice(dot) : "";
+                let n = 2;
+                while (used.has(folder + "/" + stem + " (" + n + ")" + ext)) {
+                    n++;
+                }
+                path = folder + "/" + stem + " (" + n + ")" + ext;
+                used.add(path);
+                return path;
+            }
+
+            function modrinthProjectIdFromSource(mod) {
+                if (!vercheck.sourceIsCountedAsModrinthForCheck(mod)) return "";
+                return (
+                    String(mod.url)
+                        .split("/versions/")[0]
+                        .split("/")
+                        .filter(Boolean)
+                        .pop() || ""
+                );
+            }
+
+            async function resolvePrismLoaderComponent(
+                loaderName,
+                gameVersion,
+                fallbackVersion,
+                userAgent,
+            ) {
+                const loader = String(loaderName || "fabric").trim().toLowerCase();
+                const uidByLoader = {
+                    fabric: "net.fabricmc.fabric-loader",
+                    forge: "net.minecraftforge",
+                    neoforge: "net.neoforged",
+                    quilt: "org.quiltmc.quilt-loader",
+                };
+                const uid = uidByLoader[loader] || uidByLoader.fabric;
+                let version =
+                    fallbackVersion != null ? String(fallbackVersion).trim() : "";
+                const headers = { "User-Agent": userAgent };
+                try {
+                    if (uid === "net.fabricmc.fabric-loader") {
+                        const res = await fetch(
+                            "https://meta.fabricmc.net/v2/versions/loader/" +
+                                encodeURIComponent(gameVersion),
+                            { headers },
+                        );
+                        if (res.ok) {
+                            const arr = await res.json();
+                            if (Array.isArray(arr) && arr.length > 0) {
+                                const stable = arr.find(
+                                    (row) => row?.loader?.stable === true,
+                                );
+                                const pick = stable || arr[0];
+                                if (pick?.loader?.version) {
+                                    version = String(pick.loader.version);
+                                }
+                            }
+                        }
+                    } else if (uid === "org.quiltmc.quilt-loader") {
+                        const res = await fetch(
+                            "https://meta.quiltmc.org/v3/versions/loader/" +
+                                encodeURIComponent(gameVersion),
+                            { headers },
+                        );
+                        if (res.ok) {
+                            const arr = await res.json();
+                            if (Array.isArray(arr) && arr.length > 0) {
+                                const stable = arr.find(
+                                    (row) => row?.loader?.stable === true,
+                                );
+                                const pick = stable || arr[0];
+                                const ver = pick?.loader?.version || pick?.version;
+                                if (ver) version = String(ver);
+                            }
+                        }
+                    } else {
+                        const res = await fetch(
+                            "https://meta.prismlauncher.org/v1/" +
+                                uid +
+                                "/" +
+                                encodeURIComponent(gameVersion) +
+                                ".json",
+                            { headers },
+                        );
+                        if (res.ok) {
+                            const data = await res.json();
+                            const versions = Array.isArray(data?.versions)
+                                ? data.versions
+                                : [];
+                            const recommended = versions.find(
+                                (row) => row && row.recommended === true,
+                            );
+                            const pick = recommended || versions[0];
+                            if (pick?.version) version = String(pick.version);
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Loader version lookup failed:", err);
+                }
+                const component = { uid: uid };
+                if (version) component.version = version;
+                return component;
+            }
+
+            function prismInstanceCfg(instanceName) {
+                const name = String(instanceName || "Modpack")
+                    .replace(/[\r\n]/g, " ")
+                    .trim() || "Modpack";
+                return (
+                    "InstanceType=OneSix\n" +
+                    "name=" +
+                    name +
+                    "\n" +
+                    "iconKey=default\n" +
+                    "OverrideCommands=false\n" +
+                    "OverrideConsole=false\n" +
+                    "OverrideEnv=false\n" +
+                    "OverrideGameTime=false\n" +
+                    "OverrideJavaArgs=false\n" +
+                    "OverrideJavaLocation=false\n" +
+                    "OverrideMemory=false\n" +
+                    "OverrideMiscellaneous=false\n" +
+                    "OverrideNativeWorkarounds=false\n" +
+                    "OverridePerformance=false\n" +
+                    "OverrideWindow=false\n"
+                );
+            }
+
+            async function originalModBytes(mod, embeddedZip) {
+                const type = mod?.type != null ? String(mod.type) : "";
+                if (type === "customB64" || type === "customArchiveB64") {
+                    const b64 = mod.base64;
+                    if (typeof b64 === "string" && b64.replace(/\s/g, "") !== "") {
+                        return vercheck.base64ToUint8Array(b64);
+                    }
+                    return null;
+                }
+                const rawUrl = mod?.url != null ? String(mod.url).trim() : "";
+                const safe = rawUrl ? vercheck.safeHttpUrl(rawUrl) : null;
+                if (safe) {
+                    const res = await fetch(safe);
+                    if (!res.ok) {
+                        throw new Error("HTTP " + res.status);
+                    }
+                    return new Uint8Array(await res.arrayBuffer());
+                }
+                if (embeddedZip) {
+                    const label =
+                        mod?.filename != null && String(mod.filename).trim() !== ""
+                            ? String(mod.filename)
+                            : "";
+                    const zp = label
+                        ? vercheck.findZipPathForModFile(embeddedZip, label)
+                        : null;
+                    if (zp) {
+                        const entry = embeddedZip.file(zp);
+                        if (entry && !entry.dir) {
+                            return new Uint8Array(await entry.async("arraybuffer"));
+                        }
+                    }
+                }
+                return null;
+            }
+
+            attemptDownloadButton?.addEventListener("click", async function () {
+                if (attemptDownloadBusy) return;
+                const minecraftVersionToCheck = mcVersionSelect?.value ?? null;
+                if (selectedModpackFlavor == null || !minecraftVersionToCheck) {
+                    return;
+                }
+                attemptDownloadBusy = true;
+                updateCompatCheckButtonState();
+                vercheck.clearCompatModrinthResults();
+                try {
+                    if (typeof JSZip === "undefined") {
+                        throw new Error("JSZip is not loaded");
+                    }
+                    const payload = await vercheck.loadAndLogModpackSource(
+                        selectedModpackFlavor,
+                    );
+                    vercheck.clearCompatProgress();
+                    const panel = vercheck.compatModrinthResultsEl();
+                    if (!panel) return;
+
+                    if (payload.mode !== "v2" || !payload.listing) {
+                        panel.innerHTML =
+                            '<p class="compat-modrinth-orange">Attempt download only supports v2 listings with Modrinth metadata. Legacy archives cannot be resolved to a selected Minecraft version.</p>';
+                        return;
+                    }
+
+                    const listing = payload.listing;
+                    const sources = Array.isArray(listing.sources)
+                        ? listing.sources
+                        : [];
+                    const oldVerRaw =
+                        listing.minecraftVer ??
+                        listing.minecraftVersion ??
+                        listing.mcver ??
+                        "unknown";
+                    const modsFolder = "mods_" + zipPathToken(minecraftVersionToCheck);
+                    const skippedFolder =
+                        "skipped_" + zipPathToken(oldVerRaw);
+                    const notUpdatedFolder =
+                        "notupdated_" + zipPathToken(oldVerRaw);
+                    const defaultLoader = vercheck.listingDefaultModloader(listing);
+                    const ua =
+                        "minecraftcustomclient-website-compat@" +
+                        vercheck.generateRandomString(8);
+                    const filterLibs =
+                        filterLibsLabel != null &&
+                        filterLibsLabel.hidden !== true &&
+                        filterLibsCheckbox?.checked === true;
+                    const prismProfile =
+                        prismProfileLabel != null &&
+                        prismProfileLabel.hidden !== true &&
+                        prismProfileCheckbox?.checked === true;
+                    const libraryIds = new Set();
+                    if (filterLibs) {
+                        const ids = [];
+                        for (const mod of sources) {
+                            const id = modrinthProjectIdFromSource(mod);
+                            if (id && !ids.includes(id)) ids.push(id);
+                        }
+                        for (let offset = 0; offset < ids.length; offset += 80) {
+                            const chunk = ids.slice(offset, offset + 80);
+                            try {
+                                const libRes = await fetch(
+                                    "https://api.modrinth.com/v2/projects?ids=" +
+                                        encodeURIComponent(JSON.stringify(chunk)),
+                                    { headers: { "User-Agent": ua } },
+                                );
+                                if (!libRes.ok) {
+                                    throw new Error("HTTP " + libRes.status);
+                                }
+                                const projects = await libRes.json();
+                                if (!Array.isArray(projects)) continue;
+                                for (const project of projects) {
+                                    const cats = []
+                                        .concat(
+                                            project?.categories || [],
+                                            project?.additional_categories || [],
+                                        )
+                                        .map((c) => String(c).toLowerCase());
+                                    if (
+                                        project?.id &&
+                                        cats.includes("library")
+                                    ) {
+                                        libraryIds.add(project.id);
+                                    }
+                                }
+                            } catch (err) {
+                                console.warn(
+                                    "Library category lookup failed:",
+                                    err,
+                                );
+                            }
+                        }
+                    }
+                    function sourceIsLibrary(mod, projectId) {
+                        if (mod && mod.library === true) return true;
+                        return Boolean(projectId && libraryIds.has(projectId));
+                    }
+                    function folderFor(base, isLib) {
+                        return filterLibs && isLib ? base + "/library" : base;
+                    }
+
+                    let embeddedZip = null;
+                    if (!prismProfile && payload.mlistingZipBuffer) {
+                        try {
+                            embeddedZip = await JSZip.loadAsync(
+                                payload.mlistingZipBuffer,
+                            );
+                        } catch (err) {
+                            console.warn(
+                                "Could not open mlisting zip for original jars:",
+                                err,
+                            );
+                        }
+                    }
+
+                    panel.innerHTML =
+                        '<div class="compat-modrinth-progress-row">' +
+                        '<div class="compat-modrinth-progress-host"></div>' +
+                        '<button type="button" class="compat-modrinth-cancel">Cancel</button>' +
+                        "</div>" +
+                        '<div class="compat-modrinth-summary-host"></div>';
+                    const progressHost = panel.querySelector(
+                        ".compat-modrinth-progress-host",
+                    );
+                    const resultsHost = panel.querySelector(
+                        ".compat-modrinth-summary-host",
+                    );
+                    const cancelBtn = panel.querySelector(
+                        ".compat-modrinth-cancel",
+                    );
+                    const cancelState = { cancelled: false };
+                    cancelBtn?.addEventListener("click", function onCancel() {
+                        cancelState.cancelled = true;
+                        cancelBtn.disabled = true;
+                    });
+
+                    const total = sources.length;
+                    let bar = null;
+                    if (
+                        progressHost &&
+                        typeof ProgressLoader !== "undefined"
+                    ) {
+                        const loader = new ProgressLoader(progressHost);
+                        bar = loader.createProgressBar(
+                            "Preparing download…",
+                            true,
+                            0,
+                            100,
+                        );
+                    }
+
+                    const outZip = new JSZip();
+                    const usedPaths = new Set();
+                    const found = [];
+                    const foundDependencies = new Map();
+                    const foundVersionLists = new Map();
+                    const selectedVersionByEntry = new Map();
+                    const entryModLoaders = new Map();
+                    const skipped = [];
+                    const notUpdated = [];
+
+                    for (let i = 0; i < total; i++) {
+                        if (cancelState.cancelled) break;
+                        const mod = sources[i];
+                        const originalFilename =
+                            mod?.filename != null &&
+                            String(mod.filename).trim() !== ""
+                                ? String(mod.filename).trim()
+                                : mod?.type
+                                  ? "(unnamed — " + mod.type + ")"
+                                  : "(unnamed entry)";
+                        if (bar) {
+                            bar.updateName(
+                                "Downloading… (" +
+                                    (i + 1) +
+                                    "/" +
+                                    total +
+                                    ")",
+                            );
+                        }
+
+                        if (vercheck.sourceIsCountedAsModrinthForCheck(mod)) {
+                            const projectId = modrinthProjectIdFromSource(mod);
+                            const isLib = sourceIsLibrary(mod, projectId);
+                            const modLoader =
+                                mod.modloader != null &&
+                                String(mod.modloader).trim() !== ""
+                                    ? String(mod.modloader).trim()
+                                    : defaultLoader;
+                            let versions = [];
+                            let versionError = null;
+                            try {
+                                const res = await fetch(
+                                    "https://api.modrinth.com/v2/project/" +
+                                        encodeURIComponent(projectId) +
+                                        '/version?game_versions=["' +
+                                        minecraftVersionToCheck +
+                                        '"]&loaders=["' +
+                                        modLoader +
+                                        '"]',
+                                    { headers: { "User-Agent": ua } },
+                                );
+                                if (!res.ok && res.status !== 404) {
+                                    throw new Error("HTTP " + res.status);
+                                }
+                                const body = await res.json();
+                                versions = Array.isArray(body) ? body : [];
+                            } catch (err) {
+                                versionError = err;
+                                console.error(
+                                    "Modrinth version lookup failed:",
+                                    projectId,
+                                    err,
+                                );
+                            }
+
+                            if (!versionError && versions.length > 0) {
+                                const version = versions[0];
+                                const files = Array.isArray(version?.files)
+                                    ? version.files
+                                    : [];
+                                const file =
+                                    files.find((f) => f && f.primary) ||
+                                    files[0];
+                                const downloadUrl = file?.url
+                                    ? vercheck.safeHttpUrl(file.url)
+                                    : null;
+                                const newName = zipLeafName(
+                                    file?.filename || originalFilename,
+                                    originalFilename,
+                                );
+                                const entry = {
+                                    filename: newName,
+                                    originalFilename,
+                                    projectId,
+                                    path: null,
+                                    downloadUrl,
+                                    included: false,
+                                };
+                                if (isLib) entry.library = true;
+                                entryModLoaders.set(entry, modLoader);
+                                foundVersionLists.set(entry, versions);
+                                selectedVersionByEntry.set(entry, version);
+                                foundDependencies.set(
+                                    entry,
+                                    Array.isArray(version?.dependencies)
+                                        ? version.dependencies
+                                        : [],
+                                );
+                                if (downloadUrl) {
+                                    try {
+                                        const fileRes = await fetch(downloadUrl);
+                                        if (!fileRes.ok) {
+                                            throw new Error(
+                                                "HTTP " + fileRes.status,
+                                            );
+                                        }
+                                        const bytes = new Uint8Array(
+                                            await fileRes.arrayBuffer(),
+                                        );
+                                        entry.path = takeUniqueZipPath(
+                                            usedPaths,
+                                            folderFor(modsFolder, isLib),
+                                            newName,
+                                        );
+                                        outZip.file(entry.path, bytes);
+                                        entry.included = true;
+                                        entry.filename = entry.path
+                                            .split("/")
+                                            .pop();
+                                    } catch (err) {
+                                        entry.error = String(
+                                            err?.message || err,
+                                        );
+                                        console.error(
+                                            "Updated mod download failed:",
+                                            projectId,
+                                            err,
+                                        );
+                                    }
+                                } else {
+                                    entry.error = "No downloadable file URL";
+                                }
+                                found.push(entry);
+                            } else {
+                                const entry = {
+                                    filename: originalFilename,
+                                    projectId,
+                                    path: null,
+                                    included: false,
+                                };
+                                if (isLib) entry.library = true;
+                                if (versionError) {
+                                    entry.error = String(
+                                        versionError?.message || versionError,
+                                    );
+                                }
+                                if (!prismProfile) try {
+                                    const bytes = await originalModBytes(
+                                        mod,
+                                        embeddedZip,
+                                    );
+                                    if (bytes) {
+                                        entry.path = takeUniqueZipPath(
+                                            usedPaths,
+                                            folderFor(notUpdatedFolder, isLib),
+                                            originalFilename,
+                                        );
+                                        outZip.file(entry.path, bytes);
+                                        entry.included = true;
+                                        entry.filename = entry.path
+                                            .split("/")
+                                            .pop();
+                                    }
+                                } catch (err) {
+                                    entry.error = String(err?.message || err);
+                                    console.warn(
+                                        "Original jar for not-updated mod failed:",
+                                        originalFilename,
+                                        err,
+                                    );
+                                }
+                                notUpdated.push(entry);
+                            }
+                        } else {
+                            const skippedLib = sourceIsLibrary(mod, "");
+                            const entry = {
+                                filename: originalFilename,
+                                type:
+                                    mod?.type != null
+                                        ? String(mod.type)
+                                        : "",
+                                path: null,
+                                included: false,
+                            };
+                            if (skippedLib) entry.library = true;
+                            const rawUrl =
+                                mod?.url != null ? String(mod.url).trim() : "";
+                            const safe = rawUrl
+                                ? vercheck.safeHttpUrl(rawUrl)
+                                : null;
+                            if (safe) entry.url = safe;
+                            if (!prismProfile) try {
+                                const bytes = await originalModBytes(
+                                    mod,
+                                    embeddedZip,
+                                );
+                                if (bytes) {
+                                    entry.path = takeUniqueZipPath(
+                                        usedPaths,
+                                        folderFor(skippedFolder, skippedLib),
+                                        originalFilename,
+                                    );
+                                    outZip.file(entry.path, bytes);
+                                    entry.included = true;
+                                    entry.filename = entry.path.split("/").pop();
+                                }
+                            } catch (err) {
+                                entry.error = String(err?.message || err);
+                                console.warn(
+                                    "Skipped mod file failed:",
+                                    originalFilename,
+                                    err,
+                                );
+                            }
+                            skipped.push(entry);
+                        }
+
+                        if (bar && total > 0) {
+                            bar.update(((i + 1) / total) * 100);
+                        }
+                    }
+
+                    if (bar) {
+                        bar.complete();
+                        bar.cleanUp();
+                    }
+                    panel
+                        .querySelector(".compat-modrinth-cancel")
+                        ?.remove();
+
+                    if (cancelState.cancelled) {
+                        if (resultsHost) {
+                            resultsHost.innerHTML =
+                                '<p class="compat-modrinth-orange">Download cancelled.</p>';
+                        }
+                        return;
+                    }
+
+                    async function versionObjectById(entry, versionId) {
+                        const list = foundVersionLists.get(entry) || [];
+                        const hit = list.find(
+                            (row) => row && row.id === versionId,
+                        );
+                        if (hit) return hit;
+                        const res = await fetch(
+                            "https://api.modrinth.com/v2/version/" +
+                                encodeURIComponent(versionId),
+                            { headers: { "User-Agent": ua } },
+                        );
+                        if (!res.ok) {
+                            throw new Error("HTTP " + res.status);
+                        }
+                        const body = await res.json();
+                        list.push(body);
+                        foundVersionLists.set(entry, list);
+                        return body;
+                    }
+
+                    async function installFoundVersion(entry, version) {
+                        const files = Array.isArray(version?.files)
+                            ? version.files
+                            : [];
+                        const file =
+                            files.find((f) => f && f.primary) || files[0];
+                        const downloadUrl = file?.url
+                            ? vercheck.safeHttpUrl(file.url)
+                            : null;
+                        if (!downloadUrl) {
+                            throw new Error("No downloadable file URL");
+                        }
+                        const fileRes = await fetch(downloadUrl);
+                        if (!fileRes.ok) {
+                            throw new Error("HTTP " + fileRes.status);
+                        }
+                        const bytes = new Uint8Array(
+                            await fileRes.arrayBuffer(),
+                        );
+                        if (entry.path) {
+                            outZip.remove(entry.path);
+                            usedPaths.delete(entry.path);
+                        }
+                        const newName = zipLeafName(
+                            file?.filename || entry.originalFilename,
+                            entry.originalFilename,
+                        );
+                        entry.path = takeUniqueZipPath(
+                            usedPaths,
+                            folderFor(modsFolder, entry.library === true),
+                            newName,
+                        );
+                        outZip.file(entry.path, bytes);
+                        entry.included = true;
+                        entry.downloadUrl = downloadUrl;
+                        entry.filename = entry.path.split("/").pop();
+                        delete entry.error;
+                        foundDependencies.set(
+                            entry,
+                            Array.isArray(version?.dependencies)
+                                ? version.dependencies
+                                : [],
+                        );
+                        selectedVersionByEntry.set(entry, version);
+                    }
+
+                    function pinsForPack() {
+                        const entriesByProject = new Map();
+                        for (const entry of found) {
+                            if (!entry.projectId) continue;
+                            const group =
+                                entriesByProject.get(entry.projectId) || [];
+                            group.push(entry);
+                            entriesByProject.set(entry.projectId, group);
+                        }
+                        const pins = new Map();
+                        for (const entry of found) {
+                            const deps = foundDependencies.get(entry) || [];
+                            const requester =
+                                entry.originalFilename ||
+                                entry.filename ||
+                                entry.projectId;
+                            for (const dep of deps) {
+                                const kind = String(
+                                    dep?.dependency_type || "required",
+                                ).toLowerCase();
+                                if (
+                                    kind !== "required" &&
+                                    kind !== "embedded"
+                                ) {
+                                    continue;
+                                }
+                                const targetId =
+                                    dep?.project_id != null
+                                        ? String(dep.project_id).trim()
+                                        : "";
+                                const versionId =
+                                    dep?.version_id != null
+                                        ? String(dep.version_id).trim()
+                                        : "";
+                                if (
+                                    !targetId ||
+                                    !versionId ||
+                                    targetId === entry.projectId ||
+                                    !entriesByProject.has(targetId)
+                                ) {
+                                    continue;
+                                }
+                                let byVersion = pins.get(targetId);
+                                if (!byVersion) {
+                                    byVersion = new Map();
+                                    pins.set(targetId, byVersion);
+                                }
+                                const who = byVersion.get(versionId) || [];
+                                if (!who.includes(requester)) who.push(requester);
+                                byVersion.set(versionId, who);
+                            }
+                        }
+                        return { entriesByProject, pins };
+                    }
+
+                    function versionChoiceLabel(version) {
+                        return (
+                            (version?.version_number != null &&
+                                String(version.version_number).trim()) ||
+                            (version?.name != null &&
+                                String(version.name).trim()) ||
+                            (version?.id != null && String(version.id)) ||
+                            "(version)"
+                        );
+                    }
+
+                    function askDependencyConflicts(conflicts) {
+                        return new Promise((resolve) => {
+                            const backdrop = document.createElement("div");
+                            backdrop.className = "dep-conflict-backdrop";
+                            const dialog = document.createElement("div");
+                            dialog.className = "dep-conflict-dialog";
+                            dialog.setAttribute("role", "dialog");
+                            dialog.setAttribute("aria-modal", "true");
+                            const title = document.createElement("h3");
+                            title.textContent = "Dependency version conflict";
+                            const lede = document.createElement("p");
+                            lede.textContent =
+                                "More than one mod pins a different version of the same project. Choose one of the versions they require, or check All versions to pick any Modrinth file for this Minecraft version.";
+                            dialog.appendChild(title);
+                            dialog.appendChild(lede);
+                            const sections = [];
+                            for (const conflict of conflicts) {
+                                const section = document.createElement("section");
+                                section.className = "dep-conflict-project";
+                                const heading = document.createElement("h4");
+                                const projectLink = document.createElement("a");
+                                projectLink.className = "dep-conflict-project-link";
+                                projectLink.href =
+                                    "https://modrinth.com/project/" +
+                                    encodeURIComponent(conflict.entry.projectId);
+                                projectLink.target = "_blank";
+                                projectLink.rel = "noopener noreferrer";
+                                projectLink.textContent =
+                                    conflict.entry.originalFilename ||
+                                    conflict.entry.filename ||
+                                    conflict.entry.projectId;
+                                heading.appendChild(projectLink);
+                                section.appendChild(heading);
+                                const options = document.createElement("div");
+                                const currentId =
+                                    selectedVersionByEntry.get(conflict.entry)
+                                        ?.id || "";
+                                const pinned = conflict.pinnedVersions || [];
+                                pinned.forEach((version, index) => {
+                                    const versionId =
+                                        version?.id != null
+                                            ? String(version.id)
+                                            : "";
+                                    const label = document.createElement("label");
+                                    label.className = "dep-conflict-option";
+                                    const radio = document.createElement("input");
+                                    radio.type = "radio";
+                                    radio.name =
+                                        "dep-conflict-" + conflict.entry.projectId;
+                                    radio.value = versionId;
+                                    if (
+                                        versionId === currentId ||
+                                        (index === 0 && !currentId)
+                                    ) {
+                                        radio.checked = true;
+                                    }
+                                    const text = document.createElement("span");
+                                    text.textContent = versionChoiceLabel(version);
+                                    label.appendChild(radio);
+                                    label.appendChild(text);
+                                    options.appendChild(label);
+                                    const who = conflict.pins.get(versionId) || [];
+                                    if (who.length > 0) {
+                                        const req = document.createElement("p");
+                                        req.className = "dep-conflict-req";
+                                        req.textContent = "Required by";
+                                        const list = document.createElement("ul");
+                                        list.className = "dep-conflict-req-list";
+                                        for (const name of who) {
+                                            const item = document.createElement("li");
+                                            item.textContent = name;
+                                            list.appendChild(item);
+                                        }
+                                        options.appendChild(req);
+                                        options.appendChild(list);
+                                    }
+                                });
+                                if (
+                                    !options.querySelector(
+                                        "input[type=radio]:checked",
+                                    )
+                                ) {
+                                    const first = options.querySelector(
+                                        "input[type=radio]",
+                                    );
+                                    if (first) first.checked = true;
+                                }
+                                section.appendChild(options);
+                                const allLabel = document.createElement("label");
+                                allLabel.className = "dep-conflict-all";
+                                const allInput = document.createElement("input");
+                                allInput.type = "checkbox";
+                                allLabel.appendChild(allInput);
+                                allLabel.appendChild(
+                                    document.createTextNode("All versions"),
+                                );
+                                section.appendChild(allLabel);
+                                const versionSelect = document.createElement("select");
+                                versionSelect.className = "dep-conflict-select";
+                                section.appendChild(versionSelect);
+                                let catalog = null;
+                                allInput.addEventListener("change", async function () {
+                                    const radios = options.querySelectorAll(
+                                        "input[type=radio]",
+                                    );
+                                    if (!allInput.checked) {
+                                        versionSelect.classList.remove("is-open");
+                                        radios.forEach((radio) => {
+                                            radio.disabled = false;
+                                        });
+                                        return;
+                                    }
+                                    radios.forEach((radio) => {
+                                        radio.disabled = true;
+                                    });
+                                    versionSelect.classList.add("is-open");
+                                    if (catalog) return;
+                                    versionSelect.innerHTML = "";
+                                    const loading = document.createElement("option");
+                                    loading.textContent = "Loading Modrinth versions…";
+                                    versionSelect.appendChild(loading);
+                                    versionSelect.disabled = true;
+                                    try {
+                                        const res = await fetch(
+                                            "https://api.modrinth.com/v2/project/" +
+                                                encodeURIComponent(
+                                                    conflict.entry.projectId,
+                                                ) +
+                                                '/version?game_versions=["' +
+                                                minecraftVersionToCheck +
+                                                '"]',
+                                            { headers: { "User-Agent": ua } },
+                                        );
+                                        if (!res.ok) {
+                                            throw new Error("HTTP " + res.status);
+                                        }
+                                        const body = await res.json();
+                                        catalog = Array.isArray(body) ? body : [];
+                                        const known =
+                                            foundVersionLists.get(conflict.entry) ||
+                                            [];
+                                        for (const version of catalog) {
+                                            if (
+                                                version?.id &&
+                                                !known.some(
+                                                    (row) =>
+                                                        row && row.id === version.id,
+                                                )
+                                            ) {
+                                                known.push(version);
+                                            }
+                                        }
+                                        foundVersionLists.set(conflict.entry, known);
+                                    } catch (err) {
+                                        console.warn(err);
+                                        catalog = (
+                                            conflict.allVersions || []
+                                        ).slice();
+                                    }
+                                    if (!allInput.checked) return;
+                                    const wantLoader = String(
+                                        entryModLoaders.get(conflict.entry) ||
+                                            defaultLoader ||
+                                            "",
+                                    )
+                                        .trim()
+                                        .toLowerCase();
+                                    const matchesLoader = (version) => {
+                                        if (!wantLoader) return true;
+                                        const loaders = Array.isArray(version?.loaders)
+                                            ? version.loaders
+                                            : [];
+                                        return loaders.some(
+                                            (loader) =>
+                                                String(loader).trim().toLowerCase() ===
+                                                wantLoader,
+                                        );
+                                    };
+                                    const forLoader = catalog.filter(matchesLoader);
+                                    const shown =
+                                        forLoader.length > 0 ? forLoader : catalog;
+                                    const markOtherLoaders = forLoader.length === 0;
+                                    versionSelect.innerHTML = "";
+                                    for (const version of shown) {
+                                        const opt = document.createElement("option");
+                                        opt.value =
+                                            version?.id != null
+                                                ? String(version.id)
+                                                : "";
+                                        opt.textContent = versionChoiceLabel(version);
+                                        if (
+                                            markOtherLoaders &&
+                                            !matchesLoader(version)
+                                        ) {
+                                            opt.className = "dep-conflict-wrong-loader";
+                                            opt.style.color = "#e85d5d";
+                                        }
+                                        versionSelect.appendChild(opt);
+                                    }
+                                    if (versionSelect.options.length === 0) {
+                                        const empty = document.createElement("option");
+                                        empty.textContent = "No versions found";
+                                        versionSelect.appendChild(empty);
+                                    }
+                                    versionSelect.disabled = false;
+                                });
+                                dialog.appendChild(section);
+                                sections.push({
+                                    conflict,
+                                    options,
+                                    allInput,
+                                    versionSelect,
+                                });
+                            }
+                            const errorEl = document.createElement("p");
+                            errorEl.className = "dep-conflict-error";
+                            const actions = document.createElement("div");
+                            actions.className = "dep-conflict-actions";
+                            const continueBtn = document.createElement("button");
+                            continueBtn.type = "button";
+                            continueBtn.className =
+                                "compat-check-button dep-conflict-continue";
+                            continueBtn.textContent = "Continue";
+                            const cancelChoiceBtn = document.createElement("button");
+                            cancelChoiceBtn.type = "button";
+                            cancelChoiceBtn.className = "compat-check-button";
+                            cancelChoiceBtn.textContent = "Cancel download";
+                            actions.appendChild(continueBtn);
+                            actions.appendChild(cancelChoiceBtn);
+                            dialog.appendChild(errorEl);
+                            dialog.appendChild(actions);
+                            backdrop.appendChild(dialog);
+                            document.body.appendChild(backdrop);
+                            function close(result) {
+                                backdrop.remove();
+                                resolve(result);
+                            }
+                            cancelChoiceBtn.addEventListener("click", function () {
+                                close(null);
+                            });
+                            continueBtn.addEventListener("click", async function () {
+                                const chosen = new Map();
+                                for (const section of sections) {
+                                    let versionId = "";
+                                    if (section.allInput.checked) {
+                                        versionId = section.versionSelect.value;
+                                    } else {
+                                        const radio = section.options.querySelector(
+                                            "input[type=radio]:checked",
+                                        );
+                                        versionId = radio ? radio.value : "";
+                                    }
+                                    if (!versionId) {
+                                        errorEl.textContent =
+                                            "Choose a version for each project.";
+                                        return;
+                                    }
+                                    chosen.set(
+                                        section.conflict.entry.projectId,
+                                        versionId,
+                                    );
+                                }
+                                continueBtn.disabled = true;
+                                cancelChoiceBtn.disabled = true;
+                                errorEl.textContent = "";
+                                try {
+                                    for (const [projectId, versionId] of chosen) {
+                                        const group =
+                                            conflictEntries(projectId);
+                                        const version = await versionObjectById(
+                                            group[0],
+                                            versionId,
+                                        );
+                                        for (const entry of group) {
+                                            await installFoundVersion(entry, version);
+                                        }
+                                    }
+                                    close(true);
+                                } catch (err) {
+                                    console.error(err);
+                                    errorEl.textContent = String(
+                                        err?.message || err,
+                                    );
+                                    continueBtn.disabled = false;
+                                    cancelChoiceBtn.disabled = false;
+                                }
+                            });
+                        });
+                    }
+
+                    function conflictEntries(projectId) {
+                        return found.filter(
+                            (entry) => entry.projectId === projectId,
+                        );
+                    }
+
+                    function splitFabricVersion(raw) {
+                        const text = String(raw || "").trim();
+                        const plus = text.indexOf("+");
+                        const core = plus >= 0 ? text.slice(0, plus) : text;
+                        const dash = core.indexOf("-");
+                        const main = dash >= 0 ? core.slice(0, dash) : core;
+                        const pre = dash >= 0 ? core.slice(dash + 1) : "";
+                        const nums = main
+                            .split(".")
+                            .filter((part) => part !== "")
+                            .map((part) => {
+                                const n = parseInt(part, 10);
+                                return Number.isFinite(n) ? n : 0;
+                            });
+                        return { nums, pre };
+                    }
+
+                    function compareFabricVersions(a, b) {
+                        const pa = splitFabricVersion(a);
+                        const pb = splitFabricVersion(b);
+                        const count = Math.max(pa.nums.length, pb.nums.length);
+                        for (let i = 0; i < count; i++) {
+                            const da = pa.nums[i] || 0;
+                            const db = pb.nums[i] || 0;
+                            if (da !== db) return da > db ? 1 : -1;
+                        }
+                        if (pa.pre && !pb.pre) return -1;
+                        if (!pa.pre && pb.pre) return 1;
+                        if (pa.pre && pb.pre) return pa.pre.localeCompare(pb.pre);
+                        return 0;
+                    }
+
+                    function bumpFabricVersion(raw, index) {
+                        const parts = String(raw || "")
+                            .split("+")[0]
+                            .split("-")[0]
+                            .split(".");
+                        const nums = parts.map((part) => parseInt(part, 10) || 0);
+                        while (nums.length <= index) nums.push(0);
+                        nums[index] += 1;
+                        for (let i = index + 1; i < nums.length; i++) nums[i] = 0;
+                        return nums.join(".");
+                    }
+
+                    function fabricPredicateMatches(versionStr, predicate) {
+                        const raw = String(predicate || "").trim();
+                        if (!raw || raw === "*") return true;
+                        const version = String(versionStr || "").trim();
+                        return raw.split("||").some((orPart) => {
+                            const atoms = orPart.trim().split(/\s+/).filter(Boolean);
+                            if (atoms.length === 0) return false;
+                            return atoms.every((atom) => {
+                                const ops = [">=", "<=", ">", "<", "=", "~", "^"];
+                                let op = "";
+                                let rest = atom;
+                                for (const candidate of ops) {
+                                    if (atom.startsWith(candidate)) {
+                                        op = candidate;
+                                        rest = atom.slice(candidate.length).trim();
+                                        break;
+                                    }
+                                }
+                                if (!op) {
+                                    op = "=";
+                                    rest = atom;
+                                }
+                                if (!rest || rest === "*") return true;
+                                if (op === "=") return version === rest;
+                                const cmp = compareFabricVersions(version, rest);
+                                if (op === ">=") return cmp >= 0;
+                                if (op === "<=") return cmp <= 0;
+                                if (op === ">") return cmp > 0;
+                                if (op === "<") return cmp < 0;
+                                if (op === "~") {
+                                    return (
+                                        cmp >= 0 &&
+                                        compareFabricVersions(
+                                            version,
+                                            bumpFabricVersion(rest, 1),
+                                        ) < 0
+                                    );
+                                }
+                                if (op === "^") {
+                                    const major = parseInt(
+                                        String(rest).split(".")[0],
+                                        10,
+                                    );
+                                    const bumpAt = major === 0 ? 1 : 0;
+                                    return (
+                                        cmp >= 0 &&
+                                        compareFabricVersions(
+                                            version,
+                                            bumpFabricVersion(rest, bumpAt),
+                                        ) < 0
+                                    );
+                                }
+                                return version === rest;
+                            });
+                        });
+                    }
+
+                    function extractedModVersion(version) {
+                        const files = Array.isArray(version?.files)
+                            ? version.files
+                            : [];
+                        for (const file of files) {
+                            const name = String(file?.filename || "");
+                            const match = name.match(/-(\d.*)\.jar$/i);
+                            if (match) return match[1];
+                        }
+                        return String(version?.version_number || "");
+                    }
+
+                    function versionStringFor(version, entry, metas) {
+                        const selected = selectedVersionByEntry.get(entry);
+                        if (
+                            selected &&
+                            version &&
+                            selected.id === version.id
+                        ) {
+                            const meta = metas.get(entry);
+                            if (meta?.version) return meta.version;
+                        }
+                        return extractedModVersion(version);
+                    }
+
+                    async function readEntryModMeta(entry) {
+                        if (
+                            !entry?.included ||
+                            !entry.path ||
+                            typeof JSZip === "undefined"
+                        ) {
+                            return null;
+                        }
+                        const stored = outZip.file(entry.path);
+                        if (!stored) return null;
+                        try {
+                            const zip = await JSZip.loadAsync(
+                                await stored.async("arraybuffer"),
+                            );
+                            const fabricFile = zip.file("fabric.mod.json");
+                            if (fabricFile) {
+                                const json = JSON.parse(
+                                    await fabricFile.async("string"),
+                                );
+                                const depends = [];
+                                const raw =
+                                    json.depends &&
+                                    typeof json.depends === "object"
+                                        ? json.depends
+                                        : {};
+                                for (const [id, pred] of Object.entries(raw)) {
+                                    const preds = Array.isArray(pred)
+                                        ? pred
+                                        : [pred];
+                                    depends.push({
+                                        id: String(id),
+                                        predicates: preds.map((item) =>
+                                            String(item),
+                                        ),
+                                    });
+                                }
+                                return {
+                                    id: String(json.id || ""),
+                                    version: String(json.version || ""),
+                                    depends,
+                                };
+                            }
+                            const quiltFile = zip.file("quilt.mod.json");
+                            if (quiltFile) {
+                                const json = JSON.parse(
+                                    await quiltFile.async("string"),
+                                );
+                                const loader = json.quilt_loader || {};
+                                const depends = [];
+                                const rawDepends = Array.isArray(loader.depends)
+                                    ? loader.depends
+                                    : [];
+                                for (const dep of rawDepends) {
+                                    if (!dep || dep.id == null) continue;
+                                    const versions =
+                                        dep.versions == null
+                                            ? ["*"]
+                                            : Array.isArray(dep.versions)
+                                              ? dep.versions
+                                              : [dep.versions];
+                                    depends.push({
+                                        id: String(dep.id),
+                                        predicates: versions.map((item) =>
+                                            String(item),
+                                        ),
+                                    });
+                                }
+                                return {
+                                    id: String(loader.id || ""),
+                                    version: String(loader.version || ""),
+                                    depends,
+                                };
+                            }
+                        } catch (err) {
+                            console.warn(
+                                "Could not read mod metadata:",
+                                entry.filename,
+                                err,
+                            );
+                        }
+                        return null;
+                    }
+
+                    async function jarDependencyPlan() {
+                        const ignored = new Set([
+                            "minecraft",
+                            "java",
+                            "fabricloader",
+                            "fabric-loader",
+                            "quilt_loader",
+                            "quilt_base",
+                        ]);
+                        const metas = new Map();
+                        for (const entry of found) {
+                            metas.set(entry, await readEntryModMeta(entry));
+                        }
+                        const entryByModId = new Map();
+                        for (const [entry, meta] of metas) {
+                            if (meta?.id && !ignored.has(meta.id)) {
+                                entryByModId.set(meta.id, entry);
+                            }
+                        }
+                        const conflicts = [];
+                        let changed = false;
+                        for (const [modId, entry] of entryByModId) {
+                            if (lockedDependencyProjects.has(entry.projectId)) {
+                                continue;
+                            }
+                            const requesters = [];
+                            for (const [other, meta] of metas) {
+                                if (other === entry || !meta) continue;
+                                for (const dep of meta.depends || []) {
+                                    if (dep.id !== modId) continue;
+                                    requesters.push({
+                                        name:
+                                            other.originalFilename ||
+                                            other.filename ||
+                                            meta.id,
+                                        predicates: dep.predicates || [],
+                                    });
+                                }
+                            }
+                            if (requesters.length === 0) continue;
+                            const list = foundVersionLists.get(entry) || [];
+                            const matchesRequester = (version, requester) => {
+                                const ver = versionStringFor(
+                                    version,
+                                    entry,
+                                    metas,
+                                );
+                                return (requester.predicates || []).some(
+                                    (pred) => fabricPredicateMatches(ver, pred),
+                                );
+                            };
+                            const matchesAll = (version) =>
+                                requesters.every((requester) =>
+                                    matchesRequester(version, requester),
+                                );
+                            const selected = selectedVersionByEntry.get(entry);
+                            if (selected && matchesAll(selected)) continue;
+                            const satisfying = list.filter((version) =>
+                                matchesAll(version),
+                            );
+                            if (satisfying.length > 0) {
+                                const pick = satisfying[0];
+                                if (!selected || pick.id !== selected.id) {
+                                    await installFoundVersion(entry, pick);
+                                    alignedDependencyNames.push(
+                                        (entry.originalFilename ||
+                                            entry.filename ||
+                                            modId) +
+                                            " → " +
+                                            versionChoiceLabel(pick),
+                                    );
+                                    changed = true;
+                                }
+                                continue;
+                            }
+                            const pinnedVersions = list.filter((version) =>
+                                requesters.some((requester) =>
+                                    matchesRequester(version, requester),
+                                ),
+                            );
+                            const pins = new Map();
+                            for (const version of pinnedVersions) {
+                                const who = requesters
+                                    .filter((requester) =>
+                                        matchesRequester(version, requester),
+                                    )
+                                    .map((requester) => requester.name);
+                                if (version?.id && who.length > 0) {
+                                    pins.set(String(version.id), who);
+                                }
+                            }
+                            conflicts.push({
+                                entry,
+                                pins,
+                                pinnedVersions:
+                                    pinnedVersions.length > 0
+                                        ? pinnedVersions
+                                        : list.slice(),
+                                allVersions: list.slice(),
+                            });
+                        }
+                        return { changed, conflicts };
+                    }
+
+                    const lockedDependencyProjects = new Set();
+                    const alignedDependencyNames = [];
+                    for (let pass = 0; pass < 8; pass++) {
+                        if (cancelState.cancelled) break;
+                        const jarPlan = await jarDependencyPlan();
+                        if (jarPlan.conflicts.length > 0) {
+                            const accepted = await askDependencyConflicts(
+                                jarPlan.conflicts,
+                            );
+                            if (!accepted) {
+                                cancelState.cancelled = true;
+                                if (resultsHost) {
+                                    resultsHost.innerHTML =
+                                        '<p class="compat-modrinth-orange">Download cancelled.</p>';
+                                }
+                                return;
+                            }
+                            for (const conflict of jarPlan.conflicts) {
+                                lockedDependencyProjects.add(
+                                    conflict.entry.projectId,
+                                );
+                            }
+                            continue;
+                        }
+                        if (jarPlan.changed) continue;
+                        const { pins } = pinsForPack();
+                        const conflicts = [];
+                        let changed = false;
+                        for (const [projectId, byVersion] of pins) {
+                            if (lockedDependencyProjects.has(projectId)) continue;
+                            const versionIds = [...byVersion.keys()];
+                            const group = conflictEntries(projectId);
+                            if (group.length === 0) continue;
+                            const currentId =
+                                selectedVersionByEntry.get(group[0])?.id || "";
+                            if (versionIds.length === 1) {
+                                if (currentId === versionIds[0]) continue;
+                                const version = await versionObjectById(
+                                    group[0],
+                                    versionIds[0],
+                                );
+                                for (const entry of group) {
+                                    await installFoundVersion(entry, version);
+                                }
+                                const label = versionChoiceLabel(version);
+                                const name =
+                                    group[0].originalFilename ||
+                                    group[0].filename ||
+                                    projectId;
+                                alignedDependencyNames.push(name + " → " + label);
+                                changed = true;
+                            } else if (versionIds.length > 1) {
+                                const pinnedVersions = [];
+                                for (const versionId of versionIds) {
+                                    pinnedVersions.push(
+                                        await versionObjectById(
+                                            group[0],
+                                            versionId,
+                                        ),
+                                    );
+                                }
+                                const allVersions = (
+                                    foundVersionLists.get(group[0]) || []
+                                ).slice();
+                                for (const version of pinnedVersions) {
+                                    if (
+                                        version?.id &&
+                                        !allVersions.some(
+                                            (row) => row && row.id === version.id,
+                                        )
+                                    ) {
+                                        allVersions.push(version);
+                                    }
+                                }
+                                conflicts.push({
+                                    entry: group[0],
+                                    pins: byVersion,
+                                    pinnedVersions,
+                                    allVersions,
+                                });
+                            }
+                        }
+                        if (conflicts.length > 0) {
+                            const accepted = await askDependencyConflicts(
+                                conflicts,
+                            );
+                            if (!accepted) {
+                                cancelState.cancelled = true;
+                                if (resultsHost) {
+                                    resultsHost.innerHTML =
+                                        '<p class="compat-modrinth-orange">Download cancelled.</p>';
+                                }
+                                return;
+                            }
+                            for (const conflict of conflicts) {
+                                lockedDependencyProjects.add(
+                                    conflict.entry.projectId,
+                                );
+                            }
+                            changed = true;
+                        }
+                        if (!changed) break;
+                    }
+
+                    const packName =
+                        selectedModpackFlavor?.name != null &&
+                        String(selectedModpackFlavor.name).trim() !== ""
+                            ? String(selectedModpackFlavor.name).trim()
+                            : listing.name != null
+                              ? String(listing.name)
+                              : "modpack";
+                    let omittedLibraries = 0;
+                    if (prismProfile && filterLibs) {
+                        const versionAvailable = new Map();
+                        async function dependencyAvailable(dep) {
+                            const versionId =
+                                dep?.version_id != null
+                                    ? String(dep.version_id).trim()
+                                    : "";
+                            if (!versionId) return true;
+                            if (versionAvailable.has(versionId)) {
+                                return versionAvailable.get(versionId);
+                            }
+                            let available = false;
+                            try {
+                                const depRes = await fetch(
+                                    "https://api.modrinth.com/v2/version/" +
+                                        encodeURIComponent(versionId),
+                                    { headers: { "User-Agent": ua } },
+                                );
+                                if (depRes.ok) {
+                                    const depBody = await depRes.json();
+                                    const gameVersions = Array.isArray(
+                                        depBody?.game_versions,
+                                    )
+                                        ? depBody.game_versions.map((v) =>
+                                              String(v),
+                                          )
+                                        : [];
+                                    available = gameVersions.includes(
+                                        minecraftVersionToCheck,
+                                    );
+                                }
+                            } catch (err) {
+                                console.warn(
+                                    "Dependency version lookup failed:",
+                                    versionId,
+                                    err,
+                                );
+                                available = false;
+                            }
+                            versionAvailable.set(versionId, available);
+                            return available;
+                        }
+                        function isKnownDependency(dep) {
+                            const kind = String(
+                                dep?.dependency_type || "required",
+                            ).toLowerCase();
+                            return (
+                                kind === "required" ||
+                                kind === "optional" ||
+                                kind === "embedded"
+                            );
+                        }
+                        for (const lib of found) {
+                            if (!lib.library || !lib.projectId) continue;
+                            let listed = false;
+                            let available = false;
+                            for (const other of found) {
+                                if (other === lib || other.projectId === lib.projectId) {
+                                    continue;
+                                }
+                                const deps = foundDependencies.get(other) || [];
+                                for (const dep of deps) {
+                                    if (
+                                        !dep ||
+                                        String(dep.project_id || "") !== lib.projectId ||
+                                        !isKnownDependency(dep)
+                                    ) {
+                                        continue;
+                                    }
+                                    listed = true;
+                                    if (await dependencyAvailable(dep)) {
+                                        available = true;
+                                    }
+                                }
+                            }
+                            if (listed && available) {
+                                if (lib.path) outZip.remove(lib.path);
+                                lib.included = false;
+                                lib.path = null;
+                                lib.omittedAsDependency = true;
+                                omittedLibraries++;
+                            }
+                        }
+                    }
+                    if (resultsHost) {
+                        resultsHost.innerHTML =
+                            '<p class="compat-modrinth-orange">Compressing zip…</p>';
+                    }
+                    let blob;
+                    let zipName;
+                    let summaryHtml;
+                    const alignedNote =
+                        alignedDependencyNames.length > 0
+                            ? " Aligned to dependencies: " +
+                              vercheck.escapeHtml(
+                                  alignedDependencyNames.join("; "),
+                              ) +
+                              "."
+                            : "";
+                    if (prismProfile) {
+                        const prismZip = new JSZip();
+                        const prismPaths = new Set();
+                        let packed = 0;
+                        for (const item of found) {
+                            if (!item.included || !item.path) continue;
+                            const stored = outZip.file(item.path);
+                            if (!stored) continue;
+                            const bytes = await stored.async("uint8array");
+                            const leaf = item.path.split("/").pop();
+                            prismZip.file(
+                                takeUniqueZipPath(
+                                    prismPaths,
+                                    ".minecraft/mods",
+                                    leaf,
+                                ),
+                                bytes,
+                            );
+                            packed++;
+                        }
+                        const loaderFallback =
+                            listing.modloaderVer ??
+                            listing.modLoaderVer ??
+                            listing.loaderVersion ??
+                            "";
+                        const loaderComponent = await resolvePrismLoaderComponent(
+                            defaultLoader,
+                            minecraftVersionToCheck,
+                            loaderFallback,
+                            ua,
+                        );
+                        prismZip.file(
+                            "mmc-pack.json",
+                            JSON.stringify(
+                                {
+                                    formatVersion: 1,
+                                    components: [
+                                        {
+                                            important: true,
+                                            uid: "net.minecraft",
+                                            version: minecraftVersionToCheck,
+                                        },
+                                        loaderComponent,
+                                    ],
+                                },
+                                null,
+                                4,
+                            ) + "\n",
+                        );
+                        prismZip.file("instance.cfg", prismInstanceCfg(packName));
+                        blob = await prismZip.generateAsync({
+                            type: "blob",
+                            compression: "DEFLATE",
+                            compressionOptions: { level: 6 },
+                        });
+                        zipName =
+                            zipPathToken(packName) +
+                            "_" +
+                            zipPathToken(minecraftVersionToCheck) +
+                            "_prism.zip";
+                        summaryHtml =
+                            "<p>Saved <code>" +
+                            vercheck.escapeHtml(zipName) +
+                            "</code> — Prism profile with " +
+                            packed +
+                            " mod" +
+                            (packed === 1 ? "" : "s") +
+                            (filterLibs
+                                ? ". " +
+                                  omittedLibraries +
+                                  " library " +
+                                  (omittedLibraries === 1
+                                      ? "dependency"
+                                      : "dependencies") +
+                                  " omitted."
+                                : ".") +
+                            " Skipped and not-updated mods were not included." +
+                            alignedNote +
+                            "</p>";
+                    } else {
+                        const metadata = {
+                            modpack: packName,
+                            selectedVersion: minecraftVersionToCheck,
+                            originalVersion: String(oldVerRaw),
+                            found,
+                            skipped,
+                            notUpdated,
+                        };
+                        outZip.file(
+                            "metadata.json",
+                            JSON.stringify(metadata, null, 4),
+                        );
+                        blob = await outZip.generateAsync({
+                            type: "blob",
+                            compression: "DEFLATE",
+                            compressionOptions: { level: 6 },
+                        });
+                        zipName =
+                            zipPathToken(packName) +
+                            "_" +
+                            zipPathToken(minecraftVersionToCheck) +
+                            ".zip";
+                        summaryHtml =
+                            "<p>Saved <code>" +
+                            vercheck.escapeHtml(zipName) +
+                            "</code> — " +
+                            found.length +
+                            " found, " +
+                            skipped.length +
+                            " skipped, " +
+                            notUpdated.length +
+                            " not updated." +
+                            alignedNote +
+                            "</p>";
+                    }
+                    vercheck.downloadBlobFile(blob, zipName);
+                    if (resultsHost) {
+                        resultsHost.innerHTML = summaryHtml;
+                    }
+                } catch (err) {
+                    console.error("Attempt download failed:", err);
+                    vercheck.clearCompatProgress();
+                    const panel = vercheck.compatModrinthResultsEl();
+                    if (panel) {
+                        panel.innerHTML =
+                            '<p class="compat-modrinth-orange">Error attempting download — see console.</p>';
+                    }
+                } finally {
+                    attemptDownloadBusy = false;
+                    updateCompatCheckButtonState();
+                }
+            });
+
             rebuildModpackFlavorList();
 
             const bootMcverRaw = urlBootParams.get("mcver");
@@ -3057,6 +4897,39 @@
                     >
                         Check Compatability
                     </button>
+                    <button
+                        type="button"
+                        class="compat-check-button"
+                        id="attempt-download-button"
+                        hidden
+                        disabled
+                    >
+                        Attempt download
+                    </button>
+                    <label
+                        class="compat-filter-libs-label"
+                        id="filter-libs-label"
+                        for="filter-libs"
+                        hidden
+                    >
+                        <input
+                            type="checkbox"
+                            id="filter-libs"
+                        />
+                        Filter libs
+                    </label>
+                    <label
+                        class="compat-filter-libs-label"
+                        id="prism-profile-label"
+                        for="prism-profile"
+                        hidden
+                    >
+                        <input
+                            type="checkbox"
+                            id="prism-profile"
+                        />
+                        Prism profile
+                    </label>
                     <div
                         id="compat-progress-root"
                         class="compat-progress-root"
@@ -3800,6 +5673,30 @@
                         </p>
                         <p class="ismp-guide-desc">
                             Hides the “Snapshots” checkbox UI; <code>mccnonrel</code> can still enable snapshot versions.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?showdown</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Presence flag: shows <strong>Attempt download</strong> beside Check Compatability in the MinecraftCustomClient Modpacks section, plus <strong>Filter libs</strong> (unless <code>ui.nofilterlibs</code>) and <strong>Prism profile</strong> (unless <code>ui.noprismdown</code>). The default zip has <code>mods_{version}/</code>, <code>skipped_{oldver}/</code>, <code>notupdated_{oldver}/</code>, and four-space-indented <code>metadata.json</code>. Filter libs puts Modrinth <code>library</code> projects in a <code>library</code> subfolder. Prism profile instead builds a MultiMC/Prism instance zip (<code>instance.cfg</code>, <code>mmc-pack.json</code>, <code>.minecraft/mods/</code>) containing only mods updated for the selected version. If every other mod pins the same dependency version, that file is downloaded. If they pin different versions, a dialog asks which one to use; <strong>All versions</strong> opens a dropdown of every Modrinth file for the selected Minecraft version.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?ui.nofilterlibs=true | 1 | yes</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Hides the <strong>Filter libs</strong> checkbox that <code>?showdown</code> would otherwise show. Library mods stay in the main <code>mods_</code>, <code>skipped_</code>, and <code>notupdated_</code> folders.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="ismp-guide-param">
+                            <code>?ui.noprismdown=true | 1 | yes</code>
+                        </p>
+                        <p class="ismp-guide-desc">
+                            Hides the <strong>Prism profile</strong> checkbox that <code>?showdown</code> would otherwise show. When that box is checked together with <strong>Filter libs</strong>, library mods that are still a dependency of another mod in the pack are left out; a library is still packed if nothing depends on it, or if the pinned dependency no longer supports the selected version but the library itself has an update.
                         </p>
                     </li>
                 </ul>
